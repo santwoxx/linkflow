@@ -553,14 +553,24 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
         <div className="flex-1" />
 
         {/* Profile link */}
-        <button
-          onClick={handleCopyLink}
-          className="flex items-center justify-center xl:justify-start gap-3 w-full py-2.5 px-3 rounded-xl text-zinc-400 hover:text-zinc-200 hover:bg-white/5 transition-all cursor-pointer"
-          title="Copiar link do perfil"
-        >
-          <User className="w-5 h-5 shrink-0" />
-          <span className="hidden xl:block text-sm truncate">@{userProfile.username}</span>
-        </button>
+        <div className="w-full px-1 xl:px-3">
+          <button
+            onClick={handleCopyLink}
+            className="flex items-center justify-center xl:justify-start gap-3 w-full py-2.5 px-3 rounded-xl text-zinc-400 hover:text-zinc-200 hover:bg-white/5 transition-all cursor-pointer"
+            title="Copiar link do perfil"
+          >
+            <User className="w-5 h-5 shrink-0" />
+            <span className="hidden xl:block text-sm truncate">@{userProfile.username}</span>
+          </button>
+          <div className="hidden xl:flex items-center gap-1.5 mt-1 px-3 py-1.5 rounded-lg bg-black/30 border border-slate-800/60">
+            <span className="text-[9px] text-zinc-600 font-mono truncate flex-1">{publicProfileUrl}</span>
+            {copiedNotification ? (
+              <Check className="w-3 h-3 text-green-400 shrink-0" />
+            ) : (
+              <Copy className="w-3 h-3 text-zinc-500 hover:text-[#a78bfa] transition-all shrink-0 cursor-pointer" onClick={handleCopyLink} />
+            )}
+          </div>
+        </div>
 
         {/* Logout */}
         <button
@@ -641,6 +651,38 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
           {activeTab === 'admin' && (
             <div id="tab-content-admin" className="pb-10">
               <AdminPanel />
+            </div>
+          )}
+
+          {/* TAB: STATISTICS / METRICAS */}
+          {activeTab === 'stats' && (
+            <div id="tab-content-stats" className="space-y-6 pb-10">
+              {/* Copy profile link card */}
+              <div className="bg-[#0f172a] p-4 rounded-2xl border border-slate-800/50 shadow-lg">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-semibold text-slate-300 flex items-center gap-2">
+                    <ExternalLink className="w-3.5 h-3.5 text-[#a78bfa]" />
+                    Seu Link Público
+                  </h3>
+                  <button
+                    onClick={handleCopyLink}
+                    className="flex items-center gap-1.5 text-[10px] font-bold px-3 py-1.5 rounded-lg bg-[#a78bfa]/10 hover:bg-[#a78bfa]/20 text-[#a78bfa] border border-[#a78bfa]/20 transition-all cursor-pointer"
+                  >
+                    {copiedNotification ? <><Check className="w-3 h-3" /> Copiado!</> : <><Copy className="w-3 h-3" /> Copiar</>}
+                  </button>
+                </div>
+                <div className="mt-2 flex items-center gap-2 bg-black/40 rounded-lg border border-slate-800 px-3 py-2">
+                  <span className="text-xs text-slate-400 font-mono truncate flex-1">{publicProfileUrl}</span>
+                  <button
+                    onClick={handleCopyLink}
+                    className="text-zinc-400 hover:text-[#a78bfa] transition-all cursor-pointer shrink-0"
+                    title="Copiar link"
+                  >
+                    {copiedNotification ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+              <StatsView links={links} clicks={clicks} />
             </div>
           )}
 
