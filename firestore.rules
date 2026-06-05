@@ -143,8 +143,15 @@ service cloud.firestore {
             optionalString(d.subtitle, 200) &&
             optionalString(d.badgeText, 30) &&
             optionalString(d.iconEmoji, 20) &&
-            optionalString(d.iconUrl, 2048) &&
-            optionalString(d.imageUrl, 2048) &&
+
+            // iconUrl / imageUrl podem ser uma URL curta (https://...) ou uma
+            // data URI base64 vinda de compressImage() no cliente (até ~500 KB
+            // para JPEG 96x96@0.85 ou banners). 2048 era curto demais e
+            // quebrava o update sempre que o usuário subia uma logo.
+            // Cada link é um doc separado, então cada um pode chegar a 1 MiB
+            // (limite do Firestore) sem afetar outros.
+            optionalString(d.iconUrl, 500000) &&
+            optionalString(d.imageUrl, 500000) &&
 
             // animation: enum string, ou ausente
             (!(d.animation is string) ||
