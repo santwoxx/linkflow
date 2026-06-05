@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db, loginWithGoogle, logoutUser } from './firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where, limit, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where, limit, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { UserProfile, LinkItem, AVAILABLE_THEMES, ADMIN_EMAIL } from './types';
 import Dashboard from './components/Dashboard';
 import PublicProfile from './components/PublicProfile';
@@ -140,12 +140,31 @@ export default function App() {
   useEffect(() => {
     if (!publicSlug) return;
 
-    const fetchPublicData = async () => {
-      setPublicLoading(true);
-      setPublicError(null);
+    let unsubProfile: (() => void) | null = null;
+    let unsubLinks: (() => void) | null = null;
+    let cancelled = false;
+    let loadedAnything = false;
 
-      // Support sandbox demo bypass
-      if (publicSlug === 'usuario_demo') {
+    const finishInitialLoad = () => {
+      if (loadedAnything) return;
+      loadedAnything = true;
+      setPublicLoading(false);
+    };
+
+    const tryOfflineCache = () => {
+      const cachedProfile = localStorage.getItem(`linkflow_cached_profile_public_${publicSlug}`);
+      const cachedLinks = localStorage.getItem(`linkflow_cached_links_public_${publicSlug}`);
+      if (cachedProfile) {
+        setPublicProfile(JSON.parse(cachedProfile));
+        setPublicLinks(cachedLinks ? JSON.parse(cachedLinks) : []);
+        return true;
+      }
+      return false;
+    };
+
+    // Support sandbox demo bypass (kept in sync with dashboard via storage events)
+    if (publicSlug === 'usuario_demo') {
+      const applyDemo = () => {
         const savedDemoProfile = localStorage.getItem('linkflow_demo_profile');
         const defaultProfile: UserProfile = savedDemoProfile ? JSON.parse(savedDemoProfile) : {
           uid: 'demo-user-123',
@@ -191,70 +210,99 @@ export default function App() {
 
         setPublicProfile(defaultProfile);
         setPublicLinks(defaultLinks);
-        setPublicLoading(false);
-        return;
-      }
+        finishInitialLoad();
+      };
 
-      try {
-        // 1. Find user by username
-        const usersRef = collection(db, 'users');
-        const q = query(usersRef, where('username', '==', publicSlug), limit(1));
-        const querySnapshot = await getDocs(q);
+      applyDemo();
+      window.addEventListener('storage', applyDemo);
+      window.addEventListener('linkflow_demo_updated', applyDemo);
+      return () => {
+        window.removeEventListener('storage', applyDemo);
+        window.removeEventListener('linkflow_demo_updated', applyDemo);
+      };
+    }
 
+    setPublicLoading(true);
+    setPublicError(null);
+
+    // 1. Find user by username (real-time so profile edits propagate)
+    const usersRef = collection(db, 'users');
+    const userQuery = query(usersRef, where('username', '==', publicSlug), limit(1));
+    let resolvedUid: string | null = null;
+
+    unsubProfile = onSnapshot(
+      userQuery,
+      (querySnapshot) => {
+        if (cancelled) return;
         if (querySnapshot.empty) {
           setPublicError('Página não encontrada.');
-          setPublicLoading(false);
+          setPublicLinks([]);
+          finishInitialLoad();
           return;
         }
 
-        // Get user profile
         const userDoc = querySnapshot.docs[0];
         const profileData = userDoc.data() as UserProfile;
         setPublicProfile(profileData);
+        localStorage.setItem(`linkflow_cached_profile_public_${publicSlug}`, JSON.stringify(profileData));
 
         if (profileData.banned) {
+          if (unsubLinks) { unsubLinks(); unsubLinks = null; }
           setPublicLinks([]);
-          setPublicLoading(false);
+          finishInitialLoad();
           return;
         }
 
-        // 2. Load their active links
-        const linksRef = collection(db, 'users', profileData.uid, 'links');
-        const linksQuery = query(linksRef, where('active', '==', true));
-        const linksSnapshot = await getDocs(linksQuery);
-
-        const items: LinkItem[] = [];
-        linksSnapshot.forEach((l) => {
-          items.push(l.data() as LinkItem);
-        });
-
-        setPublicLinks(items);
-
-        // Save local cache for offline viewers
-        localStorage.setItem(`linkflow_cached_profile_public_${publicSlug}`, JSON.stringify(profileData));
-        localStorage.setItem(`linkflow_cached_links_public_${publicSlug}`, JSON.stringify(items));
-      } catch (err: any) {
-        const isOffline = err?.message?.includes('offline') || String(err).includes('offline');
-        if (isOffline) {
-          console.warn("Firestore está offline. Carregando dados da página pública do cache local...");
-          const cachedProfile = localStorage.getItem(`linkflow_cached_profile_public_${publicSlug}`);
-          const cachedLinks = localStorage.getItem(`linkflow_cached_links_public_${publicSlug}`);
-          if (cachedProfile) {
-            setPublicProfile(JSON.parse(cachedProfile));
-            setPublicLinks(cachedLinks ? JSON.parse(cachedLinks) : []);
-          } else {
-            setPublicError('O linkflow está offline e não possui dados salvos localmente.');
-          }
-        } else {
-          console.error("Erro ao buscar página pública:", err);
-          setPublicError('Falha ao carregar o perfil.');
+        // 2. Subscribe to their active links (real-time so save shows immediately)
+        if (resolvedUid !== profileData.uid) {
+          resolvedUid = profileData.uid;
+          if (unsubLinks) { unsubLinks(); unsubLinks = null; }
+          const linksRef = collection(db, 'users', profileData.uid, 'links');
+          const linksQuery = query(linksRef, where('active', '==', true));
+          unsubLinks = onSnapshot(
+            linksQuery,
+            (linksSnapshot) => {
+              if (cancelled) return;
+              const items: LinkItem[] = [];
+              linksSnapshot.forEach((l) => items.push(l.data() as LinkItem));
+              items.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+              setPublicLinks(items);
+              localStorage.setItem(`linkflow_cached_links_public_${publicSlug}`, JSON.stringify(items));
+              finishInitialLoad();
+            },
+            (linksErr) => {
+              if (cancelled) return;
+              console.warn('Erro no snapshot de links públicos:', linksErr);
+              const isOffline = String(linksErr?.message || '').includes('offline');
+              if (isOffline && tryOfflineCache()) {
+                finishInitialLoad();
+                return;
+              }
+              setPublicError('Falha ao carregar os links do perfil.');
+              finishInitialLoad();
+            }
+          );
         }
-      } finally {
-        setPublicLoading(false);
+        finishInitialLoad();
+      },
+      (err) => {
+        if (cancelled) return;
+        const isOffline = String(err?.message || '').includes('offline');
+        if (isOffline && tryOfflineCache()) {
+          finishInitialLoad();
+          return;
+        }
+        console.error('Erro ao buscar página pública:', err);
+        setPublicError('Falha ao carregar o perfil.');
+        finishInitialLoad();
       }
-    };
+    );
 
-    fetchPublicData();
+    return () => {
+      cancelled = true;
+      if (unsubProfile) unsubProfile();
+      if (unsubLinks) unsubLinks();
+    };
   }, [publicSlug]);
 
   // Auth Observer

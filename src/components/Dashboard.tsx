@@ -340,6 +340,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
       setLinks(updated);
       try {
         localStorage.setItem('demo_links', JSON.stringify(updated));
+        window.dispatchEvent(new Event('linkflow_demo_updated'));
       } catch (err) {
         setLinks(previousLinks);
         throw err;
