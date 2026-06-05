@@ -20,6 +20,24 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
   
   const [sessionUser, setSessionUser] = useState<any>(null);
   const [sessionProfile, setSessionProfile] = useState<UserProfile | null>(null);
+  const [proData, setProData] = useState<any>(null);
+
+  // Check professional profile
+  useEffect(() => {
+    if (profile.serviceEnabled && profile.verifiedProfessional && profile.uid) {
+      getDoc(doc(db, 'professional_profiles', profile.uid))
+        .then(snap => {
+          if (snap.exists()) {
+            setProData(snap.data());
+          }
+        })
+        .catch(err => {
+          if (!String(err).includes('offline')) {
+            console.error('Erro ao buscar perfil profissional:', err);
+          }
+        });
+    }
+  }, [profile]);
 
   // Follow state
   const [followingState, setFollowingState] = useState(false);
@@ -531,7 +549,44 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                 <p className="text-sm opacity-60">Nenhum link disponível no momento.</p>
               </div>
             ) : (
-              activeLinks.map((link) => {
+              <>
+              {profile.serviceEnabled && profile.verifiedProfessional && proData && (
+                <div className="w-full max-w-md space-y-4 mb-6">
+                  <h3 className="text-xs font-bold text-center uppercase tracking-widest flex items-center justify-center gap-2 mb-2">
+                    <Briefcase className="w-4 h-4 text-[#a78bfa]" /> Serviços Profissionais
+                  </h3>
+                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 shadow-xl">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                      <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">Profissional Verificado LinkFlow</span>
+                    </div>
+                    <h4 className="text-lg font-black text-white mb-1 font-sans">{proData.profession}</h4>
+                    {proData.skills && proData.skills.length > 0 && (
+                      <div className="mt-3">
+                        <span className="text-[10px] text-white/60 uppercase tracking-wider block mb-2 font-bold">Especialidades:</span>
+                        <div className="flex flex-wrap gap-2">
+                          {proData.skills.map((skill: string, i: number) => (
+                            <span key={i} className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white/10 text-white shadow-sm border border-white/10">
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {proData.whatsapp && (
+                      <a
+                        href={`https://wa.me/${proData.whatsapp.replace(/\D/g, '')}?text=Olá! Encontrei seu perfil no LinkFlow e gostaria de solicitar um orçamento.`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-5 w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-emerald-600/30"
+                      >
+                        <MessageSquare className="w-4 h-4 shrink-0" /> Entrar em contato
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+              {activeLinks.map((link) => {
                 const animClass = link.animation === 'pulse' ? ' anim-pulse' :
                                   link.animation === 'wobble' ? ' anim-wobble' :
                                   link.animation === 'bounce' ? ' anim-bounce' :
@@ -825,7 +880,8 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                     </span>
                   </a>
                 );
-              })
+              })}
+              </>
             )}
           </div>
         ) : (

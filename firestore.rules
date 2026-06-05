@@ -11,6 +11,7 @@ rules_version = '2';
 //   - posts/{postId}                    → posts do feed comunitário
 //   - posts/{postId}/comments/{cmtId}  → comentários dos posts
 //   - follows/{followId}                → relacionamentos de seguir
+//   - professional_profiles/{uid}       → perfis de prestadores de serviço (LinkFlow Profissional)
 // ============================================================================
 
 service cloud.firestore {
@@ -98,10 +99,7 @@ service cloud.firestore {
         && request.resource.data.theme is map;
 
       // Admin pode banar/desbanar/editar qualquer perfil
-      allow update: if isAdmin();
-
-      // Admin pode deletar usuários
-      allow delete: if isAdmin();
+      allow update, delete: if isAdmin();
 
       // ======================================================================
       // LINKS /{linkId}  (blocos da landing page)
@@ -217,6 +215,28 @@ service cloud.firestore {
         allow create: if true;  // qualquer visitante pode registrar um clique
         allow update, delete: if isAdmin();
       }
+    }
+
+    // ==========================================================================
+    // PROFESSIONAL_PROFILES /{userId} (LinkFlow Profissional)
+    // ==========================================================================
+    match /professional_profiles/{userId} {
+      allow read: if true; // Todos podem ver os perfis públicos
+      
+      // Criar: Apenas o dono pode criar e as tags de aprovação devem vir como false (se não for admin)
+      allow create: if isOwner(userId) && !isBanned()
+        && request.resource.data.uid == userId
+        && (isAdmin() || (request.resource.data.verified == false && request.resource.data.pendingApproval == true));
+
+      // Atualizar: Usuário só pode atualizar os próprios dados. Campos "verified" e "pendingApproval" restritos
+      allow update: if (isOwner(userId) && !isBanned()
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.verified == resource.data.verified
+        && request.resource.data.pendingApproval == resource.data.pendingApproval)
+        || isAdmin();
+
+      // Deletar: Apenas Admin ou o próprio usuário
+      allow delete: if isAdmin() || isOwner(userId);
     }
 
     // ==========================================================================
