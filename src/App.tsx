@@ -960,7 +960,7 @@ export default function App() {
       <header className="px-6 py-5 border-b border-slate-800/40 flex items-center justify-between sticky top-0 bg-[#050b18]/80 backdrop-blur-md z-40" role="banner">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-[#a78bfa] flex items-center justify-center text-white font-bold shadow-[0_0_15px_rgba(167,139,250,0.3)]" aria-hidden="true">
-            <Link2 className="w-4.5 h-4.5 rotate-45 text-white" />
+            <Link2 className="w-4 h-4 rotate-45 text-white" />
           </div>
           <span className="font-sans font-extrabold text-sm tracking-wide text-white select-none">LinkFlow</span>
         </div>
@@ -1006,14 +1006,14 @@ export default function App() {
         {/* CTA Login Button with Auth Errors and Manual Debug Guides */}
         <div className="pt-2 flex flex-col items-center gap-4 w-full max-w-lg mx-auto">
           {authError && (
-            <div className="text-left w-full bg-red-950/20 border border-red-900/30 rounded-2xl p-4.5 space-y-2">
+            <div className="text-left w-full bg-red-950/20 border border-red-900/30 rounded-2xl p-4 sm:p-5 space-y-2">
               <div className="flex items-start gap-2 text-red-400 font-bold text-xs sm:text-sm">
                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{authError}</span>
               </div>
               
               {showConfigGuide && (
-                <div className="mt-3 text-xs text-slate-400 space-y-2 leading-relaxed bg-black/30 p-4 rounded-xl border border-slate-900">
+                  <div className="mt-3 text-xs text-slate-400 space-y-2 leading-relaxed bg-black/30 p-4 sm:p-5 rounded-xl border border-slate-900">
                   <span className="block font-bold text-slate-300 uppercase tracking-wider text-[10px] mb-1">Como Ativar o Login no Google:</span>
                   <ol className="list-decimal pl-4 space-y-1.5 text-slate-400">
                     <li>Acesse o <a href="https://console.firebase.google.com/" target="_blank" rel="noreferrer" className="text-[#a78bfa] hover:underline inline-flex items-center gap-0.5 font-semibold">Console do Firebase <ExternalLink className="w-3 h-3 inline" /></a>.</li>
@@ -1062,7 +1062,7 @@ export default function App() {
               <Store className="w-4 h-4 text-emerald-400" aria-hidden="true" />
               <h2 className="text-xs font-bold text-slate-300 uppercase tracking-widest">Como funciona o marketplace de serviços</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
               <div className="flex gap-3">
                 <div className="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xs font-black shrink-0" aria-hidden="true">1</div>
                 <div>
@@ -1093,7 +1093,7 @@ export default function App() {
           
           <article className="bg-[#0f172a] p-5 rounded-2xl border border-slate-900/50 space-y-2 shadow-md hover:border-emerald-500/20 hover:shadow-emerald-500/5 transition-all">
             <div className="w-8 h-8 rounded-lg bg-emerald-600/10 text-emerald-400 flex items-center justify-center mb-2" aria-hidden="true">
-              <Store className="w-4.5 h-4.5" />
+              <Store className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-bold text-slate-200 font-sans">Divulgue seus Serviços</h3>
             <p className="text-xs text-slate-500 leading-relaxed font-light">Crie vitrine de serviços com preços, categorias e contato direto por WhatsApp. Você é o dono do seu negócio.</p>
@@ -1101,7 +1101,7 @@ export default function App() {
 
           <article className="bg-[#0f172a] p-5 rounded-2xl border border-slate-900/50 space-y-2 shadow-md hover:border-[#a78bfa]/20 hover:shadow-[#a78bfa]/5 transition-all">
             <div className="w-8 h-8 rounded-lg bg-[#a78bfa]/10 text-[#a78bfa] flex items-center justify-center mb-2" aria-hidden="true">
-              <Palette className="w-4.5 h-4.5" />
+              <Palette className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-bold text-slate-200 font-sans">Totalmente Personalizável</h3>
             <p className="text-xs text-slate-500 leading-relaxed font-light">Mais de 14 temas, paletas, estilos de botões, fontes, capa, avatar e layout — sua página com a sua cara.</p>
@@ -1109,7 +1109,7 @@ export default function App() {
 
           <article className="bg-[#0f172a] p-5 rounded-2xl border border-slate-900/50 space-y-2 shadow-md hover:border-purple-500/20 hover:shadow-purple-500/5 transition-all">
             <div className="w-8 h-8 rounded-lg bg-purple-600/10 text-purple-400 flex items-center justify-center mb-2" aria-hidden="true">
-              <Users className="w-4.5 h-4.5" />
+              <Users className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-bold text-slate-200 font-sans">Rede Social Integrada</h3>
             <p className="text-xs text-slate-500 leading-relaxed font-light">Publique fotos, receba curtidas e comentários, siga perfis e construa sua comunidade dentro do LinkFlow.</p>
@@ -1117,7 +1117,7 @@ export default function App() {
 
           <article className="bg-[#0f172a] p-5 rounded-2xl border border-slate-900/50 space-y-2 shadow-md hover:border-amber-500/20 hover:shadow-amber-500/5 transition-all">
             <div className="w-8 h-8 rounded-lg bg-amber-600/10 text-amber-400 flex items-center justify-center mb-2" aria-hidden="true">
-              <BarChart4 className="w-4.5 h-4.5" />
+              <BarChart4 className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-bold text-slate-200 font-sans">Métricas em Tempo Real</h3>
             <p className="text-xs text-slate-500 leading-relaxed font-light">Monitore cliques e visualizações em tempo real com gráficos e feed ao vivo de atividades dos seus links.</p>

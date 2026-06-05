@@ -548,10 +548,10 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
             <button
               id="open-ig-widget"
               onClick={() => setIsSelectorOpen(!isSelectorOpen)}
-              className="px-4 py-2 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer shadow-md shadow-pink-900/10 active:scale-95 transition-all"
+              className="px-3 sm:px-4 py-2 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer shadow-md shadow-pink-900/10 active:scale-95 transition-all shrink-0"
             >
               <Plus className="w-4 h-4 stroke-[2.5]" />
-              {isSelectorOpen ? 'Fechar' : 'Nova Publicação'}
+              <span className="hidden sm:inline">{isSelectorOpen ? 'Fechar' : 'Nova Publicação'}</span>
             </button>
           </div>
 
@@ -1050,7 +1050,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                     </div>
 
                     <div className="flex items-center px-4 py-3 gap-2">
-                      <Smile className="w-4.5 h-4.5 text-slate-500 shrink-0" />
+                      <Smile className="w-4 h-4 text-slate-500 shrink-0" />
                       <input
                         type="text"
                         placeholder="Adicione um comentário público..."
@@ -1164,7 +1164,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                     }}
                     className="hidden md:inline-flex text-slate-400 hover:text-white p-1 rounded-full cursor-pointer"
                   >
-                    <X className="w-4.5 h-4.5" />
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
 

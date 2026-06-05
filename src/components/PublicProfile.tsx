@@ -332,7 +332,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
     <div
       id="public-profile-screen"
       style={getContainerStyle()}
-      className={`${previewMode ? 'min-h-0' : 'min-h-[100dvh]'} w-full flex flex-col justify-between items-center py-12 px-6 relative transition-all duration-500 ${fontClass} ${letterSpacingClass} ${textAlignClass} ${
+      className={`${previewMode ? 'min-h-0' : 'min-h-[100dvh]'} w-full flex flex-col justify-between items-center py-8 px-4 sm:py-10 sm:px-5 md:py-12 md:px-6 relative transition-all duration-500 ${fontClass} ${letterSpacingClass} ${textAlignClass} ${
         bgType === 'color' && !isCustomBg ? theme.backgroundColor || 'bg-zinc-950 text-zinc-100' : 'text-zinc-100'
       } ${theme.patternOverlay === 'dots' ? 'bg-[radial-gradient(circle,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[length:20px_20px]' : ''} ${theme.patternOverlay === 'grid' ? 'bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[length:40px_40px]' : ''} ${theme.patternOverlay === 'crosshatch' ? 'bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_2px,transparent_2px,transparent_6px),repeating-linear-gradient(-45deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_2px,transparent_2px,transparent_6px)]' : ''} ${theme.patternOverlay === 'waves' ? 'bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,255,255,0.04)_0%,transparent_50%),radial-gradient(ellipse_at_50%_100%,rgba(255,255,255,0.02)_0%,transparent_50%)]' : ''} ${theme.wallpaperNoise ? 'bg-noise' : ''}`}
     >
@@ -888,7 +888,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
           <div className={`w-full ${contentMaxW} text-left space-y-4`}>
             {/* If visitor is a guest, prompt them to sign in or sign up */}
             {!sessionUser && !previewMode && (
-              <div className="bg-white/5 border border-white/10 p-4.5 rounded-2xl backdrop-blur-md text-center space-y-3 shadow-lg">
+              <div className="bg-white/5 border border-white/10 p-4 sm:p-5 rounded-2xl backdrop-blur-md text-center space-y-3 shadow-lg">
                 <p className="text-[11px] text-white/70 leading-relaxed font-sans">
                   Você está visualizando a rede social de <span className="font-bold text-white">@{profile.username}</span> como visitante. Faça login para curtir, comentar e criar o seu próprio <span className="font-bold">LinkFlow</span>!
                 </p>
@@ -942,7 +942,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
       )}
 
       {/* 3. Footer */}
-      <div id="profile-badge-footer" className="mt-16 text-center select-none flex flex-col items-center gap-2">
+      <div id="profile-badge-footer" className="mt-10 sm:mt-14 md:mt-16 text-center select-none flex flex-col items-center gap-2">
         {theme.footerText && (
           <p className="text-[10px] text-white/40 max-w-xs leading-relaxed">{theme.footerText}</p>
         )}

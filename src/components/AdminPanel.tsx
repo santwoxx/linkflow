@@ -562,7 +562,7 @@ export default function AdminPanel() {
                         </div>
                       )}
                     </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
                       {pro.whatsapp && (
                         <a
                           href={`https://wa.me/${pro.whatsapp.replace(/\D/g, '')}`}

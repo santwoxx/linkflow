@@ -40,7 +40,7 @@ export default function ProSalesPage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(167,139,250,0.18)_0%,transparent_60%)] pointer-events-none" />
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[length:40px_40px]" />
 
-        <div className="relative max-w-3xl mx-auto px-4 py-20 text-center">
+        <div className="relative max-w-3xl mx-auto px-4 py-12 sm:py-16 md:py-20 text-center">
           <div className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#a78bfa] bg-[#a78bfa]/10 border border-[#a78bfa]/25 px-4 py-2 rounded-full mb-6">
             <Star className="w-3 h-3 fill-[#a78bfa]" /> LinkFlow Profissional
           </div>
@@ -61,9 +61,10 @@ export default function ProSalesPage() {
               href={CHECKOUT_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#a78bfa] to-indigo-500 hover:from-[#c4b5fd] hover:to-indigo-400 text-white font-black text-base rounded-xl transition-all shadow-xl shadow-[#a78bfa]/25 cursor-pointer group"
+              className="inline-flex items-center gap-2 px-6 sm:px-8 py-4 bg-gradient-to-r from-[#a78bfa] to-indigo-500 hover:from-[#c4b5fd] hover:to-indigo-400 text-white font-black text-sm sm:text-base rounded-xl transition-all shadow-xl shadow-[#a78bfa]/25 cursor-pointer group whitespace-nowrap"
             >
-              Assinar Agora — R$ 19,90/mês
+              <span className="sm:hidden">Assinar — R$ 19,90</span>
+              <span className="hidden sm:inline">Assinar Agora — R$ 19,90/mês</span>
               <ChevronRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
             </a>
             <a

@@ -740,15 +740,16 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
             <User className="w-5 h-5 shrink-0" />
             <span className="hidden xl:block text-sm truncate">@{userProfile.username}</span>
           </button>
-          <div className="hidden xl:flex items-center gap-1.5 mt-1 px-3 py-1.5 rounded-lg bg-black/30 border border-slate-800/60">
-            <span className="text-[9px] text-zinc-600 font-mono truncate flex-1">{publicProfileUrl}</span>
-            {copiedNotification ? (
-              <Check className="w-3 h-3 text-green-400 shrink-0" />
-            ) : (
-              <Copy className="w-3 h-3 text-zinc-500 hover:text-[#a78bfa] transition-all shrink-0 cursor-pointer" onClick={handleCopyLink} />
-            )}
-            <GoToNatanDevButton variant="icon" className="ml-0.5" />
-          </div>
+          <a
+            href={`?u=${userProfile.username}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden xl:flex items-center justify-center gap-1.5 mt-1 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 transition-all"
+            title="Abrir minha página pública em nova aba"
+          >
+            <ExternalLink className="w-3 h-3" />
+            <span className="text-[10px] font-bold">Visitar</span>
+          </a>
         </div>
 
         {/* Logout */}
@@ -786,12 +787,21 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
           </div>
           <span className="text-sm font-extrabold text-white">LinkFlow</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          <a
+            href={`?u=${userProfile.username}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[10px] text-emerald-400 hover:text-emerald-300 px-2 py-1 rounded-lg border border-emerald-500/20 hover:border-emerald-500/40 transition-all cursor-pointer flex items-center gap-1"
+            title="Abrir minha página pública em nova aba"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Visitar</span>
+          </a>
           <button onClick={handleCopyLink} className="text-[10px] text-zinc-400 hover:text-white px-2 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer">
             {copiedNotification ? 'Copiado!' : 'Copiar'}
           </button>
-          <GoToNatanDevButton variant="icon" />
-          <button onClick={handleLogout} className="text-[10px] text-zinc-500 hover:text-rose-400 transition-all cursor-pointer">
+          <button onClick={handleLogout} className="text-[10px] text-zinc-500 hover:text-rose-400 p-1.5 rounded-lg transition-all cursor-pointer" title="Sair">
             <LogOut className="w-4 h-4" />
           </button>
         </div>
