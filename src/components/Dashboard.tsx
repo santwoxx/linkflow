@@ -618,8 +618,8 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
       </div>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 flex overflow-y-auto pt-0 md:pt-0 pb-16 md:pb-0">
-        <div id="controls-panel-container" className={`flex-1 overflow-y-auto ${activeTab === 'feed' ? 'max-w-2xl mx-auto px-4 py-4 md:py-6' : 'p-4 sm:p-5 md:p-6 space-y-6 md:max-w-3xl lg:max-w-4xl mx-auto w-full'}`}>
+      <main className={`flex-1 flex pt-0 md:pt-0 pb-16 md:pb-0 ${activeTab === 'design' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+        <div id="controls-panel-container" className={`flex-1 ${activeTab === 'design' ? 'flex overflow-hidden' : 'overflow-y-auto'} ${activeTab === 'feed' ? 'max-w-2xl mx-auto px-4 py-4 md:py-6' : activeTab !== 'design' ? 'p-4 sm:p-5 md:p-6 space-y-6 md:max-w-3xl lg:max-w-4xl mx-auto w-full' : ''}`}>
 
           {/* TAB: SOCIAL COMMUNITY FEED (default) */}
           {activeTab === 'feed' && (
@@ -686,9 +686,13 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
             </div>
           )}
 
-          {/* TAB: PROFILE DESIGN & APPEARANCE */}
+          {/* TAB: PROFILE DESIGN & APPEARANCE — Two-column sticky layout */}
           {activeTab === 'design' && (
-            <div id="tab-content-design" className="space-y-6 pb-10">
+            <div id="tab-content-design" className="flex w-full h-full overflow-hidden">
+
+              {/* LEFT COLUMN — scrollable controls */}
+              <div className="flex-1 overflow-y-auto min-w-0 p-4 sm:p-5 md:p-6 space-y-6">
+
               <div className="bg-[#0f172a] p-4 rounded-2xl border border-slate-800/50 shadow-lg">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-xs font-bold text-slate-300 flex items-center gap-2">
@@ -718,9 +722,9 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                 </div>
               </div>
 
-              <div className="flex flex-col xl:flex-row gap-6">
-                {/* Left: Editor Controls */}
-                <div className="flex-1 space-y-6 min-w-0">
+              <div className="space-y-6">
+                {/* Editor Controls */}
+                <div className="space-y-6 min-w-0">
                   <form id="profile-editor-form" onSubmit={handleSaveProfile} className="bg-[#0f172a] p-5 rounded-2xl border border-slate-800/50 shadow-lg">
                     <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-5">
                       <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2 font-sans">
@@ -729,7 +733,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                       </h3>
                       <span className="text-[11px] font-bold text-[#a78bfa] bg-[#a78bfa]/10 px-2 py-0.5 rounded-full uppercase tracking-wider font-mono">Canva Editor</span>
                     </div>
-                    <div className="flex flex-col lg:flex-row gap-6">
+                    <div className="flex flex-col gap-6">
                       <div className="flex-1 space-y-5 min-w-0">
                     <div className="bg-black/30 rounded-xl p-4 border border-slate-900 space-y-3">
                       <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -868,22 +872,36 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                     <ThemeSelector currentTheme={theme} onChange={handleThemeChange} />
                   </div>
                 </div>
+              </div>
 
-                {/* Right: Phone Preview */}
-                <div className="xl:sticky xl:top-4 xl:self-start shrink-0">
-                  <div className="bg-[#0f172a]/95 p-4 rounded-2xl border border-slate-800/50 shadow-lg">
-                    <div className="flex items-center gap-1.5 mb-3 text-[10px] text-[#a78bfa] font-semibold tracking-wider uppercase select-none">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#a78bfa] animate-pulse"></span>
-                      Pré-visualização ao Vivo
+              {/* pb spacer */}
+              <div className="h-10" />
+
+              </div>{/* END LEFT COLUMN */}
+
+              {/* RIGHT COLUMN — fixed phone preview, never scrolls */}
+              <div className="hidden xl:flex shrink-0 w-[320px] h-full items-start justify-center p-6 border-l border-slate-800/40 bg-[#050b18]/60">
+                <div className="w-full flex flex-col items-center gap-3">
+                  <div className="flex items-center gap-1.5 text-[10px] text-[#a78bfa] font-semibold tracking-wider uppercase select-none">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#a78bfa] animate-pulse"></span>
+                    Pré-visualização ao Vivo
+                  </div>
+                  {/* Phone shell */}
+                  <div className="w-[240px] rounded-[36px] overflow-hidden border-[6px] border-zinc-700/90 bg-zinc-950 shadow-2xl shadow-black/60 relative">
+                    {/* Notch */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 bg-zinc-900 rounded-b-2xl z-10 flex items-center justify-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
+                      <span className="w-8 h-1 rounded-full bg-zinc-700" />
                     </div>
-                    <div className="w-full max-w-[280px] mx-auto rounded-[32px] overflow-hidden border-[6px] border-zinc-800/80 bg-zinc-950 shadow-xl">
-                      <div className="w-full aspect-[9/19] overflow-y-auto">
-                        <PublicProfile profile={livePreviewProfile} links={links} previewMode={true} />
-                      </div>
+                    {/* Screen */}
+                    <div className="w-full overflow-y-auto" style={{ height: '480px' }}>
+                      <PublicProfile profile={livePreviewProfile} links={links} previewMode={true} />
                     </div>
                   </div>
+                  <p className="text-[9px] text-zinc-600 text-center">As alterações aparecem aqui em tempo real</p>
                 </div>
               </div>
+
             </div>
           )}
 
