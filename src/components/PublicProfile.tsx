@@ -690,7 +690,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                 }
 
                 // --- DEFAULT BUTTON LINKS (Link, WhatsApp, Telegram, Buy Now) ---
-                
+
                 // Color overrides for specialized CTA buttons
                 const isWhatsapp = link.type === 'whatsapp';
                 const isBuyNow = link.type === 'buy_now';
@@ -705,6 +705,76 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                   specializedBtnStyle.border = 'none';
                 }
 
+                // Per-link advanced customization overrides
+                const hasCustomBg = !!(link.useGradient && link.customGradient) || !!link.customColor;
+                const customStyleClasses: string[] = [];
+                if (link.customStyle === 'flat') customStyleClasses.push('!rounded-none');
+                else if (link.customStyle === 'rounded') customStyleClasses.push('!rounded-2xl');
+                else if (link.customStyle === 'outline') customStyleClasses.push('!rounded-xl');
+                else if (link.customStyle === 'shadow') customStyleClasses.push('!rounded-xl');
+                else if (link.customStyle === 'brutalist') customStyleClasses.push('!rounded-none');
+                else if (link.customStyle === 'glass') customStyleClasses.push('!rounded-2xl');
+                else if (link.customStyle === 'gradient') customStyleClasses.push('!rounded-xl');
+                else if (link.customStyle === 'neon') customStyleClasses.push('!rounded-xl');
+
+                if (link.customRadius === 'none') customStyleClasses.push('!rounded-none');
+                else if (link.customRadius === 'subtle') customStyleClasses.push('!rounded-md');
+                else if (link.customRadius === 'medium') customStyleClasses.push('!rounded-xl');
+                else if (link.customRadius === 'full') customStyleClasses.push('!rounded-2xl');
+                else if (link.customRadius === 'pill') customStyleClasses.push('!rounded-full');
+
+                if (link.customSize === 'small') customStyleClasses.push('!py-1.5 !text-[10px]');
+                else if (link.customSize === 'medium') customStyleClasses.push('!py-2.5 !text-xs');
+                else if (link.customSize === 'large') customStyleClasses.push('!py-3.5 !text-sm');
+                else if (link.customSize === 'xl') customStyleClasses.push('!py-4 !text-base');
+
+                if (link.customShadow) customStyleClasses.push('!shadow-xl !shadow-black/40');
+                if (link.customGlass) customStyleClasses.push('!backdrop-blur-md');
+
+                if (link.customFont === 'sans') customStyleClasses.push('!font-sans');
+                else if (link.customFont === 'serif') customStyleClasses.push('!font-serif');
+                else if (link.customFont === 'mono') customStyleClasses.push('!font-mono');
+                else if (link.customFont === 'space') customStyleClasses.push('!font-space');
+                else if (link.customFont === 'outfit') customStyleClasses.push('!font-outfit');
+                else if (link.customFont === 'syne') customStyleClasses.push('!font-syne');
+                else if (link.customFont === 'bebas') customStyleClasses.push('!font-bebas');
+                else if (link.customFont === 'caveat') customStyleClasses.push('!font-caveat');
+
+                // Inline style overrides from per-link customization
+                if (hasCustomBg) {
+                  if (link.useGradient && link.customGradient) {
+                    specializedBtnStyle.background = link.customGradient;
+                    specializedBtnStyle.backgroundColor = '';
+                  } else if (link.customColor) {
+                    specializedBtnStyle.background = '';
+                    specializedBtnStyle.backgroundColor = link.customColor;
+                  }
+                }
+                if (link.customTextColor) specializedBtnStyle.color = link.customTextColor;
+                if (link.customBorderWidth && link.customBorderWidth > 0) {
+                  specializedBtnStyle.border = `${link.customBorderWidth}px solid ${link.customBorderColor || '#a78bfa'}`;
+                }
+                if (link.customStyle === 'shadow') {
+                  specializedBtnStyle.boxShadow = '0 8px 20px rgba(0,0,0,0.4)';
+                } else if (link.customStyle === 'brutalist') {
+                  specializedBtnStyle.boxShadow = '4px 4px 0 0 #000';
+                } else if (link.customStyle === 'neon' && (link.customColor || link.customGradient)) {
+                  specializedBtnStyle.boxShadow = `0 0 18px ${link.customColor || '#a78bfa'}`;
+                }
+                if (link.customLetterSpacing) {
+                  specializedBtnStyle.letterSpacing = link.customLetterSpacing === 'tight' ? '-0.02em'
+                    : link.customLetterSpacing === 'wide' ? '0.05em'
+                    : link.customLetterSpacing === 'wider' ? '0.15em' : '0';
+                }
+
+                const iconPos = link.customIconPosition || 'left';
+                const showIcon = !!link.iconEmoji && iconPos !== 'none';
+                const iconLeft = showIcon && (iconPos === 'left' || (!link.customIconPosition));
+                const iconTop = showIcon && iconPos === 'top';
+                const iconRight = showIcon && iconPos === 'right';
+                const titleAlignClass = link.customTextAlign === 'left' ? '!items-start !text-left'
+                  : link.customTextAlign === 'right' ? '!items-end !text-right' : '!items-center !text-center';
+
                 return (
                   <a
                     key={link.id}
@@ -713,7 +783,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => handleRegisterClick(link)}
-                    className={`${btnStyle.className}${animClass} relative flex items-center justify-between group overflow-visible`}
+                    className={`${btnStyle.className}${animClass} relative flex items-center justify-between group overflow-visible ${customStyleClasses.join(' ')}`}
                     style={specializedBtnStyle}
                   >
                     {link.badgeText && (
@@ -723,17 +793,23 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                     )}
 
                     <span className="w-4"></span>
-                    
-                    <div className="flex flex-col items-center text-center w-full min-w-0 py-1.5 select-none relative">
-                      <div className="flex items-center justify-center gap-2 w-full">
-                        {link.iconEmoji && (
+
+                    <div className={`flex flex-col ${titleAlignClass} w-full min-w-0 py-1.5 select-none relative`}>
+                      {iconTop && link.iconEmoji && (
+                        <span className="text-base shrink-0 select-none mb-0.5">{link.iconEmoji}</span>
+                      )}
+                      <div className={`flex items-center w-full ${link.customTextAlign === 'left' ? 'justify-start' : link.customTextAlign === 'right' ? 'justify-end' : 'justify-center'} gap-2`}>
+                        {iconLeft && link.iconEmoji && (
                           <span className="text-base shrink-0 select-none">{link.iconEmoji}</span>
                         )}
-                        <span className="font-extrabold text-xs sm:text-sm tracking-wide truncate">
+                        <span className={`font-extrabold text-xs sm:text-sm tracking-wide truncate ${link.customUppercase ? 'uppercase' : ''}`}>
                           {link.title}
                         </span>
+                        {iconRight && link.iconEmoji && (
+                          <span className="text-base shrink-0 select-none">{link.iconEmoji}</span>
+                        )}
                       </div>
-                      
+
                       {link.subtitle && (
                         <span className="text-[10px] sm:text-[11px] opacity-75 font-normal tracking-wide mt-1 leading-tight truncate max-w-full">
                           {link.subtitle}

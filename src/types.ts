@@ -153,7 +153,25 @@ export interface LinkItem {
   badgeText?: string;      // A badge text (e.g., "HOT", "NEW", "10% OFF")
   iconEmoji?: string;      // Emoji directly selected for the link
   animation?: string;      // Attention getter animation: none, pulse, wobble, bounce, glow
-  
+
+  // Per-button advanced customization (overrides the profile theme)
+  customColor?: string;        // Background color (hex/rgba) — ignored if useGradient && customGradient
+  customTextColor?: string;    // Text color (hex/rgba)
+  customGradient?: string;     // CSS gradient string (e.g. linear-gradient(135deg, #f00, #00f))
+  useGradient?: boolean;       // If true, use customGradient instead of customColor
+  customBorderColor?: string;  // Border color
+  customBorderWidth?: number;  // Border width in px (0–8)
+  customStyle?: 'flat' | 'rounded' | 'outline' | 'shadow' | 'brutalist' | 'glass' | 'gradient' | 'neon';
+  customRadius?: 'none' | 'subtle' | 'medium' | 'full' | 'pill';
+  customSize?: 'small' | 'medium' | 'large' | 'xl';
+  customShadow?: boolean;      // Drop shadow on/off
+  customGlass?: boolean;       // Glassmorphism (backdrop blur + transparency) on/off
+  customFont?: 'sans' | 'serif' | 'mono' | 'space' | 'outfit' | 'syne' | 'bebas' | 'caveat';
+  customTextAlign?: 'left' | 'center' | 'right';
+  customLetterSpacing?: 'tight' | 'normal' | 'wide' | 'wider';
+  customUppercase?: boolean;   // Force uppercase title
+  customIconPosition?: 'left' | 'right' | 'top' | 'none';
+
   // Specific fields for specialized blocks
   content?: any;           // Generic array for items (products, testimonials, services, gallery image urls)
   imageUrl?: string;       // For Promo Banner

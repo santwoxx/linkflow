@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { LinkItem, BlockType } from '../types';
-import { Plus, Trash2, ArrowUp, ArrowDown, ExternalLink, Edit2, Check, X, ToggleLeft, ToggleRight, Loader2, Sparkles, Tag, Smile, Zap, MessageCircle, ShoppingBag, Image as ImageIcon, Star, Briefcase, CreditCard, LayoutTemplate } from 'lucide-react';
+import { LinkItem, BlockType, FONTS_LIST } from '../types';
+import { Plus, Trash2, ArrowUp, ArrowDown, ExternalLink, Edit2, Check, X, ToggleLeft, ToggleRight, Loader2, Sparkles, Tag, Smile, Zap, MessageCircle, ShoppingBag, Image as ImageIcon, Star, Briefcase, CreditCard, LayoutTemplate, Palette, Type, Square, Droplet, Eye, EyeOff, Maximize, Minimize, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 
 interface LinkEditorProps {
   links: LinkItem[];
@@ -11,7 +11,7 @@ interface LinkEditorProps {
 
 export default function LinkEditor({ links, onAdd, onUpdate, onDelete }: LinkEditorProps) {
   const [isAdding, setIsAdding] = useState(false);
-  
+
   // Track which link ID is currently being edited
   const [editingLinkId, setEditingLinkId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -21,6 +21,24 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete }: LinkEdi
   const [editIconEmoji, setEditIconEmoji] = useState('');
   const [editAnimation, setEditAnimation] = useState('none');
   const [editImageUrl, setEditImageUrl] = useState(''); // For banners
+  // Per-button advanced customization
+  const [editCustomColor, setEditCustomColor] = useState('');
+  const [editCustomTextColor, setEditCustomTextColor] = useState('');
+  const [editCustomGradient, setEditCustomGradient] = useState('');
+  const [editUseGradient, setEditUseGradient] = useState(false);
+  const [editCustomStyle, setEditCustomStyle] = useState<'' | 'flat' | 'rounded' | 'outline' | 'shadow' | 'brutalist' | 'glass' | 'gradient' | 'neon'>('');
+  const [editCustomRadius, setEditCustomRadius] = useState<'' | 'none' | 'subtle' | 'medium' | 'full' | 'pill'>('');
+  const [editCustomSize, setEditCustomSize] = useState<'' | 'small' | 'medium' | 'large' | 'xl'>('');
+  const [editCustomShadow, setEditCustomShadow] = useState(false);
+  const [editCustomGlass, setEditCustomGlass] = useState(false);
+  const [editCustomFont, setEditCustomFont] = useState<'' | 'sans' | 'serif' | 'mono' | 'space' | 'outfit' | 'syne' | 'bebas' | 'caveat'>('');
+  const [editCustomBorderColor, setEditCustomBorderColor] = useState('');
+  const [editCustomBorderWidth, setEditCustomBorderWidth] = useState(0);
+  const [editCustomTextAlign, setEditCustomTextAlign] = useState<'' | 'left' | 'center' | 'right'>('');
+  const [editCustomLetterSpacing, setEditCustomLetterSpacing] = useState<'' | 'tight' | 'normal' | 'wide' | 'wider'>('');
+  const [editCustomUppercase, setEditCustomUppercase] = useState(false);
+  const [editCustomIconPosition, setEditCustomIconPosition] = useState<'' | 'left' | 'right' | 'top' | 'none'>('');
+  const [showAdvancedStyle, setShowAdvancedStyle] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   const handleAddBlock = async (type: BlockType) => {
@@ -107,6 +125,23 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete }: LinkEdi
     setEditIconEmoji(link.iconEmoji || '');
     setEditAnimation(link.animation || 'none');
     setEditImageUrl(link.imageUrl || '');
+    setEditCustomColor(link.customColor || '');
+    setEditCustomTextColor(link.customTextColor || '');
+    setEditCustomGradient(link.customGradient || '');
+    setEditUseGradient(!!link.useGradient);
+    setEditCustomStyle((link.customStyle as any) || '');
+    setEditCustomRadius((link.customRadius as any) || '');
+    setEditCustomSize((link.customSize as any) || '');
+    setEditCustomShadow(!!link.customShadow);
+    setEditCustomGlass(!!link.customGlass);
+    setEditCustomFont((link.customFont as any) || '');
+    setEditCustomBorderColor(link.customBorderColor || '');
+    setEditCustomBorderWidth(link.customBorderWidth || 0);
+    setEditCustomTextAlign((link.customTextAlign as any) || '');
+    setEditCustomLetterSpacing((link.customLetterSpacing as any) || '');
+    setEditCustomUppercase(!!link.customUppercase);
+    setEditCustomIconPosition((link.customIconPosition as any) || '');
+    setShowAdvancedStyle(false);
   };
 
   const handleSaveEdit = async (linkId: string) => {
@@ -125,6 +160,22 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete }: LinkEdi
         iconEmoji: editIconEmoji.trim() || '',
         animation: editAnimation || 'none',
         imageUrl: editImageUrl.trim() || '',
+        customColor: editCustomColor.trim() || '',
+        customTextColor: editCustomTextColor.trim() || '',
+        customGradient: editCustomGradient.trim() || '',
+        useGradient: editUseGradient,
+        customStyle: (editCustomStyle || undefined) as any,
+        customRadius: (editCustomRadius || undefined) as any,
+        customSize: (editCustomSize || undefined) as any,
+        customShadow: editCustomShadow,
+        customGlass: editCustomGlass,
+        customFont: (editCustomFont || undefined) as any,
+        customBorderColor: editCustomBorderColor.trim() || '',
+        customBorderWidth: editCustomBorderWidth || 0,
+        customTextAlign: (editCustomTextAlign || undefined) as any,
+        customLetterSpacing: (editCustomLetterSpacing || undefined) as any,
+        customUppercase: editCustomUppercase,
+        customIconPosition: (editCustomIconPosition || undefined) as any,
       });
       setEditingLinkId(null);
     } catch (err) {
@@ -356,6 +407,360 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete }: LinkEdi
                           <p className="text-[11px] text-blue-400">
                             A edição avançada de itens internos (fotos da galeria, depoimentos individuais) será feita em uma janela modal nas próximas atualizações. O bloco base já está pronto para receber dados via código!
                           </p>
+                        </div>
+                      )}
+
+                      {/* Advanced per-button customization */}
+                      {(link.type === 'link' || link.type === 'whatsapp' || link.type === 'buy_now' || link.type === 'telegram' || link.type === 'payment') && (
+                        <div className="bg-gradient-to-br from-[#a78bfa]/5 to-purple-500/5 border border-[#a78bfa]/20 rounded-xl overflow-hidden">
+                          <button
+                            type="button"
+                            onClick={() => setShowAdvancedStyle(v => !v)}
+                            className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-[#a78bfa]/5 transition-all cursor-pointer"
+                          >
+                            <span className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-wider flex items-center gap-1.5">
+                              <Palette className="w-3.5 h-3.5" /> Personalização Avançada do Botão
+                            </span>
+                            <span className="text-[9px] text-slate-500 flex items-center gap-1">
+                              {showAdvancedStyle ? 'Ocultar' : 'Mostrar'}
+                              {showAdvancedStyle ? <Minimize className="w-3 h-3" /> : <Maximize className="w-3 h-3" />}
+                            </span>
+                          </button>
+
+                          {showAdvancedStyle && (
+                            <div className="px-4 pb-4 space-y-4 border-t border-[#a78bfa]/10 pt-3">
+                              {/* Visual style preset */}
+                              <div>
+                                <label className="block text-[10px] text-slate-400 font-semibold mb-1.5 flex items-center gap-1">
+                                  <Square className="w-3 h-3 text-[#a78bfa]" /> Estilo Visual
+                                </label>
+                                <div className="grid grid-cols-4 gap-1.5">
+                                  {([
+                                    { v: '', l: 'Padrão' },
+                                    { v: 'flat', l: 'Flat' },
+                                    { v: 'rounded', l: 'Round' },
+                                    { v: 'outline', l: 'Outline' },
+                                    { v: 'shadow', l: 'Shadow' },
+                                    { v: 'brutalist', l: 'Brutal' },
+                                    { v: 'glass', l: 'Glass' },
+                                    { v: 'gradient', l: 'Grad' },
+                                    { v: 'neon', l: 'Neon' },
+                                  ] as const).map(o => (
+                                    <button key={o.v || 'default'} type="button"
+                                      onClick={() => setEditCustomStyle(o.v as any)}
+                                      className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all cursor-pointer ${
+                                        editCustomStyle === o.v
+                                          ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
+                                          : 'bg-black/40 border-slate-800 text-zinc-500 hover:border-slate-600'
+                                      }`}>{o.l}</button>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Color customization */}
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <label className="text-[10px] text-slate-400 font-semibold flex items-center gap-1">
+                                    <Droplet className="w-3 h-3 text-blue-400" /> Cor de Fundo
+                                  </label>
+                                  <label className="flex items-center gap-1.5 text-[9px] text-slate-500 cursor-pointer">
+                                    <input type="checkbox" checked={editUseGradient} onChange={(e) => setEditUseGradient(e.target.checked)} className="accent-[#a78bfa] w-3 h-3" />
+                                    Usar gradiente
+                                  </label>
+                                </div>
+                                {!editUseGradient ? (
+                                  <div className="flex gap-2">
+                                    <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(editCustomColor) ? editCustomColor : '#111a36'} onChange={(e) => setEditCustomColor(e.target.value)} className="w-9 h-9 rounded border border-slate-800 bg-transparent cursor-pointer shrink-0" title="Cor sólida" />
+                                    <input type="text" placeholder="#111a36 ou rgba(...)" value={editCustomColor} onChange={(e) => setEditCustomColor(e.target.value)} className="flex-1 bg-black text-[10px] text-slate-300 py-2 px-3 rounded-lg border border-slate-800 focus:border-[#a78bfa] focus:outline-none font-mono" />
+                                    {editCustomColor && <button type="button" onClick={() => setEditCustomColor('')} className="bg-rose-500/10 text-rose-400 text-[10px] font-bold px-2 rounded-lg border border-rose-500/20 cursor-pointer">Limpar</button>}
+                                  </div>
+                                ) : (
+                                  <div className="space-y-2">
+                                    <div className="flex gap-2">
+                                      <input type="text" placeholder="linear-gradient(135deg, #f00, #00f)" value={editCustomGradient} onChange={(e) => setEditCustomGradient(e.target.value)} className="flex-1 bg-black text-[10px] text-slate-300 py-2 px-3 rounded-lg border border-slate-800 focus:border-[#a78bfa] focus:outline-none font-mono" />
+                                      {editCustomGradient && <button type="button" onClick={() => setEditCustomGradient('')} className="bg-rose-500/10 text-rose-400 text-[10px] font-bold px-2 rounded-lg border border-rose-500/20 cursor-pointer">Limpar</button>}
+                                    </div>
+                                    <div className="h-7 w-full rounded-lg border border-slate-800 transition-all" style={{ background: editCustomGradient || 'linear-gradient(135deg, #1e3a8a, #7c3aed)' }} />
+                                  </div>
+                                )}
+                                <div className="flex flex-wrap gap-1">
+                                  {['#111a36','#1e40af','#7c3aed','#a78bfa','#db2777','#dc2626','#16a34a','#0d9488','#f59e0b','#f43f5e','#0ea5e9','#10b981','#1f2937','#000000','#ffffff','#6b7280'].map(c => (
+                                    <button key={c} type="button" onClick={() => { setEditCustomColor(c); if (editUseGradient) setEditUseGradient(false); }} className={`w-5 h-5 rounded-full border-2 transition-all cursor-pointer hover:scale-110 ${editCustomColor === c ? 'border-[#a78bfa] scale-110' : 'border-transparent hover:border-zinc-500'}`} style={{ backgroundColor: c }} title={c} />
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Text color */}
+                              <div>
+                                <label className="block text-[10px] text-slate-400 font-semibold mb-1.5 flex items-center gap-1">
+                                  <Type className="w-3 h-3 text-emerald-400" /> Cor do Texto
+                                </label>
+                                <div className="flex gap-2">
+                                  <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(editCustomTextColor) ? editCustomTextColor : '#ffffff'} onChange={(e) => setEditCustomTextColor(e.target.value)} className="w-9 h-9 rounded border border-slate-800 bg-transparent cursor-pointer shrink-0" title="Cor do texto" />
+                                  <input type="text" placeholder="#ffffff" value={editCustomTextColor} onChange={(e) => setEditCustomTextColor(e.target.value)} className="flex-1 bg-black text-[10px] text-slate-300 py-2 px-3 rounded-lg border border-slate-800 focus:border-[#a78bfa] focus:outline-none font-mono" />
+                                  {editCustomTextColor && <button type="button" onClick={() => setEditCustomTextColor('')} className="bg-rose-500/10 text-rose-400 text-[10px] font-bold px-2 rounded-lg border border-rose-500/20 cursor-pointer">Limpar</button>}
+                                </div>
+                                <div className="flex flex-wrap gap-1 mt-1.5">
+                                  {['#ffffff','#000000','#f8fafc','#fef3c7','#fef2f2','#ecfdf5','#eff6ff','#fdf4ff','#fff7ed','#f0fdf4','#f5f3ff'].map(c => (
+                                    <button key={c} type="button" onClick={() => setEditCustomTextColor(c)} className={`w-5 h-5 rounded-full border-2 transition-all cursor-pointer hover:scale-110 ${editCustomTextColor === c ? 'border-[#a78bfa] scale-110' : 'border-transparent hover:border-zinc-500'}`} style={{ backgroundColor: c }} title={c} />
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Border */}
+                              <div>
+                                <label className="block text-[10px] text-slate-400 font-semibold mb-1.5 flex items-center gap-1">
+                                  <Square className="w-3 h-3 text-amber-400" /> Borda
+                                </label>
+                                <div className="flex gap-2">
+                                  <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(editCustomBorderColor) ? editCustomBorderColor : '#a78bfa'} onChange={(e) => setEditCustomBorderColor(e.target.value)} className="w-9 h-9 rounded border border-slate-800 bg-transparent cursor-pointer shrink-0" />
+                                  <input type="text" placeholder="#a78bfa" value={editCustomBorderColor} onChange={(e) => setEditCustomBorderColor(e.target.value)} className="flex-1 bg-black text-[10px] text-slate-300 py-2 px-3 rounded-lg border border-slate-800 focus:border-[#a78bfa] focus:outline-none font-mono" />
+                                  <div className="flex items-center gap-1.5 bg-black border border-slate-800 rounded-lg px-2 shrink-0">
+                                    <span className="text-[9px] text-zinc-500">Esp:</span>
+                                    <input type="number" min="0" max="8" value={editCustomBorderWidth} onChange={(e) => setEditCustomBorderWidth(Math.max(0, Math.min(8, Number(e.target.value))))} className="w-10 bg-transparent text-[10px] text-slate-300 py-2 focus:outline-none text-center font-mono" />
+                                    <span className="text-[9px] text-zinc-500">px</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Border radius */}
+                              <div>
+                                <label className="block text-[10px] text-slate-400 font-semibold mb-1.5">Arredondamento</label>
+                                <div className="grid grid-cols-5 gap-1.5">
+                                  {([
+                                    { v: '', l: 'Padrão' },
+                                    { v: 'none', l: 'Quadrado' },
+                                    { v: 'subtle', l: 'Sutil' },
+                                    { v: 'medium', l: 'Médio' },
+                                    { v: 'full', l: 'Redondo' },
+                                    { v: 'pill', l: 'Pílula' },
+                                  ] as const).map(o => (
+                                    <button key={o.v || 'default'} type="button"
+                                      onClick={() => setEditCustomRadius(o.v as any)}
+                                      className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all cursor-pointer ${
+                                        editCustomRadius === o.v
+                                          ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
+                                          : 'bg-black/40 border-slate-800 text-zinc-500 hover:border-slate-600'
+                                      }`}>{o.l}</button>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Size */}
+                              <div>
+                                <label className="block text-[10px] text-slate-400 font-semibold mb-1.5">Tamanho</label>
+                                <div className="grid grid-cols-4 gap-1.5">
+                                  {([
+                                    { v: '', l: 'Padrão' },
+                                    { v: 'small', l: 'P' },
+                                    { v: 'medium', l: 'M' },
+                                    { v: 'large', l: 'G' },
+                                    { v: 'xl', l: 'GG' },
+                                  ] as const).map(o => (
+                                    <button key={o.v || 'default'} type="button"
+                                      onClick={() => setEditCustomSize(o.v as any)}
+                                      className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all cursor-pointer ${
+                                        editCustomSize === o.v
+                                          ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
+                                          : 'bg-black/40 border-slate-800 text-zinc-500 hover:border-slate-600'
+                                      }`}>{o.l}</button>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Font */}
+                              <div>
+                                <label className="block text-[10px] text-slate-400 font-semibold mb-1.5 flex items-center gap-1">
+                                  <Type className="w-3 h-3 text-rose-400" /> Fonte do Botão
+                                </label>
+                                <div className="grid grid-cols-4 gap-1.5">
+                                  {([
+                                    { v: '', l: 'Padrão' },
+                                    { v: 'sans', l: 'Sans' },
+                                    { v: 'serif', l: 'Serif' },
+                                    { v: 'mono', l: 'Mono' },
+                                    { v: 'space', l: 'Space' },
+                                    { v: 'outfit', l: 'Outfit' },
+                                    { v: 'syne', l: 'Syne' },
+                                    { v: 'bebas', l: 'Bebas' },
+                                    { v: 'caveat', l: 'Caveat' },
+                                  ] as const).map(o => (
+                                    <button key={o.v || 'default'} type="button"
+                                      onClick={() => setEditCustomFont(o.v as any)}
+                                      className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all cursor-pointer ${
+                                        editCustomFont === o.v
+                                          ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
+                                          : 'bg-black/40 border-slate-800 text-zinc-500 hover:border-slate-600'
+                                      }`}>{o.l}</button>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Text alignment + letter spacing + uppercase */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                  <label className="block text-[10px] text-slate-400 font-semibold mb-1.5">Alinhamento do Texto</label>
+                                  <div className="grid grid-cols-3 gap-1.5">
+                                    {([
+                                      { v: '', l: 'Padrão', i: <AlignCenter className="w-3 h-3" /> },
+                                      { v: 'left', l: 'Esq', i: <AlignLeft className="w-3 h-3" /> },
+                                      { v: 'center', l: 'Centro', i: <AlignCenter className="w-3 h-3" /> },
+                                      { v: 'right', l: 'Dir', i: <AlignRight className="w-3 h-3" /> },
+                                    ] as const).map(o => (
+                                      <button key={o.v || 'default'} type="button"
+                                        onClick={() => setEditCustomTextAlign(o.v as any)}
+                                        className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                                          editCustomTextAlign === o.v
+                                            ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
+                                            : 'bg-black/40 border-slate-800 text-zinc-500 hover:border-slate-600'
+                                        }`}>{o.i}{o.l}</button>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="block text-[10px] text-slate-400 font-semibold mb-1.5">Espaçamento Letras</label>
+                                  <div className="grid grid-cols-4 gap-1.5">
+                                    {([
+                                      { v: '', l: 'Padrão' },
+                                      { v: 'tight', l: 'Justo' },
+                                      { v: 'normal', l: 'Normal' },
+                                      { v: 'wide', l: 'Largo' },
+                                      { v: 'wider', l: 'L+', },
+                                    ] as const).map(o => (
+                                      <button key={o.v || 'default'} type="button"
+                                        onClick={() => setEditCustomLetterSpacing(o.v as any)}
+                                        className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all cursor-pointer ${
+                                          editCustomLetterSpacing === o.v
+                                            ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
+                                            : 'bg-black/40 border-slate-800 text-zinc-500 hover:border-slate-600'
+                                        }`}>{o.l}</button>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Icon position */}
+                              <div>
+                                <label className="block text-[10px] text-slate-400 font-semibold mb-1.5">Posição do Ícone (Emoji)</label>
+                                <div className="grid grid-cols-4 gap-1.5">
+                                  {([
+                                    { v: '', l: 'Padrão' },
+                                    { v: 'left', l: '← Esq' },
+                                    { v: 'top', l: '↑ Topo' },
+                                    { v: 'right', l: 'Dir →' },
+                                    { v: 'none', l: 'Oculto' },
+                                  ] as const).map(o => (
+                                    <button key={o.v || 'default'} type="button"
+                                      onClick={() => setEditCustomIconPosition(o.v as any)}
+                                      className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all cursor-pointer ${
+                                        editCustomIconPosition === o.v
+                                          ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
+                                          : 'bg-black/40 border-slate-800 text-zinc-500 hover:border-slate-600'
+                                      }`}>{o.l}</button>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Toggles */}
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                                <label className="flex items-center justify-between gap-2 bg-black/40 rounded-lg p-2 border border-slate-800 cursor-pointer">
+                                  <span className="text-[9px] text-zinc-400 flex items-center gap-1.5">
+                                    {editCustomShadow ? <Eye className="w-3 h-3 text-[#a78bfa]" /> : <EyeOff className="w-3 h-3 text-zinc-600" />}
+                                    Sombra
+                                  </span>
+                                  <span className={`relative w-8 h-4 rounded-full transition-all ${editCustomShadow ? 'bg-[#a78bfa]' : 'bg-zinc-700'}`}>
+                                    <input type="checkbox" checked={editCustomShadow} onChange={(e) => setEditCustomShadow(e.target.checked)} className="sr-only" />
+                                    <span className={`absolute top-0.5 w-3 h-3 rounded-full bg-white shadow transition-all ${editCustomShadow ? 'left-4' : 'left-0.5'}`} />
+                                  </span>
+                                </label>
+                                <label className="flex items-center justify-between gap-2 bg-black/40 rounded-lg p-2 border border-slate-800 cursor-pointer">
+                                  <span className="text-[9px] text-zinc-400 flex items-center gap-1.5">
+                                    {editCustomGlass ? <Eye className="w-3 h-3 text-[#a78bfa]" /> : <EyeOff className="w-3 h-3 text-zinc-600" />}
+                                    Vidro (Blur)
+                                  </span>
+                                  <span className={`relative w-8 h-4 rounded-full transition-all ${editCustomGlass ? 'bg-[#a78bfa]' : 'bg-zinc-700'}`}>
+                                    <input type="checkbox" checked={editCustomGlass} onChange={(e) => setEditCustomGlass(e.target.checked)} className="sr-only" />
+                                    <span className={`absolute top-0.5 w-3 h-3 rounded-full bg-white shadow transition-all ${editCustomGlass ? 'left-4' : 'left-0.5'}`} />
+                                  </span>
+                                </label>
+                                <label className="flex items-center justify-between gap-2 bg-black/40 rounded-lg p-2 border border-slate-800 cursor-pointer">
+                                  <span className="text-[9px] text-zinc-400 flex items-center gap-1.5">
+                                    {editCustomUppercase ? <Eye className="w-3 h-3 text-[#a78bfa]" /> : <EyeOff className="w-3 h-3 text-zinc-600" />}
+                                    Maiúsculas
+                                  </span>
+                                  <span className={`relative w-8 h-4 rounded-full transition-all ${editCustomUppercase ? 'bg-[#a78bfa]' : 'bg-zinc-700'}`}>
+                                    <input type="checkbox" checked={editCustomUppercase} onChange={(e) => setEditCustomUppercase(e.target.checked)} className="sr-only" />
+                                    <span className={`absolute top-0.5 w-3 h-3 rounded-full bg-white shadow transition-all ${editCustomUppercase ? 'left-4' : 'left-0.5'}`} />
+                                  </span>
+                                </label>
+                              </div>
+
+                              {/* Live mini-preview */}
+                              <div className="pt-2 border-t border-[#a78bfa]/10">
+                                <label className="block text-[10px] text-slate-400 font-semibold mb-1.5">Pré-visualização</label>
+                                <div className="bg-black/30 rounded-xl p-4 border border-slate-800 flex items-center justify-center min-h-[70px]">
+                                  <span
+                                    className={`px-4 font-bold text-xs tracking-wide flex items-center gap-2 ${
+                                      editCustomStyle === 'rounded' ? 'rounded-2xl' :
+                                      editCustomStyle === 'flat' ? 'rounded-none' :
+                                      editCustomStyle === 'outline' ? 'rounded-xl' :
+                                      editCustomStyle === 'shadow' ? 'rounded-xl' :
+                                      editCustomStyle === 'brutalist' ? 'rounded-none' :
+                                      editCustomStyle === 'glass' ? 'rounded-2xl' :
+                                      editCustomStyle === 'gradient' ? 'rounded-xl' :
+                                      editCustomStyle === 'neon' ? 'rounded-xl' :
+                                      'rounded-xl'
+                                    } ${
+                                      editCustomRadius === 'none' ? '!rounded-none' :
+                                      editCustomRadius === 'subtle' ? '!rounded-md' :
+                                      editCustomRadius === 'medium' ? '!rounded-xl' :
+                                      editCustomRadius === 'full' ? '!rounded-2xl' :
+                                      editCustomRadius === 'pill' ? '!rounded-full' : ''
+                                    } ${
+                                      editCustomSize === 'small' ? 'py-1.5 text-[10px]' :
+                                      editCustomSize === 'medium' ? 'py-2.5 text-xs' :
+                                      editCustomSize === 'large' ? 'py-3.5 text-sm' :
+                                      editCustomSize === 'xl' ? 'py-4 text-base' : 'py-2.5 text-xs'
+                                    } ${
+                                      editCustomShadow ? 'shadow-xl shadow-black/40' : ''
+                                    } ${
+                                      editCustomGlass ? 'backdrop-blur-md' : ''
+                                    } ${
+                                      editCustomFont === 'sans' ? 'font-sans' :
+                                      editCustomFont === 'serif' ? 'font-serif' :
+                                      editCustomFont === 'mono' ? 'font-mono' :
+                                      editCustomFont === 'space' ? 'font-space' :
+                                      editCustomFont === 'outfit' ? 'font-outfit' :
+                                      editCustomFont === 'syne' ? 'font-syne' :
+                                      editCustomFont === 'bebas' ? 'font-bebas' :
+                                      editCustomFont === 'caveat' ? 'font-caveat' : ''
+                                    }`}
+                                    style={{
+                                      background: editUseGradient && editCustomGradient
+                                        ? editCustomGradient
+                                        : editCustomColor || '#111a36',
+                                      color: editCustomTextColor || '#ffffff',
+                                      border: editCustomBorderWidth > 0
+                                        ? `${editCustomBorderWidth}px solid ${editCustomBorderColor || '#a78bfa'}`
+                                        : 'none',
+                                      letterSpacing: editCustomLetterSpacing === 'tight' ? '-0.02em' :
+                                                      editCustomLetterSpacing === 'normal' ? '0' :
+                                                      editCustomLetterSpacing === 'wide' ? '0.05em' :
+                                                      editCustomLetterSpacing === 'wider' ? '0.15em' : undefined,
+                                      boxShadow: editCustomStyle === 'shadow' ? '0 8px 20px rgba(0,0,0,0.4)' :
+                                                 editCustomStyle === 'brutalist' ? '4px 4px 0 0 #000' :
+                                                 editCustomStyle === 'neon' ? '0 0 18px ' + (editCustomColor || '#a78bfa') : undefined,
+                                    }}
+                                  >
+                                    {editIconEmoji && editCustomIconPosition !== 'none' && editCustomIconPosition !== 'top' && <span>{editIconEmoji}</span>}
+                                    <span className={editCustomUppercase ? 'uppercase' : ''}>
+                                      {editTitle || 'Seu Botão'}
+                                    </span>
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
 
