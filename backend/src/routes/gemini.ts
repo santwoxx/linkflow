@@ -1,11 +1,12 @@
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
 import { GoogleGenAI } from '@google/genai';
+import { verifyFirebaseToken, AuthenticatedRequest } from '../middleware/auth.js';
 
 export const geminiRouter = Router();
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-geminiRouter.post('/generate', async (req: Request, res: Response) => {
+geminiRouter.post('/generate', verifyFirebaseToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     if (!GEMINI_API_KEY) {
       res.status(500).json({ error: 'GEMINI_API_KEY não configurada no servidor.' });

@@ -22,6 +22,9 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
   const isAdmin = userProfile.email === ADMIN_EMAIL || userProfile.role === 'admin';
   const [links, setLinks] = useState<LinkItem[]>([]);
   const [clicks, setClicks] = useState<ClickLog[]>([]);
+  // Per-link in-progress edit overrides from LinkEditor; merged into links
+  // only for the live preview, never persisted until "Aplicar" is clicked.
+  const [linkPreviewOverrides, setLinkPreviewOverrides] = useState<Record<string, Partial<LinkItem>>>({});
   
   // Compress image to data URI without external storage
   const compressImage = (file: File, maxW: number, maxH: number, quality: number): Promise<string> =>
@@ -90,6 +93,10 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
   };
 
   // Reusable live phone preview (sticky) used by Construtor and Aparência tabs
+  const previewLinks: LinkItem[] = links.map(l =>
+    linkPreviewOverrides[l.id] ? { ...l, ...linkPreviewOverrides[l.id] } : l
+  );
+
   const renderPhonePreview = () => (
     <div className="hidden lg:flex shrink-0 w-[380px] self-stretch border-l border-slate-800/40 bg-[#050b18]/60">
       <div className="sticky top-0 w-full max-h-screen overflow-y-auto flex flex-col items-center gap-3 p-6">
@@ -103,7 +110,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
             <span className="w-10 h-1 rounded-full bg-zinc-700" />
           </div>
           <div className="w-full overflow-y-auto" style={{ height: '620px' }}>
-            <PublicProfile profile={livePreviewProfile} links={links} previewMode={true} />
+            <PublicProfile profile={livePreviewProfile} links={previewLinks} previewMode={true} />
           </div>
         </div>
         <p className="text-[9px] text-zinc-600 text-center">As alterações aparecem aqui em tempo real</p>
@@ -347,23 +354,39 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
 
   // 4. Update single link credentials
   const handleUpdateLink = async (linkId: string, updates: Partial<LinkItem>) => {
+    const merged = { ...updates, updatedAt: new Date() };
+
     if (userProfile.uid === 'demo-user-123') {
-      const updated = links.map(l => l.id === linkId ? { ...l, ...updates, updatedAt: new Date() } : l);
+      const updated = links.map(l => l.id === linkId ? { ...l, ...merged } : l);
       setLinks(updated);
       localStorage.setItem('demo_links', JSON.stringify(updated));
       return;
     }
 
+    // Optimistic local update so the preview reflects changes instantly,
+    // before the Firestore roundtrip completes (onSnapshot will reconcile).
+    setLinks(prev => prev.map(l => l.id === linkId ? { ...l, ...merged } : l));
+
     const path = `users/${userProfile.uid}/links/${linkId}`;
     try {
       const docRef = doc(db, 'users', userProfile.uid, 'links', linkId);
-      await updateDoc(docRef, {
-        ...updates,
-        updatedAt: new Date(),
-      });
+      await updateDoc(docRef, merged);
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, path);
     }
+  };
+
+  // 4b. Receive in-progress edit values from LinkEditor for live preview.
+  // Pass `null` to clear the override (on save/cancel).
+  const handleLinkPreviewChange = (linkId: string, patch: Partial<LinkItem> | null) => {
+    setLinkPreviewOverrides(prev => {
+      if (patch === null) {
+        if (!(linkId in prev)) return prev;
+        const { [linkId]: _removed, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [linkId]: patch };
+    });
   };
 
   // 5. Delete link
@@ -711,6 +734,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                   onAdd={handleAddLink}
                   onUpdate={handleUpdateLink}
                   onDelete={handleDeleteLink}
+                  onPreviewChange={handleLinkPreviewChange}
                 />
                 <div className="h-10" />
               </div>

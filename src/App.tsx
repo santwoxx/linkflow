@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { auth, db, loginWithGoogle } from './firebase';
+import { auth, db, loginWithGoogle, logoutUser } from './firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where, limit, serverTimestamp } from 'firebase/firestore';
 import { UserProfile, LinkItem, AVAILABLE_THEMES, ADMIN_EMAIL } from './types';
@@ -688,7 +688,6 @@ export default function App() {
           <div className="pt-2">
             <button
               onClick={async () => {
-                const { logoutUser } = await import('./firebase');
                 await logoutUser();
               }}
               className="py-3 px-6 bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 text-xs font-bold rounded-xl border border-rose-500/20 transition-all cursor-pointer"

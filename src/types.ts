@@ -91,6 +91,10 @@ export interface UserProfile {
   bio: string;
   profilePicUrl: string;
   coverUrl?: string;
+  coverColor?: string;
+  coverGradient?: string;
+  coverPosition?: 'top' | 'center' | 'bottom';
+  coverOverlay?: number;
   theme: UserTheme;
   email?: string;
   role?: 'user' | 'admin';

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LinkItem, BlockType, FONTS_LIST } from '../types';
 import { Plus, Trash2, ArrowUp, ArrowDown, ExternalLink, Edit2, Check, X, ToggleLeft, ToggleRight, Loader2, Sparkles, Tag, Smile, Zap, MessageCircle, ShoppingBag, Image as ImageIcon, Star, Briefcase, CreditCard, LayoutTemplate, Palette, Type, Square, Droplet, Eye, EyeOff, Maximize, Minimize, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 
@@ -7,9 +7,10 @@ interface LinkEditorProps {
   onAdd: (title: string, url: string, type?: BlockType, extraData?: any) => Promise<void>;
   onUpdate: (linkId: string, updates: Partial<LinkItem>) => Promise<void>;
   onDelete: (linkId: string) => Promise<void>;
+  onPreviewChange?: (linkId: string, patch: Partial<LinkItem> | null) => void;
 }
 
-export default function LinkEditor({ links, onAdd, onUpdate, onDelete }: LinkEditorProps) {
+export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreviewChange }: LinkEditorProps) {
   const [isAdding, setIsAdding] = useState(false);
 
   // Track which link ID is currently being edited
@@ -40,6 +41,46 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete }: LinkEdi
   const [editCustomIconPosition, setEditCustomIconPosition] = useState<'' | 'left' | 'right' | 'top' | 'none'>('');
   const [showAdvancedStyle, setShowAdvancedStyle] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
+
+  // Live preview: report all in-progress edit values to parent so the right-side
+  // phone preview reflects the customization while the user is editing (before
+  // they click "Aplicar"). Pass `null` from save/cancel handlers to clear.
+  useEffect(() => {
+    if (!editingLinkId || !onPreviewChange) return;
+    onPreviewChange(editingLinkId, {
+      title: editTitle,
+      url: editUrl,
+      subtitle: editSubtitle,
+      badgeText: editBadgeText,
+      iconEmoji: editIconEmoji,
+      animation: editAnimation,
+      imageUrl: editImageUrl,
+      customColor: editCustomColor,
+      customTextColor: editCustomTextColor,
+      customGradient: editCustomGradient,
+      useGradient: editUseGradient,
+      customStyle: (editCustomStyle || undefined) as any,
+      customRadius: (editCustomRadius || undefined) as any,
+      customSize: (editCustomSize || undefined) as any,
+      customShadow: editCustomShadow,
+      customGlass: editCustomGlass,
+      customFont: (editCustomFont || undefined) as any,
+      customBorderColor: editCustomBorderColor,
+      customBorderWidth: editCustomBorderWidth,
+      customTextAlign: (editCustomTextAlign || undefined) as any,
+      customLetterSpacing: (editCustomLetterSpacing || undefined) as any,
+      customUppercase: editCustomUppercase,
+      customIconPosition: (editCustomIconPosition || undefined) as any,
+    });
+  }, [
+    editingLinkId, onPreviewChange,
+    editTitle, editUrl, editSubtitle, editBadgeText, editIconEmoji, editAnimation, editImageUrl,
+    editCustomColor, editCustomTextColor, editCustomGradient, editUseGradient,
+    editCustomStyle, editCustomRadius, editCustomSize,
+    editCustomShadow, editCustomGlass, editCustomFont,
+    editCustomBorderColor, editCustomBorderWidth,
+    editCustomTextAlign, editCustomLetterSpacing, editCustomUppercase, editCustomIconPosition,
+  ]);
 
   const handleAddBlock = async (type: BlockType) => {
     setIsAdding(true);
@@ -177,6 +218,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete }: LinkEdi
         customUppercase: editCustomUppercase,
         customIconPosition: (editCustomIconPosition || undefined) as any,
       });
+      if (onPreviewChange) onPreviewChange(linkId, null);
       setEditingLinkId(null);
     } catch (err) {
       console.error(err);
@@ -280,7 +322,10 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete }: LinkEdi
                         <div className="flex gap-1">
                           <button
                             type="button"
-                            onClick={() => setEditingLinkId(null)}
+                          onClick={() => {
+                            if (onPreviewChange && editingLinkId) onPreviewChange(editingLinkId, null);
+                            setEditingLinkId(null);
+                          }}
                             className="p-1 text-slate-400 hover:text-slate-200"
                             title="Cancelar"
                           >
