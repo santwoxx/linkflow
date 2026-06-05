@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db, loginWithGoogle, logoutUser } from './firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where, limit, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocFromServer, getDocs, getDocsFromServer, query, setDoc, updateDoc, where, limit, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { UserProfile, LinkItem, AVAILABLE_THEMES, ADMIN_EMAIL } from './types';
 import Dashboard from './components/Dashboard';
 import PublicProfile from './components/PublicProfile';
@@ -144,6 +144,11 @@ export default function App() {
     let unsubLinks: (() => void) | null = null;
     let cancelled = false;
     let loadedAnything = false;
+    let resolvedUid: string | null = null;
+    // Cross-tab "owner just saved" notification so public tab refreshes instantly.
+    const broadcastChannel = typeof BroadcastChannel !== 'undefined'
+      ? new BroadcastChannel('linkflow_public_sync')
+      : null;
 
     const finishInitialLoad = () => {
       if (loadedAnything) return;
@@ -151,15 +156,40 @@ export default function App() {
       setPublicLoading(false);
     };
 
+    const applyLinks = (items: LinkItem[]) => {
+      items.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      setPublicLinks(items);
+      try {
+        localStorage.setItem(`linkflow_cached_links_public_${publicSlug}`, JSON.stringify(items));
+      } catch {}
+    };
+
     const tryOfflineCache = () => {
       const cachedProfile = localStorage.getItem(`linkflow_cached_profile_public_${publicSlug}`);
       const cachedLinks = localStorage.getItem(`linkflow_cached_links_public_${publicSlug}`);
       if (cachedProfile) {
         setPublicProfile(JSON.parse(cachedProfile));
-        setPublicLinks(cachedLinks ? JSON.parse(cachedLinks) : []);
+        if (cachedLinks) setPublicLinks(JSON.parse(cachedLinks));
         return true;
       }
       return false;
+    };
+
+    const refreshLinksFromServer = async (uid: string) => {
+      try {
+        const linksRef = collection(db, 'users', uid, 'links');
+        const linksQuery = query(linksRef, where('active', '==', true));
+        const linksSnap = await getDocsFromServer(linksQuery);
+        if (cancelled) return;
+        const items: LinkItem[] = [];
+        linksSnap.forEach((l) => items.push(l.data() as LinkItem));
+        applyLinks(items);
+        finishInitialLoad();
+      } catch (err) {
+        if (cancelled) return;
+        const isOffline = String((err as any)?.message || '').includes('offline');
+        if (isOffline) tryOfflineCache();
+      }
     };
 
     // Support sandbox demo bypass (kept in sync with dashboard via storage events)
@@ -225,15 +255,25 @@ export default function App() {
     setPublicLoading(true);
     setPublicError(null);
 
-    // 1. Find user by username (real-time so profile edits propagate)
-    const usersRef = collection(db, 'users');
-    const userQuery = query(usersRef, where('username', '==', publicSlug), limit(1));
-    let resolvedUid: string | null = null;
+    // Listen for cross-tab "owner saved" broadcasts (forces an immediate re-fetch).
+    const onBroadcast = (ev: MessageEvent) => {
+      const data = ev.data as { type?: string; slug?: string; uid?: string } | null;
+      if (!data) return;
+      if (data.type === 'link_updated' && data.slug === publicSlug && data.uid) {
+        refreshLinksFromServer(data.uid);
+      }
+    };
+    if (broadcastChannel) broadcastChannel.addEventListener('message', onBroadcast);
 
-    unsubProfile = onSnapshot(
-      userQuery,
-      (querySnapshot) => {
+    // 1. Force an initial server fetch (bypasses Firestore cache → no stale color).
+    const initialFetch = async () => {
+      try {
+        const usersRef = collection(db, 'users');
+        const userQuery = query(usersRef, where('username', '==', publicSlug), limit(1));
+        const querySnapshot = await getDocsFromServer(userQuery);
+
         if (cancelled) return;
+
         if (querySnapshot.empty) {
           setPublicError('Página não encontrada.');
           setPublicLinks([]);
@@ -244,16 +284,68 @@ export default function App() {
         const userDoc = querySnapshot.docs[0];
         const profileData = userDoc.data() as UserProfile;
         setPublicProfile(profileData);
-        localStorage.setItem(`linkflow_cached_profile_public_${publicSlug}`, JSON.stringify(profileData));
+        try {
+          localStorage.setItem(`linkflow_cached_profile_public_${publicSlug}`, JSON.stringify(profileData));
+        } catch {}
 
         if (profileData.banned) {
-          if (unsubLinks) { unsubLinks(); unsubLinks = null; }
           setPublicLinks([]);
           finishInitialLoad();
           return;
         }
 
-        // 2. Subscribe to their active links (real-time so save shows immediately)
+        resolvedUid = profileData.uid;
+
+        const linksRef = collection(db, 'users', profileData.uid, 'links');
+        const linksQuery = query(linksRef, where('active', '==', true));
+        const linksSnapshot = await getDocsFromServer(linksQuery);
+        if (cancelled) return;
+        const items: LinkItem[] = [];
+        linksSnapshot.forEach((l) => items.push(l.data() as LinkItem));
+        applyLinks(items);
+        finishInitialLoad();
+      } catch (err: any) {
+        if (cancelled) return;
+        const isOffline = String(err?.message || '').includes('offline');
+        if (isOffline && tryOfflineCache()) {
+          finishInitialLoad();
+          return;
+        }
+        console.error('Erro ao buscar página pública:', err);
+        setPublicError('Falha ao carregar o perfil.');
+        finishInitialLoad();
+      }
+    };
+
+    initialFetch();
+
+    // 2. After the initial server fetch, attach a real-time listener so subsequent
+    //    saves in the same tab show up immediately (cache-coherent on this device).
+    const usersRef = collection(db, 'users');
+    const userQuery = query(usersRef, where('username', '==', publicSlug), limit(1));
+
+    unsubProfile = onSnapshot(
+      userQuery,
+      (querySnapshot) => {
+        if (cancelled) return;
+        if (querySnapshot.empty) {
+          setPublicError('Página não encontrada.');
+          return;
+        }
+
+        const userDoc = querySnapshot.docs[0];
+        const profileData = userDoc.data() as UserProfile;
+        setPublicProfile(profileData);
+        try {
+          localStorage.setItem(`linkflow_cached_profile_public_${publicSlug}`, JSON.stringify(profileData));
+        } catch {}
+
+        if (profileData.banned) {
+          if (unsubLinks) { unsubLinks(); unsubLinks = null; }
+          setPublicLinks([]);
+          return;
+        }
+
         if (resolvedUid !== profileData.uid) {
           resolvedUid = profileData.uid;
           if (unsubLinks) { unsubLinks(); unsubLinks = null; }
@@ -265,36 +357,18 @@ export default function App() {
               if (cancelled) return;
               const items: LinkItem[] = [];
               linksSnapshot.forEach((l) => items.push(l.data() as LinkItem));
-              items.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-              setPublicLinks(items);
-              localStorage.setItem(`linkflow_cached_links_public_${publicSlug}`, JSON.stringify(items));
-              finishInitialLoad();
+              applyLinks(items);
             },
             (linksErr) => {
               if (cancelled) return;
               console.warn('Erro no snapshot de links públicos:', linksErr);
-              const isOffline = String(linksErr?.message || '').includes('offline');
-              if (isOffline && tryOfflineCache()) {
-                finishInitialLoad();
-                return;
-              }
-              setPublicError('Falha ao carregar os links do perfil.');
-              finishInitialLoad();
             }
           );
         }
-        finishInitialLoad();
       },
       (err) => {
         if (cancelled) return;
-        const isOffline = String(err?.message || '').includes('offline');
-        if (isOffline && tryOfflineCache()) {
-          finishInitialLoad();
-          return;
-        }
-        console.error('Erro ao buscar página pública:', err);
-        setPublicError('Falha ao carregar o perfil.');
-        finishInitialLoad();
+        console.warn('Erro no snapshot do perfil público:', err);
       }
     );
 
@@ -302,6 +376,10 @@ export default function App() {
       cancelled = true;
       if (unsubProfile) unsubProfile();
       if (unsubLinks) unsubLinks();
+      if (broadcastChannel) {
+        broadcastChannel.removeEventListener('message', onBroadcast);
+        broadcastChannel.close();
+      }
     };
   }, [publicSlug]);
 

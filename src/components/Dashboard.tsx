@@ -359,6 +359,22 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
     try {
       const docRef = doc(db, 'users', userProfile.uid, 'links', linkId);
       await updateDoc(docRef, merged);
+
+      // Notify any open public page in another tab so the new color shows up
+      // immediately, without waiting for Firestore cache propagation.
+      try {
+        if (typeof BroadcastChannel !== 'undefined' && userProfile.username) {
+          const channel = new BroadcastChannel('linkflow_public_sync');
+          channel.postMessage({
+            type: 'link_updated',
+            slug: userProfile.username,
+            uid: userProfile.uid,
+            linkId,
+            at: Date.now(),
+          });
+          channel.close();
+        }
+      } catch {}
     } catch (err) {
       // Revert optimistic update so the UI matches persisted state
       setLinks(previousLinks);
