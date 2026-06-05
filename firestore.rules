@@ -222,11 +222,15 @@ service cloud.firestore {
     // ==========================================================================
     match /professional_profiles/{userId} {
       allow read: if true; // Todos podem ver os perfis públicos
-      
-      // Criar: Apenas o dono pode criar e as tags de aprovação devem vir como false (se não for admin)
-      allow create: if isOwner(userId) && !isBanned()
-        && request.resource.data.uid == userId
-        && (isAdmin() || (request.resource.data.verified == false && request.resource.data.pendingApproval == true));
+
+      // Criar: usuário cria o próprio perfil (pendente) OU admin promove um usuário
+      // comum a prestador (também entra como pendente para aprovação posterior).
+      // Em ambos os casos, verified/pendingApproval devem vir como false/true —
+      // apenas admin pode virar verified=true via update.
+      allow create: if request.resource.data.uid == userId
+        && request.resource.data.verified == false
+        && request.resource.data.pendingApproval == true
+        && (isAdmin() || (isOwner(userId) && !isBanned()));
 
       // Atualizar: Usuário só pode atualizar os próprios dados. Campos "verified" e "pendingApproval" restritos
       allow update: if (isOwner(userId) && !isBanned()

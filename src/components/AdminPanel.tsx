@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebase';
-import { collection, query, orderBy, limit, getDocs, doc, updateDoc, deleteDoc, where } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, doc, updateDoc, deleteDoc, setDoc, serverTimestamp, where } from 'firebase/firestore';
 import { UserProfile, LinkItem, ProfessionalProfile } from '../types';
-import { Crown, Users, Link2, BarChart2, Sparkles, RefreshCw, ExternalLink, ChevronDown, ChevronRight, Ban, CheckCircle, Calendar, MousePointerClick, Hash, ShieldBan, Edit3, Check, X, Briefcase, MapPin, Star, MessageCircle, Trash2 } from 'lucide-react';
+import { Crown, Users, Link2, BarChart2, Sparkles, RefreshCw, ExternalLink, ChevronDown, ChevronRight, Ban, CheckCircle, Calendar, MousePointerClick, Hash, ShieldBan, Edit3, Check, X, Briefcase, MapPin, Star, MessageCircle, Trash2, UserPlus, ShieldPlus } from 'lucide-react';
 
 export default function AdminPanel() {
   const [allProfiles, setAllProfiles] = useState<UserProfile[]>([]);
@@ -23,6 +23,8 @@ export default function AdminPanel() {
   const [approvingUid, setApprovingUid] = useState<string | null>(null);
   const [rejectingUid, setRejectingUid] = useState<string | null>(null);
   const [proFilter, setProFilter] = useState<'pending' | 'verified' | 'all'>('pending');
+  const [convertingUid, setConvertingUid] = useState<string | null>(null);
+  const [promotingUid, setPromotingUid] = useState<string | null>(null);
 
   const fetchAllUsers = async () => {
     setIsLoading(true);
@@ -125,6 +127,84 @@ export default function AdminPanel() {
       setApprovingUid(null);
     }
   };
+
+  const handleConvertToPro = async (user: UserProfile) => {
+    if (!user.uid) return;
+    const ok = window.confirm(
+      `Tornar ${user.displayName} (@${user.username}) um prestador de serviços?\n\n` +
+      `Será criado um cadastro em "Pendentes" para você revisar e aprovar. ` +
+      `O prestador poderá preencher profissão, WhatsApp e skills depois.`
+    );
+    if (!ok) return;
+    setConvertingUid(user.uid);
+    try {
+      const ref = doc(db, 'professional_profiles', user.uid);
+      const seed: ProfessionalProfile = {
+        uid: user.uid,
+        username: user.username,
+        displayName: user.displayName,
+        profilePicUrl: user.profilePicUrl,
+        profession: '',
+        category: 'Outros',
+        bio: '',
+        whatsapp: '',
+        instagram: '',
+        portfolio: '',
+        city: '',
+        skills: [],
+        verified: false,
+        pendingApproval: true,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+      await setDoc(ref, seed);
+      // Adiciona na lista local de pros para aparecer em "Pendentes" imediatamente
+      setAllPros(prev => [
+        { ...seed, createdAt: new Date(), updatedAt: new Date() },
+        ...prev.filter(p => p.uid !== user.uid),
+      ]);
+    } catch (err: any) {
+      console.error('Erro ao converter em prestador', err);
+      alert('Erro ao converter: ' + (err?.message || ''));
+    } finally {
+      setConvertingUid(null);
+    }
+  };
+
+  const handleToggleAdmin = async (user: UserProfile) => {
+    if (!user.uid) return;
+    const willBeAdmin = user.role !== 'admin';
+    if (user.email === 'brisasofc@gmail.com' && willBeAdmin) {
+      alert('Este e-mail já é admin por regra do Firestore.');
+      return;
+    }
+    const ok = window.confirm(
+      willBeAdmin
+        ? `Tornar ${user.displayName} (@${user.username}) um administrador? Terá poder total no painel.`
+        : `Remover o cargo de administrador de ${user.displayName}?`
+    );
+    if (!ok) return;
+    setPromotingUid(user.uid);
+    try {
+      const ref = doc(db, 'users', user.uid);
+      await updateDoc(ref, { role: willBeAdmin ? 'admin' : 'user' });
+      setAllProfiles(prev => prev.map(p => p.uid === user.uid
+        ? { ...p, role: willBeAdmin ? 'admin' : 'user' }
+        : p
+      ));
+    } catch (err: any) {
+      console.error('Erro ao alterar role', err);
+      alert('Erro ao alterar: ' + (err?.message || ''));
+    } finally {
+      setPromotingUid(null);
+    }
+  };
+
+  // Mapa de uids que já possuem cadastro de prestador (para badge na lista de usuários)
+  const proByUid = new Map<string, ProfessionalProfile>();
+  for (const p of allPros) {
+    if (p.uid) proByUid.set(p.uid, p);
+  }
 
   const filteredPros = allPros.filter(p => {
     if (proFilter === 'pending') return p.pendingApproval === true && !p.verified;
@@ -310,6 +390,15 @@ export default function AdminPanel() {
                           <Crown className="w-2.5 h-2.5" /> CEO
                         </span>
                       )}
+                      {proByUid.has(p.uid) && (
+                        <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 ${
+                          proByUid.get(p.uid)?.verified
+                            ? 'bg-emerald-500/20 text-emerald-400'
+                            : 'bg-amber-500/20 text-amber-400'
+                        }`}>
+                          <Briefcase className="w-2.5 h-2.5" /> {proByUid.get(p.uid)?.verified ? 'Pro' : 'Pro pendente'}
+                        </span>
+                      )}
                       {p.banned && (
                         <span className="text-[8px] font-bold bg-rose-500/20 text-rose-400 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
                           <Ban className="w-2.5 h-2.5" /> Banido
@@ -338,7 +427,52 @@ export default function AdminPanel() {
                       <span className="text-[10px] text-zinc-500">@{p.username}</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+                    {!proByUid.has(p.uid) && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleConvertToPro(p); }}
+                        disabled={convertingUid === p.uid}
+                        className="text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50"
+                        title="Criar cadastro de prestador (vai para Pendentes)"
+                      >
+                        {convertingUid === p.uid ? (
+                          <RefreshCw className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <UserPlus className="w-3 h-3" />
+                        )}
+                        <span className="hidden md:inline">Tornar Prestador</span>
+                      </button>
+                    )}
+                    {p.role !== 'admin' && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleToggleAdmin(p); }}
+                        disabled={promotingUid === p.uid}
+                        className="text-[10px] font-bold px-2 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50"
+                        title="Promover a administrador (poder total)"
+                      >
+                        {promotingUid === p.uid ? (
+                          <RefreshCw className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <ShieldPlus className="w-3 h-3" />
+                        )}
+                        <span className="hidden md:inline">Admin</span>
+                      </button>
+                    )}
+                    {p.role === 'admin' && p.email !== 'brisasofc@gmail.com' && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleToggleAdmin(p); }}
+                        disabled={promotingUid === p.uid}
+                        className="text-[10px] font-bold px-2 py-1 rounded-lg bg-zinc-700/30 hover:bg-zinc-700/50 text-zinc-300 border border-zinc-600/30 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50"
+                        title="Remover cargo de administrador"
+                      >
+                        {promotingUid === p.uid ? (
+                          <RefreshCw className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <ShieldPlus className="w-3 h-3" />
+                        )}
+                        <span className="hidden md:inline">Remover Admin</span>
+                      </button>
+                    )}
                     <div className="hidden sm:flex items-center gap-2 text-[9px] text-zinc-600">
                       <span className="flex items-center gap-0.5"><Link2 className="w-2.5 h-2.5" /> {userLinks[p.uid]?.links.length ?? '-'}</span>
                       <span className="flex items-center gap-0.5"><MousePointerClick className="w-2.5 h-2.5" /> {userLinks[p.uid]?.clicksCount ?? '-'}</span>
