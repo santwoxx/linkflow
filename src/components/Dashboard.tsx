@@ -207,9 +207,11 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
     const q = query(collection(db, 'users', userProfile.uid, 'links'), orderBy('order', 'asc'));
 
     const unsubscribe = onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
-      // Skip local cache snapshots so we don't overwrite optimistic UI updates
-      // with stale IndexedDB data before the server response arrives.
-      if (snapshot.metadata.fromCache) return;
+      // Skip snapshots that still reflect a pending local write — we only want
+      // the server-confirmed state. This prevents the race where an intermediate
+      // snapshot (fromCache=false, hasPendingWrites=true) carries stale data
+      // and overwrites the optimistic update in `handleUpdateLink`.
+      if (snapshot.metadata.hasPendingWrites) return;
       const items: LinkItem[] = [];
       snapshot.forEach((d) => {
         items.push(d.data() as LinkItem);

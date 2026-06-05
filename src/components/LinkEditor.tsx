@@ -242,7 +242,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
       if (url && !/^https?:\/\//i.test(url)) {
         url = 'https://' + url;
       }
-      await onUpdate(linkId, {
+      const updatePayload = {
         title: editTitle.trim(),
         url: url,
         subtitle: editSubtitle.trim() || '',
@@ -267,7 +267,11 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
         customLetterSpacing: editCustomLetterSpacing as any,
         customUppercase: editCustomUppercase,
         customIconPosition: editCustomIconPosition as any,
-      });
+      };
+      // [diagnóstico] ajuda a confirmar no DevTools que TODOS os campos
+      // customizados estão sendo enviados antes do onUpdate().
+      console.log('[LinkEditor] saving link', linkId, updatePayload);
+      await onUpdate(linkId, updatePayload);
       if (onPreviewChange) onPreviewChange(linkId, null);
       setSaveError(null);
       setEditingLinkId(null);
@@ -941,7 +945,12 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                       <div className="flex gap-2 justify-end border-t border-slate-850 pt-3">
                         <button
                           type="button"
-                          onClick={() => setEditingLinkId(null)}
+                          onClick={() => {
+                            if (onPreviewChange && editingLinkId) {
+                              onPreviewChange(editingLinkId, null);
+                            }
+                            setEditingLinkId(null);
+                          }}
                           className="px-4 py-2 text-xs border border-slate-800 text-slate-400 rounded-xl hover:bg-slate-900 transition-all cursor-pointer font-bold"
                         >
                           Cancelar
