@@ -5,6 +5,9 @@ import { collection, doc, getDoc, getDocFromServer, getDocs, getDocsFromServer, 
 import { UserProfile, LinkItem, AVAILABLE_THEMES, ADMIN_EMAIL } from './types';
 import Dashboard from './components/Dashboard';
 import PublicProfile from './components/PublicProfile';
+import ServicesDiscovery from './components/ServicesDiscovery';
+import ProfessionalProfilePage from './components/ProfessionalProfilePage';
+import ProSalesPage from './components/ProSalesPage';
 import { Link2, Sparkles, LogIn, Lock, CheckCircle, RefreshCw, BarChart4, Palette, Heart, AlertTriangle, ExternalLink, Ban, FileText, X, Briefcase, Users, ShieldCheck, TrendingUp, Smartphone, Store } from 'lucide-react';
 
 export default function App() {
@@ -86,6 +89,8 @@ export default function App() {
 
   // States for public link page view (e.g. ?u=slug)
   const [publicSlug, setPublicSlug] = useState<string | null>(null);
+  const [publicView, setPublicView] = useState<string | null>(null);
+  const [publicProProfile, setPublicProProfile] = useState<string | null>(null);
   const [publicProfile, setPublicProfile] = useState<UserProfile | null>(null);
   const [publicLinks, setPublicLinks] = useState<LinkItem[]>([]);
   const [publicLoading, setPublicLoading] = useState(false);
@@ -129,8 +134,16 @@ export default function App() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const u = params.get('u');
+    const view = params.get('view');
+    const pro = params.get('pro');
     if (u) {
       setPublicSlug(u.trim().toLowerCase());
+    }
+    if (view) {
+      setPublicView(view.trim().toLowerCase());
+    }
+    if (pro) {
+      setPublicProProfile(pro.trim().toLowerCase());
     }
     // Scroll to top on navigation
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -673,6 +686,57 @@ export default function App() {
     }
   };
 
+  // ----- RENDER NEW PROFESSIONAL MODULE ROUTES -----
+  if (publicView === 'servicos') {
+    if (publicProProfile) {
+      return (
+        <React.Suspense fallback={
+          <div className="min-h-screen bg-[#050b18] flex items-center justify-center text-slate-400">
+            <RefreshCw className="w-8 h-8 text-[#a78bfa] animate-spin" />
+          </div>
+        }>
+          <ProfessionalProfilePage 
+            username={publicProProfile} 
+            onBack={() => {
+              const newUrl = new URL(window.location.href);
+              newUrl.searchParams.delete('pro');
+              window.history.pushState({}, '', newUrl.toString());
+              setPublicProProfile(null);
+            }} 
+          />
+        </React.Suspense>
+      );
+    }
+    return (
+      <React.Suspense fallback={
+        <div className="min-h-screen bg-[#050b18] flex items-center justify-center text-slate-400">
+          <RefreshCw className="w-8 h-8 text-[#a78bfa] animate-spin" />
+        </div>
+      }>
+        <ServicesDiscovery 
+          onViewProfile={(username) => {
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.set('pro', username);
+            window.history.pushState({}, '', newUrl.toString());
+            setPublicProProfile(username);
+          }} 
+        />
+      </React.Suspense>
+    );
+  }
+
+  if (publicView === 'profissional') {
+    return (
+      <React.Suspense fallback={
+        <div className="min-h-screen bg-[#050b18] flex items-center justify-center text-slate-400">
+          <RefreshCw className="w-8 h-8 text-[#a78bfa] animate-spin" />
+        </div>
+      }>
+        <ProSalesPage />
+      </React.Suspense>
+    );
+  }
+
   // ----- RENDER BRIGHT PUBLIC PAGE ROUTE -----
   if (publicSlug) {
     if (publicLoading) {
@@ -900,7 +964,14 @@ export default function App() {
           </div>
           <span className="font-sans font-extrabold text-sm tracking-wide text-white select-none">LinkFlow</span>
         </div>
-        <nav aria-label="Autenticação">
+        <nav aria-label="Navegação principal" className="flex items-center gap-2">
+          <a
+            href="?view=servicos"
+            className="py-1.5 px-3 hover:bg-[#a78bfa]/10 text-xs text-slate-300 hover:text-white font-semibold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer"
+            aria-label="Encontrar profissionais e serviços"
+          >
+            <Briefcase className="w-3.5 h-3.5 text-[#a78bfa]" aria-hidden="true" /> Serviços
+          </a>
           <button
             onClick={handleLogin}
             className="py-1.5 px-3.5 border border-slate-800 hover:border-[#a78bfa]/40 hover:bg-[#a78bfa]/10 text-xs text-slate-300 hover:text-white font-semibold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer"
@@ -967,7 +1038,14 @@ export default function App() {
               <LogIn className="w-4 h-4 text-white" aria-hidden="true" />
               Criar Minha Página Grátis
             </button>
-
+            <a
+              href="?view=servicos"
+              className="px-6 py-4 bg-[#0a1128] hover:bg-[#0f1635] border border-slate-800 hover:border-emerald-500/40 text-slate-200 hover:text-white font-bold text-xs rounded-xl tracking-wide font-sans transition-all cursor-pointer flex items-center justify-center gap-2 uppercase shrink-0"
+              aria-label="Encontrar profissionais e serviços"
+            >
+              <Briefcase className="w-4 h-4 text-emerald-400" aria-hidden="true" />
+              Encontrar Profissionais
+            </a>
           </div>
 
           <div className="flex items-center gap-6 text-[10px] text-slate-500 font-sans flex-wrap justify-center">
