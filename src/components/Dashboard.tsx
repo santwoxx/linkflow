@@ -8,8 +8,8 @@ import StatsView from './StatsView';
 import PublicProfile from './PublicProfile';
 import CommunityFeed from './CommunityFeed';
 import DiscoverProfiles from './DiscoverProfiles';
-import AdminPanel from './AdminPanel';
-import ProfessionalDashboard from './ProfessionalDashboard';
+const AdminPanel = React.lazy(() => import('./AdminPanel'));
+const ProfessionalDashboard = React.lazy(() => import('./ProfessionalDashboard'));
 import GoToNatanDevButton from './GoToNatanDevButton';
 import { Link2, Sparkles, User, LogOut, Check, Copy, ExternalLink, RefreshCw, MessageSquare, Compass, ImageIcon, Crown, Layout, Smartphone, BarChart4, Briefcase } from 'lucide-react';
 import { ADMIN_EMAIL } from '../types';
@@ -877,14 +877,26 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                   <Briefcase className="w-3.5 h-3.5" aria-hidden="true" /> Abrir vitrine
                 </a>
               </div>
-              <ProfessionalDashboard userProfile={userProfile} />
+              <React.Suspense fallback={
+                <div className="flex items-center justify-center py-16">
+                  <RefreshCw className="w-6 h-6 text-[#a78bfa] animate-spin" aria-hidden="true" />
+                </div>
+              }>
+                <ProfessionalDashboard userProfile={userProfile} />
+              </React.Suspense>
             </div>
           )}
 
           {/* TAB: ADMIN PANEL (CEO only) */}
           {activeTab === 'admin' && (
             <div id="tab-content-admin" className="pb-10">
-              <AdminPanel />
+              <React.Suspense fallback={
+                <div className="flex items-center justify-center py-16">
+                  <RefreshCw className="w-6 h-6 text-[#a78bfa] animate-spin" aria-hidden="true" />
+                </div>
+              }>
+                <AdminPanel />
+              </React.Suspense>
             </div>
           )}
 

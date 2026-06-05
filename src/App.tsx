@@ -5,9 +5,9 @@ import { collection, doc, getDoc, getDocFromServer, getDocs, getDocsFromServer, 
 import { UserProfile, LinkItem, AVAILABLE_THEMES, ADMIN_EMAIL } from './types';
 import Dashboard from './components/Dashboard';
 import PublicProfile from './components/PublicProfile';
-import ServicesDiscovery from './components/ServicesDiscovery';
-import ProfessionalProfilePage from './components/ProfessionalProfilePage';
-import ProSalesPage from './components/ProSalesPage';
+const ServicesDiscovery = React.lazy(() => import('./components/ServicesDiscovery'));
+const ProfessionalProfilePage = React.lazy(() => import('./components/ProfessionalProfilePage'));
+const ProSalesPage = React.lazy(() => import('./components/ProSalesPage'));
 import { Link2, Sparkles, LogIn, Lock, CheckCircle, RefreshCw, BarChart4, Palette, Heart, AlertTriangle, ExternalLink, Ban, FileText, X, Briefcase, Users, ShieldCheck, TrendingUp, Smartphone, Store } from 'lucide-react';
 
 export default function App() {
