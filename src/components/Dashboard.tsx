@@ -837,7 +837,6 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                       >
                         <ExternalLink className="w-3 h-3" /> Visitar
                       </a>
-                      <GoToNatanDevButton />
                     </div>
                   </div>
                 </div>

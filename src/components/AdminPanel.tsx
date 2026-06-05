@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../firebase';
-import { collection, query, orderBy, limit, getDocs, doc, updateDoc, where } from 'firebase/firestore';
-import { UserProfile, LinkItem } from '../types';
-import { Crown, Users, Link2, BarChart2, Sparkles, RefreshCw, ExternalLink, ChevronDown, ChevronRight, Ban, CheckCircle, Calendar, MousePointerClick, Hash, ShieldBan, Edit3, Check, X } from 'lucide-react';
+import { db, auth } from '../firebase';
+import { collection, query, orderBy, limit, getDocs, doc, updateDoc, deleteDoc, where } from 'firebase/firestore';
+import { UserProfile, LinkItem, ProfessionalProfile } from '../types';
+import { Crown, Users, Link2, BarChart2, Sparkles, RefreshCw, ExternalLink, ChevronDown, ChevronRight, Ban, CheckCircle, Calendar, MousePointerClick, Hash, ShieldBan, Edit3, Check, X, Briefcase, MapPin, Star, MessageCircle, Trash2 } from 'lucide-react';
 
 export default function AdminPanel() {
   const [allProfiles, setAllProfiles] = useState<UserProfile[]>([]);
@@ -15,6 +15,14 @@ export default function AdminPanel() {
   const [editingUsername, setEditingUsername] = useState<string | null>(null);
   const [editingUsernameValue, setEditingUsernameValue] = useState('');
   const [savingUsername, setSavingUsername] = useState(false);
+
+  // Professionals state
+  const [allPros, setAllPros] = useState<ProfessionalProfile[]>([]);
+  const [prosLoading, setProsLoading] = useState(true);
+  const [prosError, setProsError] = useState('');
+  const [approvingUid, setApprovingUid] = useState<string | null>(null);
+  const [rejectingUid, setRejectingUid] = useState<string | null>(null);
+  const [proFilter, setProFilter] = useState<'pending' | 'verified' | 'all'>('pending');
 
   const fetchAllUsers = async () => {
     setIsLoading(true);
@@ -36,6 +44,96 @@ export default function AdminPanel() {
   };
 
   useEffect(() => { fetchAllUsers(); }, []);
+
+  const fetchAllPros = async () => {
+    setProsLoading(true);
+    setProsError('');
+    try {
+      const snap = await getDocs(query(collection(db, 'professional_profiles'), orderBy('createdAt', 'desc'), limit(200)));
+      setAllPros(snap.docs.map(d => d.data() as ProfessionalProfile));
+    } catch (err: any) {
+      setProsError(err?.message || 'Erro ao carregar prestadores');
+      console.error(err);
+    } finally {
+      setProsLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchAllPros(); }, []);
+
+  const handleApprovePro = async (pro: ProfessionalProfile) => {
+    if (!pro.uid) return;
+    setApprovingUid(pro.uid);
+    try {
+      const adminEmail = auth.currentUser?.email || 'admin';
+      const ref = doc(db, 'professional_profiles', pro.uid);
+      await updateDoc(ref, {
+        verified: true,
+        pendingApproval: false,
+        approvedBy: adminEmail,
+        updatedAt: new Date(),
+      });
+      setAllPros(prev => prev.map(p => p.uid === pro.uid
+        ? { ...p, verified: true, pendingApproval: false, approvedBy: adminEmail }
+        : p
+      ));
+    } catch (err: any) {
+      console.error('Erro ao aprovar prestador', err);
+      alert('Erro ao aprovar: ' + (err?.message || ''));
+    } finally {
+      setApprovingUid(null);
+    }
+  };
+
+  const handleRejectPro = async (pro: ProfessionalProfile) => {
+    if (!pro.uid) return;
+    const ok = window.confirm(`Rejeitar e remover o cadastro de ${pro.displayName} (@${pro.username})? Essa ação não pode ser desfeita.`);
+    if (!ok) return;
+    setRejectingUid(pro.uid);
+    try {
+      const ref = doc(db, 'professional_profiles', pro.uid);
+      await deleteDoc(ref);
+      setAllPros(prev => prev.filter(p => p.uid !== pro.uid));
+    } catch (err: any) {
+      console.error('Erro ao rejeitar prestador', err);
+      alert('Erro ao rejeitar: ' + (err?.message || ''));
+    } finally {
+      setRejectingUid(null);
+    }
+  };
+
+  const handleUnverifyPro = async (pro: ProfessionalProfile) => {
+    if (!pro.uid) return;
+    const ok = window.confirm(`Revogar verificação de ${pro.displayName}? O prestador voltará a ficar oculto da vitrine pública.`);
+    if (!ok) return;
+    setApprovingUid(pro.uid);
+    try {
+      const ref = doc(db, 'professional_profiles', pro.uid);
+      await updateDoc(ref, {
+        verified: false,
+        pendingApproval: true,
+        updatedAt: new Date(),
+      });
+      setAllPros(prev => prev.map(p => p.uid === pro.uid
+        ? { ...p, verified: false, pendingApproval: true }
+        : p
+      ));
+    } catch (err: any) {
+      console.error('Erro ao revogar verificação', err);
+      alert('Erro ao revogar: ' + (err?.message || ''));
+    } finally {
+      setApprovingUid(null);
+    }
+  };
+
+  const filteredPros = allPros.filter(p => {
+    if (proFilter === 'pending') return p.pendingApproval === true && !p.verified;
+    if (proFilter === 'verified') return p.verified === true;
+    return true;
+  });
+
+  const pendingCount = allPros.filter(p => p.pendingApproval === true && !p.verified).length;
+  const verifiedCount = allPros.filter(p => p.verified === true).length;
 
   const adminCount = allProfiles.filter(p => p.role === 'admin').length;
   const membersCount = allProfiles.filter(p => p.role !== 'admin').length;
@@ -352,6 +450,190 @@ export default function AdminPanel() {
         <Sparkles className="w-3 h-3 inline-block mr-1 text-amber-400" />
         LinkFlow Platform — {new Date().getFullYear()}
       </p>
+
+      {/* ============================================================ */}
+      {/* PROFESSIONAL APPROVALS (LinkFlow Profissional)               */}
+      {/* ============================================================ */}
+      <div className="bg-black/40 border border-white/5 rounded-xl overflow-hidden">
+        <div className="flex items-center justify-between p-4 border-b border-white/5 flex-wrap gap-2">
+          <h4 className="text-xs font-bold text-zinc-300 flex items-center gap-2">
+            <Briefcase className="w-4 h-4 text-emerald-400" />
+            Prestadores de Serviços
+            <span className="text-[10px] text-zinc-500 font-normal">({allPros.length})</span>
+          </h4>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 bg-black/40 border border-white/5 rounded-lg p-0.5">
+              {([
+                { id: 'pending', label: 'Pendentes', count: pendingCount, color: 'text-amber-400' },
+                { id: 'verified', label: 'Aprovados', count: verifiedCount, color: 'text-emerald-400' },
+                { id: 'all', label: 'Todos', count: allPros.length, color: 'text-zinc-300' },
+              ] as const).map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setProFilter(tab.id)}
+                  className={`text-[10px] font-bold px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1 ${
+                    proFilter === tab.id
+                      ? 'bg-white/10 text-white'
+                      : 'text-zinc-500 hover:text-zinc-300'
+                  }`}
+                >
+                  {tab.label}
+                  <span className={`text-[9px] ${tab.color}`}>{tab.count}</span>
+                </button>
+              ))}
+            </div>
+            <button onClick={fetchAllPros} className="text-[10px] font-bold text-zinc-400 hover:text-white transition-colors flex items-center gap-1 cursor-pointer">
+              <RefreshCw className="w-3 h-3" /> Atualizar
+            </button>
+          </div>
+        </div>
+
+        {prosLoading ? (
+          <div className="p-8 text-center text-zinc-500 text-xs flex items-center justify-center gap-2">
+            <RefreshCw className="w-3 h-3 animate-spin" /> Carregando prestadores...
+          </div>
+        ) : prosError ? (
+          <div className="p-8 text-center text-rose-400 text-xs">{prosError}</div>
+        ) : filteredPros.length === 0 ? (
+          <div className="p-8 text-center text-zinc-500 text-xs">
+            {proFilter === 'pending'
+              ? 'Nenhum prestador aguardando aprovação.'
+              : proFilter === 'verified'
+                ? 'Nenhum prestador aprovado ainda.'
+                : 'Nenhum prestador cadastrado.'}
+          </div>
+        ) : (
+          <div className="divide-y divide-white/5">
+            {filteredPros.map((pro) => {
+              const isPending = pro.pendingApproval === true && !pro.verified;
+              const isApproved = pro.verified === true;
+              return (
+                <div key={pro.uid} className={`p-3 hover:bg-white/5 transition-colors ${isPending ? 'bg-amber-950/5' : ''}`}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-zinc-800 overflow-hidden shrink-0">
+                      {pro.profilePicUrl ? (
+                        <img src={pro.profilePicUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-zinc-500">
+                          {pro.displayName?.charAt(0)?.toUpperCase() || '?'}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs font-bold text-zinc-200 truncate">{pro.displayName}</span>
+                        {isApproved && (
+                          <span className="text-[8px] font-bold bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                            <Star className="w-2.5 h-2.5 fill-emerald-400" /> Aprovado
+                          </span>
+                        )}
+                        {isPending && (
+                          <span className="text-[8px] font-bold bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                            <RefreshCw className="w-2.5 h-2.5" /> Pendente
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5 text-[10px] text-zinc-500 flex-wrap">
+                        <span className="text-[#a78bfa] font-medium">{pro.profession}</span>
+                        <span>·</span>
+                        <span>{pro.category}</span>
+                        {pro.city && (
+                          <>
+                            <span>·</span>
+                            <span className="flex items-center gap-0.5"><MapPin className="w-2.5 h-2.5" /> {pro.city}</span>
+                          </>
+                        )}
+                      </div>
+                      {pro.skills && pro.skills.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {pro.skills.slice(0, 4).map((s, i) => (
+                            <span key={i} className="text-[8px] bg-zinc-800/80 text-zinc-400 px-1.5 py-0.5 rounded-full border border-zinc-700/60">
+                              {s}
+                            </span>
+                          ))}
+                          {pro.skills.length > 4 && (
+                            <span className="text-[8px] text-zinc-500 px-1 self-center">+{pro.skills.length - 4}</span>
+                          )}
+                        </div>
+                      )}
+                      {pro.approvedBy && isApproved && (
+                        <div className="text-[9px] text-zinc-600 mt-0.5">
+                          aprovado por {pro.approvedBy}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {pro.whatsapp && (
+                        <a
+                          href={`https://wa.me/${pro.whatsapp.replace(/\D/g, '')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-zinc-500 hover:text-emerald-400 transition-colors"
+                          title={`WhatsApp: ${pro.whatsapp}`}
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                        </a>
+                      )}
+                      <a
+                        href={`?view=servicos&pro=${pro.username}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-zinc-500 hover:text-[#a78bfa] transition-colors"
+                        title="Ver perfil público"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                      {isPending && (
+                        <>
+                          <button
+                            onClick={() => handleApprovePro(pro)}
+                            disabled={approvingUid === pro.uid || rejectingUid === pro.uid}
+                            className="text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/20 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50"
+                          >
+                            {approvingUid === pro.uid ? (
+                              <RefreshCw className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Check className="w-3 h-3" />
+                            )}
+                            Aprovar
+                          </button>
+                          <button
+                            onClick={() => handleRejectPro(pro)}
+                            disabled={approvingUid === pro.uid || rejectingUid === pro.uid}
+                            className="text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50"
+                          >
+                            {rejectingUid === pro.uid ? (
+                              <RefreshCw className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-3 h-3" />
+                            )}
+                            Rejeitar
+                          </button>
+                        </>
+                      )}
+                      {isApproved && (
+                        <button
+                          onClick={() => handleUnverifyPro(pro)}
+                          disabled={approvingUid === pro.uid}
+                          className="text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50"
+                          title="Revogar verificação e marcar como pendente"
+                        >
+                          {approvingUid === pro.uid ? (
+                            <RefreshCw className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <Ban className="w-3 h-3" />
+                          )}
+                          Revogar
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
