@@ -202,8 +202,11 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
 
     const linksPath = `users/${userProfile.uid}/links`;
     const q = query(collection(db, 'users', userProfile.uid, 'links'), orderBy('order', 'asc'));
-    
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+
+    const unsubscribe = onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
+      // Skip local cache snapshots so we don't overwrite optimistic UI updates
+      // with stale IndexedDB data before the server response arrives.
+      if (snapshot.metadata.fromCache) return;
       const items: LinkItem[] = [];
       snapshot.forEach((d) => {
         items.push(d.data() as LinkItem);
@@ -257,8 +260,9 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
 
     const clicksPath = `users/${userProfile.uid}/clicks`;
     const q = query(collection(db, 'users', userProfile.uid, 'clicks'), orderBy('timestamp', 'desc'));
-    
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+
+    const unsubscribe = onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
+      if (snapshot.metadata.fromCache) return;
       const logs: ClickLog[] = [];
       snapshot.forEach((d) => {
         const data = d.data();
@@ -436,6 +440,17 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
       };
       localStorage.setItem('linkflow_demo_profile', JSON.stringify(updatedProfile));
       onProfileUpdate(updatedProfile);
+      try {
+        window.dispatchEvent(new CustomEvent('linkflow_public_sync_local', {
+          detail: { type: 'profile_updated', slug: updatedProfile.username, uid: updatedProfile.uid }
+        }));
+        window.dispatchEvent(new Event('linkflow_demo_updated'));
+        if (typeof BroadcastChannel !== 'undefined') {
+          const ch = new BroadcastChannel('linkflow_public_sync');
+          ch.postMessage({ type: 'profile_updated', slug: updatedProfile.username, uid: updatedProfile.uid });
+          ch.close();
+        }
+      } catch {}
       setIsSavingProfile(false);
       return;
     }
@@ -487,6 +502,21 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
       });
 
       onProfileUpdate(updatedProfile);
+
+      // Notify any open public page to re-fetch the profile (cross-tab + same-tab).
+      try {
+        const finalUsername = updatedProfile.username;
+        if (finalUsername) {
+          window.dispatchEvent(new CustomEvent('linkflow_public_sync_local', {
+            detail: { type: 'profile_updated', slug: finalUsername, uid: userProfile.uid }
+          }));
+          if (typeof BroadcastChannel !== 'undefined') {
+            const ch = new BroadcastChannel('linkflow_public_sync');
+            ch.postMessage({ type: 'profile_updated', slug: finalUsername, uid: userProfile.uid });
+            ch.close();
+          }
+        }
+      } catch {}
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, path);
     } finally {
@@ -519,6 +549,16 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
       };
       localStorage.setItem('linkflow_demo_profile', JSON.stringify(updatedProfile));
       onProfileUpdate(updatedProfile);
+      try {
+        window.dispatchEvent(new CustomEvent('linkflow_public_sync_local', {
+          detail: { type: 'profile_updated', slug: userProfile.username, uid: userProfile.uid }
+        }));
+        if (typeof BroadcastChannel !== 'undefined' && userProfile.username) {
+          const ch = new BroadcastChannel('linkflow_public_sync');
+          ch.postMessage({ type: 'profile_updated', slug: userProfile.username, uid: userProfile.uid });
+          ch.close();
+        }
+      } catch {}
       return;
     }
 
@@ -536,6 +576,20 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
       });
 
       onProfileUpdate(updatedProfile);
+
+      // Notify any open public page (cross-tab and in-tab) to re-fetch the profile.
+      try {
+        if (userProfile.username) {
+          window.dispatchEvent(new CustomEvent('linkflow_public_sync_local', {
+            detail: { type: 'profile_updated', slug: userProfile.username, uid: userProfile.uid }
+          }));
+          if (typeof BroadcastChannel !== 'undefined') {
+            const ch = new BroadcastChannel('linkflow_public_sync');
+            ch.postMessage({ type: 'profile_updated', slug: userProfile.username, uid: userProfile.uid });
+            ch.close();
+          }
+        }
+      } catch {}
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, path);
     }

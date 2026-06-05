@@ -192,6 +192,24 @@ export default function App() {
       }
     };
 
+    const refreshProfileFromServer = async () => {
+      try {
+        const usersRef = collection(db, 'users');
+        const userQuery = query(usersRef, where('username', '==', publicSlug), limit(1));
+        const snap = await getDocsFromServer(userQuery);
+        if (cancelled) return;
+        if (snap.empty) return;
+        const profileData = snap.docs[0].data() as UserProfile;
+        setPublicProfile(profileData);
+        try {
+          localStorage.setItem(`linkflow_cached_profile_public_${publicSlug}`, JSON.stringify(profileData));
+        } catch {}
+      } catch (err) {
+        if (cancelled) return;
+        console.warn('[PublicProfile] refreshProfileFromServer falhou:', err);
+      }
+    };
+
     // Support sandbox demo bypass (kept in sync with dashboard via storage events)
     if (publicSlug === 'usuario_demo') {
       const applyDemo = () => {
@@ -259,11 +277,30 @@ export default function App() {
     const onBroadcast = (ev: MessageEvent) => {
       const data = ev.data as { type?: string; slug?: string; uid?: string } | null;
       if (!data) return;
-      if (data.type === 'link_updated' && data.slug === publicSlug && data.uid) {
+      if (data.slug !== publicSlug) return;
+      if (data.type === 'link_updated' && data.uid) {
         refreshLinksFromServer(data.uid);
+        refreshProfileFromServer();
+      } else if (data.type === 'profile_updated') {
+        refreshProfileFromServer();
       }
     };
     if (broadcastChannel) broadcastChannel.addEventListener('message', onBroadcast);
+
+    // Also listen to the same-tab custom event (BroadcastChannel doesn't fire in
+    // the same tab). Useful for in-tab updates from the dashboard preview.
+    const onLocalUpdate = (ev: Event) => {
+      const detail = (ev as CustomEvent).detail as { type?: string; slug?: string; uid?: string } | undefined;
+      if (!detail) return;
+      if (detail.slug !== publicSlug) return;
+      if (detail.type === 'link_updated' && detail.uid) {
+        refreshLinksFromServer(detail.uid);
+        refreshProfileFromServer();
+      } else if (detail.type === 'profile_updated') {
+        refreshProfileFromServer();
+      }
+    };
+    window.addEventListener('linkflow_public_sync_local', onLocalUpdate);
 
     // 1. Force an initial server fetch (bypasses Firestore cache → no stale color).
     const initialFetch = async () => {
@@ -320,14 +357,24 @@ export default function App() {
     initialFetch();
 
     // 2. After the initial server fetch, attach a real-time listener so subsequent
-    //    saves in the same tab show up immediately (cache-coherent on this device).
+    //    saves in the same tab show up immediately. We use includeMetadataChanges
+    //    and IGNORE snapshots where metadata.fromCache === true, because the
+    //    Firestore SDK delivers the local IndexedDB cache before the server
+    //    response. Without this filter, the cached (stale) data would overwrite
+    //    the fresh server data fetched by initialFetch().
     const usersRef = collection(db, 'users');
     const userQuery = query(usersRef, where('username', '==', publicSlug), limit(1));
 
     unsubProfile = onSnapshot(
       userQuery,
+      { includeMetadataChanges: true },
       (querySnapshot) => {
         if (cancelled) return;
+        // Skip local cache snapshots — only apply server-confirmed data
+        if (querySnapshot.metadata.fromCache) {
+          console.debug('[PublicProfile] Ignorando snapshot do cache local — aguardando servidor');
+          return;
+        }
         if (querySnapshot.empty) {
           setPublicError('Página não encontrada.');
           return;
@@ -353,8 +400,10 @@ export default function App() {
           const linksQuery = query(linksRef, where('active', '==', true));
           unsubLinks = onSnapshot(
             linksQuery,
+            { includeMetadataChanges: true },
             (linksSnapshot) => {
               if (cancelled) return;
+              if (linksSnapshot.metadata.fromCache) return;
               const items: LinkItem[] = [];
               linksSnapshot.forEach((l) => items.push(l.data() as LinkItem));
               applyLinks(items);
@@ -380,6 +429,7 @@ export default function App() {
         broadcastChannel.removeEventListener('message', onBroadcast);
         broadcastChannel.close();
       }
+      window.removeEventListener('linkflow_public_sync_local', onLocalUpdate);
     };
   }, [publicSlug]);
 
