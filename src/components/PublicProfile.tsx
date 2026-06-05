@@ -6,6 +6,7 @@ import { collection, doc, getDoc, setDoc, serverTimestamp } from 'firebase/fires
 import { ExternalLink, Copy, Check, Sparkles, MessageSquare, Link as LinkIcon, LogIn, Star, Crown, UserPlus, UserCheck, Briefcase, ShoppingBag, Clock, ShieldCheck, Music } from 'lucide-react';
 import CommunityFeed from './CommunityFeed';
 import { isFollowing, followUser, unfollowUser } from '../utils/follow';
+import GoToNatanDevButton from './GoToNatanDevButton';
 
 interface PublicProfileProps {
   profile: UserProfile;
@@ -348,15 +349,18 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
       <div className={`w-full ${contentMaxW} flex flex-col items-center relative z-10`}>
         {/* Share Button (Only visible top-right on public profiles or simulated) */}
         {!previewMode && (
-          <button
-            id="share-profile-btn"
-            onClick={handleCopyLink}
-            type="button"
-            className="absolute top-4 right-4 bg-zinc-900/40 backdrop-blur-md border border-zinc-800/80 hover:bg-zinc-800/80 text-zinc-300 hover:text-zinc-100 p-2.5 rounded-full transition-all flex items-center justify-center cursor-pointer"
-            title="Copiar link para divulgar"
-          >
-            {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-          </button>
+          <div className="absolute top-4 right-4 flex items-center gap-2 z-20">
+            <GoToNatanDevButton variant="icon" className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/80 hover:bg-zinc-800/80 p-2.5 rounded-full" />
+            <button
+              id="share-profile-btn"
+              onClick={handleCopyLink}
+              type="button"
+              className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/80 hover:bg-zinc-800/80 text-zinc-300 hover:text-zinc-100 p-2.5 rounded-full transition-all flex items-center justify-center cursor-pointer"
+              title="Copiar link para divulgar"
+            >
+              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+            </button>
+          </div>
         )}
 
         {/* 1. Header Information */}

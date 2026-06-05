@@ -9,6 +9,7 @@ import PublicProfile from './PublicProfile';
 import CommunityFeed from './CommunityFeed';
 import DiscoverProfiles from './DiscoverProfiles';
 import AdminPanel from './AdminPanel';
+import GoToNatanDevButton from './GoToNatanDevButton';
 import { Link2, Sparkles, User, LogOut, Check, Copy, ExternalLink, RefreshCw, MessageSquare, Compass, ImageIcon, Crown, Layout, Smartphone, BarChart4 } from 'lucide-react';
 import { ADMIN_EMAIL } from '../types';
 import { compressImage } from '../utils/image';
@@ -744,6 +745,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
             ) : (
               <Copy className="w-3 h-3 text-zinc-500 hover:text-[#a78bfa] transition-all shrink-0 cursor-pointer" onClick={handleCopyLink} />
             )}
+            <GoToNatanDevButton variant="icon" className="ml-0.5" />
           </div>
         </div>
 
@@ -786,6 +788,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
           <button onClick={handleCopyLink} className="text-[10px] text-zinc-400 hover:text-white px-2 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer">
             {copiedNotification ? 'Copiado!' : 'Copiar'}
           </button>
+          <GoToNatanDevButton variant="icon" />
           <button onClick={handleLogout} className="text-[10px] text-zinc-500 hover:text-rose-400 transition-all cursor-pointer">
             <LogOut className="w-4 h-4" />
           </button>
@@ -832,6 +835,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                       >
                         <ExternalLink className="w-3 h-3" /> Visitar
                       </a>
+                      <GoToNatanDevButton />
                     </div>
                   </div>
                 </div>
@@ -867,17 +871,20 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
             <div id="tab-content-stats" className="space-y-6 pb-10">
               {/* Copy profile link card */}
               <div className="bg-[#0f172a] p-4 rounded-2xl border border-slate-800/50 shadow-lg">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
                   <h3 className="text-xs font-semibold text-slate-300 flex items-center gap-2">
                     <ExternalLink className="w-3.5 h-3.5 text-[#a78bfa]" />
                     Seu Link Público
                   </h3>
-                  <button
-                    onClick={handleCopyLink}
-                    className="flex items-center gap-1.5 text-[10px] font-bold px-3 py-1.5 rounded-lg bg-[#a78bfa]/10 hover:bg-[#a78bfa]/20 text-[#a78bfa] border border-[#a78bfa]/20 transition-all cursor-pointer"
-                  >
-                    {copiedNotification ? <><Check className="w-3 h-3" /> Copiado!</> : <><Copy className="w-3 h-3" /> Copiar</>}
-                  </button>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={handleCopyLink}
+                      className="flex items-center gap-1.5 text-[10px] font-bold px-3 py-1.5 rounded-lg bg-[#a78bfa]/10 hover:bg-[#a78bfa]/20 text-[#a78bfa] border border-[#a78bfa]/20 transition-all cursor-pointer"
+                    >
+                      {copiedNotification ? <><Check className="w-3 h-3" /> Copiado!</> : <><Copy className="w-3 h-3" /> Copiar</>}
+                    </button>
+                    <GoToNatanDevButton />
+                  </div>
                 </div>
                 <div className="mt-2 flex items-center gap-2 bg-black/40 rounded-lg border border-slate-800 px-3 py-2">
                   <span className="text-xs text-slate-400 font-mono truncate flex-1">{publicProfileUrl}</span>
@@ -888,6 +895,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                   >
                     {copiedNotification ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
                   </button>
+                  <GoToNatanDevButton variant="icon" />
                 </div>
               </div>
               <StatsView links={links} clicks={clicks} />

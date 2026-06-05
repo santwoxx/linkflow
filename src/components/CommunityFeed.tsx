@@ -17,14 +17,14 @@ import {
   arrayRemove,
   where
 } from 'firebase/firestore';
-import { 
-  Heart, 
-  MessageSquare, 
-  Send, 
-  Trash2, 
-  Plus, 
-  Globe, 
-  Sparkles, 
+import {
+  Heart,
+  MessageSquare,
+  Send,
+  Trash2,
+  Plus,
+  Globe,
+  Sparkles,
   Image as ImageIcon,
   ExternalLink,
   RefreshCw,
@@ -33,9 +33,11 @@ import {
   Grid,
   List,
   X,
-  MoreHorizontal
+  MoreHorizontal,
+  AtSign
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import GoToNatanDevButton from './GoToNatanDevButton';
 
 interface CommunityFeedProps {
   currentUserProfile: UserProfile;
@@ -889,7 +891,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                     >
                       <AnimatePresence>
                         {copiedPostId === post.id ? (
-                          <motion.span 
+                          <motion.span
                             initial={{ y: 5, opacity: 0 }}
                             animate={{ y: -16, opacity: 1 }}
                             exit={{ opacity: 0 }}
@@ -901,6 +903,19 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                       </AnimatePresence>
                       <Send className="w-[22px] h-[22px] stroke-[2]" />
                     </button>
+
+                    {/* Separator + quick-nav to @natanmarinho-dev */}
+                    <span className="w-px h-5 bg-slate-700/60 mx-0.5" aria-hidden="true" />
+                    <a
+                      href="?u=natanmarinho-dev"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sky-400 hover:text-sky-300 active:scale-95 transition-transform cursor-pointer"
+                      title="Visitar @natanmarinho-dev em nova aba"
+                      aria-label="Visitar @natanmarinho-dev em nova aba"
+                    >
+                      <AtSign className="w-[22px] h-[22px] stroke-[2]" />
+                    </a>
                   </div>
 
                   {/* Bookmark list save mockup */}
