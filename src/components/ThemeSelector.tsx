@@ -77,14 +77,17 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
     const preset = AVAILABLE_THEMES.find((t) => t.id === presetId) || CURATED_THEMES.find((t) => t.id === presetId);
     if (!preset) return;
 
-    onChange({
+    const isGradientPreset = preset.backgroundClass.includes('gradient');
+
+    const merged: UserTheme = {
+      ...currentTheme,
       themeId: preset.id,
       cardStyle: preset.cardStyle,
       fontFamily: preset.fontClass.includes('mono') ? 'mono' : preset.fontClass.includes('serif') ? 'serif' : preset.fontClass.includes('space') ? 'space' : 'sans',
       buttonColor: preset.buttonColor,
       buttonTextColor: preset.buttonTextColor,
       backgroundColor: preset.backgroundClass,
-      backgroundType: preset.backgroundClass.includes('gradient') ? 'gradient' : 'color',
+      backgroundType: isGradientPreset ? 'gradient' : 'color',
       glassmorphism: false,
       avatarFrame: 'none',
       borderRadius: 'medium',
@@ -93,15 +96,26 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
       patternOverlay: 'none',
       buttonSize: 'medium',
       textAlign: 'center',
+      wallpaperStyle: isGradientPreset ? 'gradient' : 'fill',
+      wallpaperBlur: isGradientPreset ? 0 : (currentTheme.wallpaperBlur ?? 0),
+      gradientDirection: currentTheme.gradientDirection || 'linear-down',
+      layout: currentTheme.layout,
       headerStyle: currentTheme.headerStyle || 'classic',
       titleStyle: currentTheme.titleStyle || 'text',
       titleColor: currentTheme.titleColor || '#ffffff',
-      wallpaperStyle: 'fill',
+      titleLogoUrl: currentTheme.titleLogoUrl || '',
+      customBackground: currentTheme.customBackground || '',
+      backgroundGradient: isGradientPreset ? preset.backgroundClass : (currentTheme.backgroundGradient || ''),
+      backgroundImageUrl: isGradientPreset ? '' : (currentTheme.backgroundImageUrl || ''),
+      wallpaperVideoUrl: currentTheme.wallpaperVideoUrl || '',
       wallpaperNoise: false,
+      buttonGradient: currentTheme.buttonGradient || '',
       stickers: currentTheme.stickers || [],
       footerText: currentTheme.footerText || '',
       showBranding: currentTheme.showBranding !== false,
-    });
+    };
+
+    onChange(merged);
   };
 
   const sidebarBtnClass = (id: string) =>

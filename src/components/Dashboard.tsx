@@ -40,6 +40,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
   const [theme, setTheme] = useState(userProfile.theme);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [copiedNotification, setCopiedNotification] = useState(false);
+  const [saveToast, setSaveToast] = useState<{ kind: 'success' | 'error' | 'theme'; message: string } | null>(null);
 
   // Sync state with parent userProfile changes
   useEffect(() => {
@@ -418,13 +419,64 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
     }
   };
 
-  // 6. Save Profile fields (Display Name, Bio, Avatar Pic, Cover Pic)
+  // 6. Save Profile fields (Display Name, Bio, Avatar Pic, Cover Pic) + Theme
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSavingProfile(true);
+
+    try {
+      const newUsername = username.trim().toLowerCase();
+      const usernameChanged = newUsername !== userProfile.username;
+
+      if (usernameChanged) {
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('username', '==', newUsername), limit(1));
+        const snap = await getDocs(q);
+        if (!snap.empty && snap.docs[0].id !== userProfile.uid) {
+          alert('Este nome de usuário já está em uso. Escolha outro.');
+          return;
+        }
+      }
+
+      const ok = await persistProfile({ username: newUsername });
+      if (ok) {
+        setSaveToast({ kind: 'success', message: 'Perfil e tema salvos com sucesso!' });
+        setTimeout(() => setSaveToast(null), 2500);
+      } else {
+        setSaveToast({ kind: 'error', message: 'Falha ao salvar perfil. Tente novamente.' });
+        setTimeout(() => setSaveToast(null), 3500);
+      }
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
+  // Strip undefined values so Firestore doesn't reject the write
+  const cleanTheme = (t: any) => JSON.parse(JSON.stringify(t));
+
+  // ============================================================================
+  // SINGLE SOURCE OF TRUTH FOR PROFILE/THEME PERSISTENCE
+  // ============================================================================
+  // Both "Salvar Perfil" (form submit) and the ThemeSelector (auto-save) must
+  // produce the EXACT same Firestore document state. Previously these two
+  // paths diverged:
+  //   - handleThemeChange wrote only { theme, updatedAt } (partial update).
+  //   - handleSaveProfile wrote a custom subset of fields and could clobber
+  //     the just-saved theme if the local state hadn't been re-synced yet.
+  // Both now funnel through persistProfile(), which:
+  //   1. Builds a single, fully-merged UserProfile from the current local
+  //      state (form fields + local `theme`).
+  //   2. Writes ALL updatable fields in a single updateDoc().
+  //   3. Re-fires the cross-tab/same-tab sync events so the public page
+  //      refreshes immediately.
+  // ============================================================================
+  const persistProfile = async (
+    overrides: { theme?: any; username?: string } = {}
+  ): Promise<boolean> => {
     const path = `users/${userProfile.uid}`;
 
     if (userProfile.uid === 'demo-user-123') {
+      const nextTheme = overrides.theme !== undefined ? cleanTheme(overrides.theme) : cleanTheme(theme);
       const updatedProfile: UserProfile = {
         ...userProfile,
         displayName: displayName.trim(),
@@ -435,7 +487,8 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
         coverGradient: coverGradient.trim(),
         coverPosition: coverPosition,
         coverOverlay: coverOverlay,
-        theme: cleanTheme(theme),
+        username: overrides.username !== undefined ? overrides.username : (username.trim().toLowerCase() || userProfile.username),
+        theme: nextTheme,
         updatedAt: new Date(),
       };
       localStorage.setItem('linkflow_demo_profile', JSON.stringify(updatedProfile));
@@ -451,147 +504,91 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
           ch.close();
         }
       } catch {}
-      setIsSavingProfile(false);
-      return;
+      return true;
     }
 
     try {
-      const newUsername = username.trim().toLowerCase();
-      const usernameChanged = newUsername !== userProfile.username;
-
-      if (usernameChanged) {
-        const usersRef = collection(db, 'users');
-        const q = query(usersRef, where('username', '==', newUsername), limit(1));
-        const snap = await getDocs(q);
-        if (!snap.empty && snap.docs[0].id !== userProfile.uid) {
-          alert('Este nome de usuário já está em uso. Escolha outro.');
-          setIsSavingProfile(false);
-          return;
-        }
-      }
+      const nextTheme = overrides.theme !== undefined ? cleanTheme(overrides.theme) : cleanTheme(theme);
+      const nextUsername = overrides.username !== undefined ? overrides.username : username.trim().toLowerCase();
 
       const docRef = doc(db, 'users', userProfile.uid);
+
       const updatedProfile: UserProfile = {
         ...userProfile,
         displayName: displayName.trim(),
         bio: bio.trim(),
-        username: newUsername,
         profilePicUrl: profilePicUrl.trim(),
         coverUrl: coverUrl.trim(),
         coverColor: coverColor.trim(),
         coverGradient: coverGradient.trim(),
         coverPosition: coverPosition,
         coverOverlay: coverOverlay,
-        theme: cleanTheme(theme),
+        username: nextUsername,
+        theme: nextTheme,
         updatedAt: new Date(),
       };
 
-      const savedTheme = cleanTheme(theme);
+      // Single atomic write with the FULL set of updatable fields.
+      // Firestore's updateDoc replaces only the listed fields; immutable
+      // fields (uid/email/role/banned/counters) are protected by rules.
       await updateDoc(docRef, {
         displayName: updatedProfile.displayName,
         bio: updatedProfile.bio,
-        username: newUsername,
         profilePicUrl: updatedProfile.profilePicUrl,
         coverUrl: updatedProfile.coverUrl,
         coverColor: updatedProfile.coverColor,
         coverGradient: updatedProfile.coverGradient,
         coverPosition: updatedProfile.coverPosition,
         coverOverlay: updatedProfile.coverOverlay,
-        theme: savedTheme,
+        username: updatedProfile.username,
+        theme: nextTheme,
         updatedAt: updatedProfile.updatedAt,
       });
 
       onProfileUpdate(updatedProfile);
 
-      // Notify any open public page to re-fetch the profile (cross-tab + same-tab).
+      // Cross-tab + same-tab sync: force the public page to re-fetch.
       try {
-        const finalUsername = updatedProfile.username;
-        if (finalUsername) {
+        if (updatedProfile.username) {
           window.dispatchEvent(new CustomEvent('linkflow_public_sync_local', {
-            detail: { type: 'profile_updated', slug: finalUsername, uid: userProfile.uid }
+            detail: { type: 'profile_updated', slug: updatedProfile.username, uid: userProfile.uid }
           }));
           if (typeof BroadcastChannel !== 'undefined') {
             const ch = new BroadcastChannel('linkflow_public_sync');
-            ch.postMessage({ type: 'profile_updated', slug: finalUsername, uid: userProfile.uid });
+            ch.postMessage({ type: 'profile_updated', slug: updatedProfile.username, uid: userProfile.uid });
             ch.close();
           }
         }
       } catch {}
+
+      return true;
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, path);
-    } finally {
-      setIsSavingProfile(false);
+      return false;
     }
   };
-
-  // Strip undefined values so Firestore doesn't reject the write
-  const cleanTheme = (t: any) => JSON.parse(JSON.stringify(t));
 
   // Pick a solid background color (sets backgroundType and clears other bg fields)
   const handlePickColor = (color: string) => {
     const { backgroundGradient: _, backgroundImageUrl: __, ...rest } = theme;
     handleThemeChange({ ...rest, themeId: 'custom', backgroundColor: color, backgroundType: 'color' });
   };
-
   // 7. Update Theme specifically (passed down to ThemeSelector)
+  // Both this and handleSaveProfile route through persistProfile so the
+  // Firestore document state is consistent regardless of which UI the user
+  // used to trigger the change.
   const handleThemeChange = async (updatedTheme: any) => {
     const cleaned = cleanTheme(updatedTheme);
-    // 1. Update local reactive theme state immediately
+    // 1. Update local reactive theme state immediately for the live preview.
     setTheme(cleaned);
 
-    const path = `users/${userProfile.uid}`;
-
-    if (userProfile.uid === 'demo-user-123') {
-      const updatedProfile = {
-        ...userProfile,
-        theme: cleaned,
-        updatedAt: new Date()
-      };
-      localStorage.setItem('linkflow_demo_profile', JSON.stringify(updatedProfile));
-      onProfileUpdate(updatedProfile);
-      try {
-        window.dispatchEvent(new CustomEvent('linkflow_public_sync_local', {
-          detail: { type: 'profile_updated', slug: userProfile.username, uid: userProfile.uid }
-        }));
-        if (typeof BroadcastChannel !== 'undefined' && userProfile.username) {
-          const ch = new BroadcastChannel('linkflow_public_sync');
-          ch.postMessage({ type: 'profile_updated', slug: userProfile.username, uid: userProfile.uid });
-          ch.close();
-        }
-      } catch {}
-      return;
-    }
-
-    try {
-      const docRef = doc(db, 'users', userProfile.uid);
-      const updatedProfile = {
-        ...userProfile,
-        theme: cleaned,
-        updatedAt: new Date()
-      };
-
-      await updateDoc(docRef, {
-        theme: cleaned,
-        updatedAt: updatedProfile.updatedAt
-      });
-
-      onProfileUpdate(updatedProfile);
-
-      // Notify any open public page (cross-tab and in-tab) to re-fetch the profile.
-      try {
-        if (userProfile.username) {
-          window.dispatchEvent(new CustomEvent('linkflow_public_sync_local', {
-            detail: { type: 'profile_updated', slug: userProfile.username, uid: userProfile.uid }
-          }));
-          if (typeof BroadcastChannel !== 'undefined') {
-            const ch = new BroadcastChannel('linkflow_public_sync');
-            ch.postMessage({ type: 'profile_updated', slug: userProfile.username, uid: userProfile.uid });
-            ch.close();
-          }
-        }
-      } catch {}
-    } catch (err) {
-      handleFirestoreError(err, OperationType.UPDATE, path);
+    const ok = await persistProfile({ theme: cleaned });
+    if (ok) {
+      setSaveToast({ kind: 'theme', message: 'Aparência aplicada e sincronizada.' });
+      setTimeout(() => setSaveToast(null), 1800);
+    } else {
+      setSaveToast({ kind: 'error', message: 'Não foi possível aplicar a aparência.' });
+      setTimeout(() => setSaveToast(null), 3500);
     }
   };
 
@@ -1132,6 +1129,28 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
 
         </div>
       </main>
+
+      {/* Save toast for theme/profile persistence feedback */}
+      {saveToast && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`fixed bottom-6 right-6 z-[100] px-4 py-3 rounded-2xl shadow-2xl border text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4 duration-200 ${
+            saveToast.kind === 'error'
+              ? 'bg-rose-950/90 border-rose-500/30 text-rose-200'
+              : saveToast.kind === 'theme'
+              ? 'bg-[#0f172a]/95 border-[#a78bfa]/40 text-[#a78bfa]'
+              : 'bg-emerald-950/90 border-emerald-500/30 text-emerald-200'
+          }`}
+        >
+          <span
+            className={`w-2 h-2 rounded-full ${
+              saveToast.kind === 'error' ? 'bg-rose-400' : saveToast.kind === 'theme' ? 'bg-[#a78bfa]' : 'bg-emerald-400'
+            }`}
+          />
+          {saveToast.message}
+        </div>
+      )}
     </div>
   );
 }
