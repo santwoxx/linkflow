@@ -45,13 +45,17 @@ service cloud.firestore {
       // lch, oklab, oklch, hwb, color, color-mix, etc), cores nomeadas CSS
       // (red, blue, transparent, currentcolor, ...) ou vazio.
       // Bloqueia caracteres perigosos (;, espaços, parens) para evitar CSS injection.
-      return c == '' ||
+      // `!(c is string)` cobre campo AUSENTE e campo de tipo errado: o caller
+      // geralmente precisa de "ausente OU válido", nunca de "obrigatório".
+      return !(c is string) ||
+             c == '' ||
              c.matches('^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$') ||
              c.matches('^[a-zA-Z][a-zA-Z0-9_-]*\\(') ||
              c.matches('^[a-zA-Z]+$');
     }
     function isValidGradient(g) {
-      return g == '' ||
+      return !(g is string) ||
+             g == '' ||
              g.matches('^[a-zA-Z][a-zA-Z0-9_-]*-gradient\\(');
     }
 
@@ -126,22 +130,33 @@ service cloud.firestore {
         allow delete: if isOwner(userId) && !isBanned();
         allow delete: if isAdmin();
 
-        // Validação centralizada de todos os campos de um link
+        // Validação centralizada de todos os campos de um link.
+        // IMPORTANTE: todos os campos além de id/userId/title/url/active/order
+        // são OPCIONAIS. Cada check usa o padrão
+        //   `!(field is <type>) || <enum/validations>`
+        // para permitir campo AUSENTE ou de tipo errado sem quebrar a regra.
+        // (Se o campo existir, precisa estar em um dos valores válidos.)
         function linkFieldsAreValid() {
           let d = request.resource.data;
           return
-            // Campos básicos
+            // Campos básicos opcionais (strings)
             optionalString(d.subtitle, 200) &&
             optionalString(d.badgeText, 30) &&
             optionalString(d.iconEmoji, 20) &&
             optionalString(d.iconUrl, 2048) &&
-            (d.animation == 'none' || d.animation == 'pulse' || d.animation == 'wobble' ||
+            optionalString(d.imageUrl, 2048) &&
+
+            // animation: enum string, ou ausente
+            (!(d.animation is string) ||
+             d.animation == 'none' || d.animation == 'pulse' || d.animation == 'wobble' ||
              d.animation == 'bounce' || d.animation == 'glow') &&
-            (d.type == 'link' || d.type == 'whatsapp' || d.type == 'telegram' ||
+
+            // type: enum string, ou ausente (defaults to 'link' no client)
+            (!(d.type is string) ||
+             d.type == 'link' || d.type == 'whatsapp' || d.type == 'telegram' ||
              d.type == 'buy_now' || d.type == 'payment' || d.type == 'products' ||
              d.type == 'services' || d.type == 'service_card' || d.type == 'testimonials' ||
              d.type == 'gallery' || d.type == 'promo_banner') &&
-            optionalString(d.imageUrl, 2048) &&
 
             // Personalização avançada (todos opcionais)
             optionalString(d.customColor, 200) &&
@@ -150,31 +165,40 @@ service cloud.firestore {
             isValidColor(d.customTextColor) &&
             optionalString(d.customGradient, 500) &&
             isValidGradient(d.customGradient) &&
-            (d.useGradient is bool) &&
+            (!(d.useGradient is bool) || d.useGradient == true || d.useGradient == false) &&
             optionalString(d.customBorderColor, 200) &&
             isValidColor(d.customBorderColor) &&
-            (d.customBorderWidth is number) && d.customBorderWidth >= 0 && d.customBorderWidth <= 8 &&
-            (d.customStyle == '' || d.customStyle == 'flat' || d.customStyle == 'rounded' ||
+            (!(d.customBorderWidth is number) ||
+             (d.customBorderWidth >= 0 && d.customBorderWidth <= 8)) &&
+
+            (!(d.customStyle is string) ||
+             d.customStyle == '' || d.customStyle == 'flat' || d.customStyle == 'rounded' ||
              d.customStyle == 'outline' || d.customStyle == 'shadow' || d.customStyle == 'brutalist' ||
              d.customStyle == 'glass' || d.customStyle == 'gradient' || d.customStyle == 'neon') &&
-            (d.customRadius == '' || d.customRadius == 'none' || d.customRadius == 'subtle' ||
+            (!(d.customRadius is string) ||
+             d.customRadius == '' || d.customRadius == 'none' || d.customRadius == 'subtle' ||
              d.customRadius == 'medium' || d.customRadius == 'full' || d.customRadius == 'pill') &&
-            (d.customSize == '' || d.customSize == 'small' || d.customSize == 'medium' ||
+            (!(d.customSize is string) ||
+             d.customSize == '' || d.customSize == 'small' || d.customSize == 'medium' ||
              d.customSize == 'large' || d.customSize == 'xl') &&
-            (d.customFont == '' || d.customFont == 'sans' || d.customFont == 'serif' ||
+            (!(d.customFont is string) ||
+             d.customFont == '' || d.customFont == 'sans' || d.customFont == 'serif' ||
              d.customFont == 'mono' || d.customFont == 'space' || d.customFont == 'outfit' ||
              d.customFont == 'syne' || d.customFont == 'bebas' || d.customFont == 'caveat') &&
-            (d.customTextAlign == '' || d.customTextAlign == 'left' || d.customTextAlign == 'center' ||
+            (!(d.customTextAlign is string) ||
+             d.customTextAlign == '' || d.customTextAlign == 'left' || d.customTextAlign == 'center' ||
              d.customTextAlign == 'right') &&
-            (d.customLetterSpacing == '' || d.customLetterSpacing == 'tight' ||
+            (!(d.customLetterSpacing is string) ||
+             d.customLetterSpacing == '' || d.customLetterSpacing == 'tight' ||
              d.customLetterSpacing == 'normal' || d.customLetterSpacing == 'wide' ||
              d.customLetterSpacing == 'wider') &&
-            (d.customUppercase is bool) &&
-            (d.customIconPosition == '' || d.customIconPosition == 'left' ||
+            (!(d.customUppercase is bool) || d.customUppercase == true || d.customUppercase == false) &&
+            (!(d.customIconPosition is string) ||
+             d.customIconPosition == '' || d.customIconPosition == 'left' ||
              d.customIconPosition == 'right' || d.customIconPosition == 'top' ||
              d.customIconPosition == 'none') &&
-            (d.customShadow is bool) &&
-            (d.customGlass is bool);
+            (!(d.customShadow is bool) || d.customShadow == true || d.customShadow == false) &&
+            (!(d.customGlass is bool) || d.customGlass == true || d.customGlass == false);
         }
       }
 
