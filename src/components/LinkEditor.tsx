@@ -221,6 +221,21 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
 
   const handleSaveEdit = async (linkId: string) => {
     if (!editTitle.trim()) return;
+
+    // Guard: base64 images stored in iconUrl/imageUrl must fit within the
+    // Firestore rule limit (500 000 chars). We cap at 350 000 to stay safe.
+    const MAX_IMAGE_CHARS = 350_000;
+    const iconUrlVal = editIconUrl.trim();
+    const imageUrlVal = editImageUrl.trim();
+    if (iconUrlVal.startsWith('data:') && iconUrlVal.length > MAX_IMAGE_CHARS) {
+      setSaveError('A imagem da logo é muito grande para salvar. Tente uma imagem menor ou de menor resolução.');
+      return;
+    }
+    if (imageUrlVal.startsWith('data:') && imageUrlVal.length > MAX_IMAGE_CHARS) {
+      setSaveError('A imagem do banner é muito grande para salvar. Tente uma imagem menor ou de menor resolução.');
+      return;
+    }
+
     setIsSavingEdit(true);
     try {
       let url = editUrl.trim();
@@ -233,9 +248,9 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
         subtitle: editSubtitle.trim() || '',
         badgeText: editBadgeText.trim() || '',
         iconEmoji: editIconEmoji.trim() || '',
-        iconUrl: editIconUrl.trim() || '',
+        iconUrl: iconUrlVal || '',
         animation: editAnimation || 'none',
-        imageUrl: editImageUrl.trim() || '',
+        imageUrl: imageUrlVal || '',
         customColor: editCustomColor.trim() || '',
         customTextColor: editCustomTextColor.trim() || '',
         customGradient: editCustomGradient.trim() || '',

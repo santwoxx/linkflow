@@ -9,8 +9,9 @@ import PublicProfile from './PublicProfile';
 import CommunityFeed from './CommunityFeed';
 import DiscoverProfiles from './DiscoverProfiles';
 import AdminPanel from './AdminPanel';
+import ProfessionalDashboard from './ProfessionalDashboard';
 import GoToNatanDevButton from './GoToNatanDevButton';
-import { Link2, Sparkles, User, LogOut, Check, Copy, ExternalLink, RefreshCw, MessageSquare, Compass, ImageIcon, Crown, Layout, Smartphone, BarChart4 } from 'lucide-react';
+import { Link2, Sparkles, User, LogOut, Check, Copy, ExternalLink, RefreshCw, MessageSquare, Compass, ImageIcon, Crown, Layout, Smartphone, BarChart4, Briefcase } from 'lucide-react';
 import { ADMIN_EMAIL } from '../types';
 import { compressImage } from '../utils/image';
 
@@ -688,6 +689,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
   const navItems = [
     { id: 'feed', label: 'Feed', icon: <MessageSquare className="w-5 h-5" /> } as const,
     { id: 'discover', label: 'Descobrir', icon: <Compass className="w-5 h-5" /> } as const,
+    { id: 'professional', label: 'Serviços', icon: <Briefcase className="w-5 h-5" /> } as const,
     { id: 'links', label: 'Construtor', icon: <Link2 className="w-5 h-5" /> } as const,
     { id: 'design', label: 'Aparência', icon: <Layout className="w-5 h-5" /> } as const,
     { id: 'stats', label: 'Métricas', icon: <BarChart4 className="w-5 h-5" /> } as const,
@@ -856,6 +858,26 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
           {activeTab === 'discover' && (
             <div id="tab-content-discover" className="pb-10 h-full">
               <DiscoverProfiles />
+            </div>
+          )}
+
+          {/* TAB: PROFESSIONAL SERVICES */}
+          {activeTab === 'professional' && (
+            <div id="tab-content-professional" className="pb-10 space-y-4">
+              <div className="flex items-center justify-between bg-[#0a1128] border border-slate-800/60 rounded-2xl p-4">
+                <div>
+                  <p className="text-sm font-bold text-white">Vitrine pública de profissionais</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Veja como os clientes encontram prestadores no LinkFlow.</p>
+                </div>
+                <a
+                  href="?view=servicos"
+                  className="shrink-0 px-4 py-2 bg-[#a78bfa] hover:bg-[#c4b5fd] text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                  aria-label="Abrir vitrine pública de profissionais"
+                >
+                  <Briefcase className="w-3.5 h-3.5" aria-hidden="true" /> Abrir vitrine
+                </a>
+              </div>
+              <ProfessionalDashboard userProfile={userProfile} />
             </div>
           )}
 
