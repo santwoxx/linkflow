@@ -101,11 +101,55 @@ export interface UserProfile {
   banned?: boolean;
   followersCount?: number;
   followingCount?: number;
+  // LinkFlow Profissional
+  verifiedProfessional?: boolean;
+  serviceEnabled?: boolean;
   createdAt: any;
   updatedAt: any;
 }
 
 export const ADMIN_EMAIL = 'brisasofc@gmail.com';
+
+export const MP_CHECKOUT_URL =
+  'https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=734a88225c174b3f8c7f8825c34fd5d7';
+
+export const PRO_CATEGORIES = [
+  'Programação',
+  'Design',
+  'Marketing',
+  'Tráfego Pago',
+  'Inteligência Artificial',
+  'Consultoria',
+  'Vídeo e Edição',
+  'Social Media',
+  'Copywriting',
+  'Outros',
+] as const;
+
+export type ProCategory = typeof PRO_CATEGORIES[number];
+
+export interface ProfessionalProfile {
+  uid: string;
+  username: string;
+  displayName: string;
+  profilePicUrl?: string;
+  profession: string;
+  category: ProCategory;
+  bio: string;
+  whatsapp: string;
+  instagram?: string;
+  portfolio?: string;
+  city: string;
+  skills: string[];
+  verified: boolean;
+  pendingApproval?: boolean;
+  approvedBy?: string;
+  rating?: number;
+  ratingCount?: number;
+  createdAt: any;
+  updatedAt: any;
+}
+
 
 export type BlockType = 'link' | 'whatsapp' | 'telegram' | 'buy_now' | 'payment' | 'products' | 'services' | 'service_card' | 'testimonials' | 'gallery' | 'promo_banner';
 
