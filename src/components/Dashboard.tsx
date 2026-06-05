@@ -51,6 +51,10 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
   const [bio, setBio] = useState(userProfile.bio || '');
   const [profilePicUrl, setProfilePicUrl] = useState(userProfile.profilePicUrl || '');
   const [coverUrl, setCoverUrl] = useState(userProfile.coverUrl || '');
+  const [coverColor, setCoverColor] = useState(userProfile.coverColor || '');
+  const [coverGradient, setCoverGradient] = useState(userProfile.coverGradient || '');
+  const [coverPosition, setCoverPosition] = useState<'top' | 'center' | 'bottom'>(userProfile.coverPosition || 'center');
+  const [coverOverlay, setCoverOverlay] = useState<number>(typeof userProfile.coverOverlay === 'number' ? userProfile.coverOverlay : 0);
   const [username, setUsername] = useState(userProfile.username || '');
   const [theme, setTheme] = useState(userProfile.theme);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
@@ -62,6 +66,10 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
     setBio(userProfile.bio || '');
     setProfilePicUrl(userProfile.profilePicUrl || '');
     setCoverUrl(userProfile.coverUrl || '');
+    setCoverColor(userProfile.coverColor || '');
+    setCoverGradient(userProfile.coverGradient || '');
+    setCoverPosition(userProfile.coverPosition || 'center');
+    setCoverOverlay(typeof userProfile.coverOverlay === 'number' ? userProfile.coverOverlay : 0);
     setUsername(userProfile.username || '');
     setTheme(userProfile.theme);
   }, [userProfile]);
@@ -73,9 +81,35 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
     bio: bio,
     profilePicUrl: profilePicUrl,
     coverUrl: coverUrl,
+    coverColor: coverColor,
+    coverGradient: coverGradient,
+    coverPosition: coverPosition,
+    coverOverlay: coverOverlay,
     username: username,
     theme: theme,
   };
+
+  // Reusable live phone preview (sticky) used by Construtor and Aparência tabs
+  const renderPhonePreview = () => (
+    <div className="hidden lg:flex shrink-0 w-[380px] self-stretch border-l border-slate-800/40 bg-[#050b18]/60">
+      <div className="sticky top-0 w-full max-h-screen overflow-y-auto flex flex-col items-center gap-3 p-6">
+        <div className="flex items-center gap-1.5 text-[10px] text-[#a78bfa] font-semibold tracking-wider uppercase select-none">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#a78bfa] animate-pulse"></span>
+          Pré-visualização ao Vivo
+        </div>
+        <div className="w-[300px] rounded-[44px] overflow-hidden border-[8px] border-zinc-700/90 bg-zinc-950 shadow-2xl shadow-black/60 relative">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-zinc-900 rounded-b-2xl z-10 flex items-center justify-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
+            <span className="w-10 h-1 rounded-full bg-zinc-700" />
+          </div>
+          <div className="w-full overflow-y-auto" style={{ height: '620px' }}>
+            <PublicProfile profile={livePreviewProfile} links={links} previewMode={true} />
+          </div>
+        </div>
+        <p className="text-[9px] text-zinc-600 text-center">As alterações aparecem aqui em tempo real</p>
+      </div>
+    </div>
+  );
 
   // Suggested pre-made avatar avatars for fast personalizations
   const AVATAR_TEMPLATES = [
@@ -363,6 +397,10 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
         bio: bio.trim(),
         profilePicUrl: profilePicUrl.trim(),
         coverUrl: coverUrl.trim(),
+        coverColor: coverColor.trim(),
+        coverGradient: coverGradient.trim(),
+        coverPosition: coverPosition,
+        coverOverlay: coverOverlay,
         theme: cleanTheme(theme),
         updatedAt: new Date(),
       };
@@ -395,6 +433,10 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
         username: newUsername,
         profilePicUrl: profilePicUrl.trim(),
         coverUrl: coverUrl.trim(),
+        coverColor: coverColor.trim(),
+        coverGradient: coverGradient.trim(),
+        coverPosition: coverPosition,
+        coverOverlay: coverOverlay,
         theme: cleanTheme(theme),
         updatedAt: new Date(),
       };
@@ -406,6 +448,10 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
         username: newUsername,
         profilePicUrl: updatedProfile.profilePicUrl,
         coverUrl: updatedProfile.coverUrl,
+        coverColor: updatedProfile.coverColor,
+        coverGradient: updatedProfile.coverGradient,
+        coverPosition: updatedProfile.coverPosition,
+        coverOverlay: updatedProfile.coverOverlay,
         theme: savedTheme,
         updatedAt: updatedProfile.updatedAt,
       });
@@ -618,8 +664,8 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
       </div>
 
       {/* MAIN CONTENT */}
-      <main className={`flex-1 flex pt-0 md:pt-0 pb-16 md:pb-0 ${activeTab === 'design' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
-        <div id="controls-panel-container" className={`flex-1 ${activeTab === 'design' ? 'flex overflow-hidden' : 'overflow-y-auto'} ${activeTab === 'feed' ? 'max-w-2xl mx-auto px-4 py-4 md:py-6' : activeTab !== 'design' ? 'p-4 sm:p-5 md:p-6 space-y-6 md:max-w-3xl lg:max-w-4xl mx-auto w-full' : ''}`}>
+      <main className={`flex-1 flex pt-0 md:pt-0 pb-16 md:pb-0 ${activeTab === 'design' || activeTab === 'links' ? '' : 'overflow-y-auto'}`}>
+        <div id="controls-panel-container" className={`flex-1 ${activeTab === 'design' || activeTab === 'links' ? 'flex' : 'overflow-y-auto'} ${activeTab === 'feed' ? 'max-w-2xl mx-auto px-4 py-4 md:py-6' : activeTab === 'design' || activeTab === 'links' ? '' : 'p-4 sm:p-5 md:p-6 space-y-6 md:max-w-3xl lg:max-w-4xl mx-auto w-full'}`}>
 
           {/* TAB: SOCIAL COMMUNITY FEED (default) */}
           {activeTab === 'feed' && (
@@ -630,13 +676,45 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
 
           {/* TAB: LINKS MANAGEMENT */}
           {activeTab === 'links' && (
-            <div id="tab-content-links" className="space-y-6">
-              <LinkEditor
-                links={links}
-                onAdd={handleAddLink}
-                onUpdate={handleUpdateLink}
-                onDelete={handleDeleteLink}
-              />
+            <div id="tab-content-links" className="flex w-full">
+              <div className="flex-1 min-w-0 p-4 sm:p-5 md:p-6 space-y-6">
+                <div className="bg-[#0f172a] p-4 rounded-2xl border border-slate-800/50 shadow-lg">
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <ExternalLink className="w-4 h-4 text-[#a78bfa] shrink-0" />
+                      <h3 className="text-xs font-semibold text-slate-300 whitespace-nowrap">Sua página pública</h3>
+                      <span className="text-[10px] text-zinc-500 font-mono truncate bg-black/40 border border-slate-800 px-2 py-1 rounded-lg">{publicProfileUrl}</span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={handleCopyLink}
+                        className="flex items-center gap-1.5 text-[10px] font-bold px-3 py-2 rounded-lg bg-[#a78bfa]/10 hover:bg-[#a78bfa]/20 text-[#a78bfa] border border-[#a78bfa]/20 transition-all cursor-pointer"
+                      >
+                        {copiedNotification ? <><Check className="w-3 h-3" /> Copiado!</> : <><Copy className="w-3 h-3" /> Copiar</>}
+                      </button>
+                      <a
+                        id="visit-public-profile-from-builder"
+                        href={`?u=${userProfile.username}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-[10px] font-bold px-3 py-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 transition-all cursor-pointer"
+                        title="Abrir minha página pública em nova aba"
+                      >
+                        <ExternalLink className="w-3 h-3" /> Visitar
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <LinkEditor
+                  links={links}
+                  onAdd={handleAddLink}
+                  onUpdate={handleUpdateLink}
+                  onDelete={handleDeleteLink}
+                />
+                <div className="h-10" />
+              </div>
+              {renderPhonePreview()}
             </div>
           )}
 
@@ -688,10 +766,10 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
 
           {/* TAB: PROFILE DESIGN & APPEARANCE — Two-column sticky layout */}
           {activeTab === 'design' && (
-            <div id="tab-content-design" className="flex w-full h-full overflow-hidden">
+            <div id="tab-content-design" className="flex w-full">
 
               {/* LEFT COLUMN — scrollable controls */}
-              <div className="flex-1 overflow-y-auto min-w-0 p-4 sm:p-5 md:p-6 space-y-6">
+              <div className="flex-1 min-w-0 p-4 sm:p-5 md:p-6 space-y-6">
 
               <div className="bg-[#0f172a] p-4 rounded-2xl border border-slate-800/50 shadow-lg">
                 <div className="flex items-center justify-between mb-3">
@@ -856,6 +934,89 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                           </button>
                         ))}
                       </div>
+
+                      <div className="pt-2 border-t border-slate-800/60 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-pink-400" />
+                          <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Cor de fundo do banner (sem imagem)</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            type="color"
+                            value={(() => {
+                              const c = (coverColor || '').trim();
+                              if (/^#[0-9a-fA-F]{6}$/.test(c)) return c;
+                              return '#0a1128';
+                            })()}
+                            onChange={(e) => { setCoverColor(e.target.value); setCoverGradient(''); }}
+                            className="w-9 h-9 rounded border border-slate-800 bg-transparent cursor-pointer shrink-0"
+                            title="Cor sólida da capa"
+                          />
+                          <input
+                            type="text"
+                            placeholder="#0a1128 ou rgba(0,0,0,0.5)"
+                            value={coverColor}
+                            onChange={(e) => { setCoverColor(e.target.value); if (e.target.value) setCoverGradient(''); }}
+                            className="flex-1 bg-black text-[10px] text-slate-300 py-2 px-3 rounded-lg border border-slate-800 focus:border-[#a78bfa] focus:outline-none transition-all placeholder-slate-700 font-mono"
+                          />
+                          {coverColor && (
+                            <button type="button" onClick={() => setCoverColor('')} className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[10px] font-bold px-2.5 py-2 rounded-lg border border-rose-500/20 transition-all cursor-pointer shrink-0">Limpar</button>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {['#0a1128','#1e1b4b','#1a1a2e','#0d1117','#111827','#000000','#3b0764','#164e63','#0b3d0b','#3d0c0c','#7c2d12','#4c1d95','#7f1d1d','#831843','#ffffff','#f8fafc','#f0fdf4','#fef2f2','#fefce8','#f5f3ff','#ecfeff','#fff7ed','#fdf2f8','#0f172a','#020617','#262626','#0f0f0f','#1c1917','#171717','#1f2937','#0d9488','#f59e0b','#ec4899','#8b5cf6','#06b6d4','#10b981','#f43f5e','#3b82f6','#a855f7'].map((c) => (
+                            <button key={c} type="button" onClick={() => { setCoverColor(c); setCoverGradient(''); }}
+                              className={`w-6 h-6 rounded-full border-2 transition-all cursor-pointer hover:scale-110 ${
+                                coverColor === c ? 'border-[#a78bfa] scale-110 ring-2 ring-[#a78bfa]/30' : 'border-transparent hover:border-zinc-500'
+                              }`}
+                              style={{ backgroundColor: c }} title={c} />
+                          ))}
+                        </div>
+
+                        <div className="flex items-center gap-2 pt-1">
+                          <span className="w-2 h-2 rounded-full bg-purple-400" />
+                          <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Gradiente do banner</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+                            value={coverGradient}
+                            onChange={(e) => { setCoverGradient(e.target.value); if (e.target.value) setCoverColor(''); }}
+                            className="flex-1 bg-black text-[10px] text-slate-300 py-2 px-3 rounded-lg border border-slate-800 focus:border-[#a78bfa] focus:outline-none transition-all placeholder-slate-700 font-mono"
+                          />
+                          {coverGradient && (
+                            <button type="button" onClick={() => setCoverGradient('')} className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[10px] font-bold px-2.5 py-2 rounded-lg border border-rose-500/20 transition-all cursor-pointer shrink-0">Limpar</button>
+                          )}
+                        </div>
+                        <div className="h-8 w-full rounded-lg border border-slate-800 transition-all" style={{ background: coverGradient || coverColor || 'transparent' }} />
+
+                        <div className="pt-1 space-y-3">
+                          <div>
+                            <label className="text-[9px] text-zinc-500 block mb-1">Posição da imagem</label>
+                            <div className="grid grid-cols-3 gap-1.5">
+                              {(['top','center','bottom'] as const).map((p) => (
+                                <button key={p} type="button" onClick={() => setCoverPosition(p)}
+                                  className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all cursor-pointer ${
+                                    coverPosition === p ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]' : 'bg-black/40 border-slate-800 text-zinc-500 hover:border-slate-600'
+                                  }`}>{p === 'top' ? 'Topo' : p === 'center' ? 'Centro' : 'Baixo'}</button>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-[9px] text-zinc-500 block mb-1">Overlay escuro: {coverOverlay}%</label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="80"
+                              value={coverOverlay}
+                              onChange={(e) => setCoverOverlay(Number(e.target.value))}
+                              className="w-full accent-[#a78bfa]"
+                            />
+                            <p className="text-[8px] text-zinc-600">Aplica um tom escuro sobre a imagem para destacar o conteúdo.</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                     <div className="pt-1 flex items-center justify-end gap-3">
                       <span className="text-[9px] text-zinc-600 italic">Todas as alterações são salvas ao clicar em Salvar</span>
@@ -879,28 +1040,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
 
               </div>{/* END LEFT COLUMN */}
 
-              {/* RIGHT COLUMN — fixed phone preview, never scrolls */}
-              <div className="hidden xl:flex shrink-0 w-[320px] h-full items-start justify-center p-6 border-l border-slate-800/40 bg-[#050b18]/60">
-                <div className="w-full flex flex-col items-center gap-3">
-                  <div className="flex items-center gap-1.5 text-[10px] text-[#a78bfa] font-semibold tracking-wider uppercase select-none">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#a78bfa] animate-pulse"></span>
-                    Pré-visualização ao Vivo
-                  </div>
-                  {/* Phone shell */}
-                  <div className="w-[240px] rounded-[36px] overflow-hidden border-[6px] border-zinc-700/90 bg-zinc-950 shadow-2xl shadow-black/60 relative">
-                    {/* Notch */}
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 bg-zinc-900 rounded-b-2xl z-10 flex items-center justify-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
-                      <span className="w-8 h-1 rounded-full bg-zinc-700" />
-                    </div>
-                    {/* Screen */}
-                    <div className="w-full overflow-y-auto" style={{ height: '480px' }}>
-                      <PublicProfile profile={livePreviewProfile} links={links} previewMode={true} />
-                    </div>
-                  </div>
-                  <p className="text-[9px] text-zinc-600 text-center">As alterações aparecem aqui em tempo real</p>
-                </div>
-              </div>
+              {renderPhonePreview()}
 
             </div>
           )}
