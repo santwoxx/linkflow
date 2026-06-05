@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LinkItem, BlockType, FONTS_LIST } from '../types';
-import { Plus, Trash2, ArrowUp, ArrowDown, ExternalLink, Edit2, Check, X, ToggleLeft, ToggleRight, Loader2, Sparkles, Tag, Smile, Zap, MessageCircle, ShoppingBag, Image as ImageIcon, Star, Briefcase, CreditCard, LayoutTemplate, Palette, Type, Square, Droplet, Eye, EyeOff, Maximize, Minimize, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
+import { compressImage } from '../utils/image';
+import { Plus, Trash2, ArrowUp, ArrowDown, ExternalLink, Edit2, Check, X, ToggleLeft, ToggleRight, Loader2, Sparkles, Tag, Smile, Zap, MessageCircle, ShoppingBag, Image as ImageIcon, Star, Briefcase, CreditCard, LayoutTemplate, Palette, Type, Square, Droplet, Eye, EyeOff, Maximize, Minimize, AlignLeft, AlignCenter, AlignRight, Upload } from 'lucide-react';
 
 interface LinkEditorProps {
   links: LinkItem[];
@@ -20,6 +21,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
   const [editSubtitle, setEditSubtitle] = useState('');
   const [editBadgeText, setEditBadgeText] = useState('');
   const [editIconEmoji, setEditIconEmoji] = useState('');
+  const [editIconUrl, setEditIconUrl] = useState('');
   const [editAnimation, setEditAnimation] = useState('none');
   const [editImageUrl, setEditImageUrl] = useState(''); // For banners
   // Per-button advanced customization
@@ -53,6 +55,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
       subtitle: editSubtitle,
       badgeText: editBadgeText,
       iconEmoji: editIconEmoji,
+      iconUrl: editIconUrl,
       animation: editAnimation,
       imageUrl: editImageUrl,
       customColor: editCustomColor,
@@ -74,7 +77,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
     });
   }, [
     editingLinkId, onPreviewChange,
-    editTitle, editUrl, editSubtitle, editBadgeText, editIconEmoji, editAnimation, editImageUrl,
+    editTitle, editUrl, editSubtitle, editBadgeText, editIconEmoji, editIconUrl, editAnimation, editImageUrl,
     editCustomColor, editCustomTextColor, editCustomGradient, editUseGradient,
     editCustomStyle, editCustomRadius, editCustomSize,
     editCustomShadow, editCustomGlass, editCustomFont,
@@ -164,6 +167,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
     setEditSubtitle(link.subtitle || '');
     setEditBadgeText(link.badgeText || '');
     setEditIconEmoji(link.iconEmoji || '');
+    setEditIconUrl(link.iconUrl || '');
     setEditAnimation(link.animation || 'none');
     setEditImageUrl(link.imageUrl || '');
     setEditCustomColor(link.customColor || '');
@@ -199,6 +203,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
         subtitle: editSubtitle.trim() || '',
         badgeText: editBadgeText.trim() || '',
         iconEmoji: editIconEmoji.trim() || '',
+        iconUrl: editIconUrl.trim() || '',
         animation: editAnimation || 'none',
         imageUrl: editImageUrl.trim() || '',
         customColor: editCustomColor.trim() || '',
@@ -422,6 +427,52 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                   onChange={(e) => setEditIconEmoji(e.target.value)}
                                   className="w-full bg-black text-xs text-slate-200 py-2.5 px-3 rounded-xl border border-slate-800 focus:outline-none focus:border-blue-500 placeholder-slate-800"
                                 />
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-[10px] text-slate-400 font-semibold mb-1 flex items-center gap-1">
+                                <Upload className="w-3 h-3 text-[#a78bfa]" />
+                                Logo / Imagem
+                              </label>
+                              <div className="flex items-center gap-2">
+                                <label className="shrink-0 w-10 h-10 rounded-xl border border-dashed border-slate-700 hover:border-[#a78bfa] flex items-center justify-center cursor-pointer overflow-hidden bg-black transition-all">
+                                  {editIconUrl ? (
+                                    <img src={editIconUrl} alt="logo" className="w-full h-full object-contain" />
+                                  ) : (
+                                    <Upload className="w-4 h-4 text-slate-500" />
+                                  )}
+                                  <input
+                                    type="file"
+                                    accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif"
+                                    className="hidden"
+                                    onChange={async (e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        try {
+                                          setEditIconUrl(await compressImage(file, 96, 96, 0.85));
+                                        } catch {}
+                                      }
+                                      e.target.value = '';
+                                    }}
+                                  />
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="ou cole uma URL"
+                                  value={editIconUrl}
+                                  onChange={(e) => setEditIconUrl(e.target.value)}
+                                  className="flex-1 min-w-0 bg-black text-[10px] text-slate-300 py-2 px-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-[#a78bfa] placeholder-slate-700 font-mono"
+                                />
+                                {editIconUrl && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditIconUrl('')}
+                                    className="shrink-0 bg-rose-500/10 text-rose-400 text-[10px] font-bold px-2 py-1 rounded-lg border border-rose-500/20 cursor-pointer"
+                                  >
+                                    Limpar
+                                  </button>
+                                )}
                               </div>
                             </div>
 
@@ -797,7 +848,11 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                                  editCustomStyle === 'neon' ? '0 0 18px ' + (editCustomColor || '#a78bfa') : undefined,
                                     }}
                                   >
-                                    {editIconEmoji && editCustomIconPosition !== 'none' && editCustomIconPosition !== 'top' && <span>{editIconEmoji}</span>}
+                                    {editIconUrl && editCustomIconPosition !== 'none' && editCustomIconPosition !== 'top' ? (
+                                      <img src={editIconUrl} alt="" className="w-5 h-5 rounded object-contain shrink-0" />
+                                    ) : editIconEmoji && editCustomIconPosition !== 'none' && editCustomIconPosition !== 'top' ? (
+                                      <span>{editIconEmoji}</span>
+                                    ) : null}
                                     <span className={editCustomUppercase ? 'uppercase' : ''}>
                                       {editTitle || 'Seu Botão'}
                                     </span>
@@ -869,7 +924,11 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                             </span>
                           </div>
                           <h4 className="text-sm font-semibold text-slate-200 truncate flex items-center gap-1.5">
-                            {link.iconEmoji && <span className="text-sm shrink-0">{link.iconEmoji}</span>}
+                            {link.iconUrl ? (
+                              <img src={link.iconUrl} alt="" className="w-4 h-4 rounded object-contain shrink-0" />
+                            ) : (
+                              link.iconEmoji && <span className="text-sm shrink-0">{link.iconEmoji}</span>
+                            )}
                             <span className="truncate">{link.title}</span>
                           </h4>
 

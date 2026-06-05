@@ -768,12 +768,17 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                 }
 
                 const iconPos = link.customIconPosition || 'left';
-                const showIcon = !!link.iconEmoji && iconPos !== 'none';
+                const showIcon = (!!link.iconEmoji || !!link.iconUrl) && iconPos !== 'none';
                 const iconLeft = showIcon && (iconPos === 'left' || (!link.customIconPosition));
                 const iconTop = showIcon && iconPos === 'top';
                 const iconRight = showIcon && iconPos === 'right';
                 const titleAlignClass = link.customTextAlign === 'left' ? '!items-start !text-left'
                   : link.customTextAlign === 'right' ? '!items-end !text-right' : '!items-center !text-center';
+                const iconNode = link.iconUrl ? (
+                  <img src={link.iconUrl} alt="" className="w-5 h-5 sm:w-6 sm:h-6 rounded object-contain shrink-0 select-none" />
+                ) : link.iconEmoji ? (
+                  <span className="text-base shrink-0 select-none">{link.iconEmoji}</span>
+                ) : null;
 
                 return (
                   <a
@@ -795,19 +800,13 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                     <span className="w-4"></span>
 
                     <div className={`flex flex-col ${titleAlignClass} w-full min-w-0 py-1.5 select-none relative`}>
-                      {iconTop && link.iconEmoji && (
-                        <span className="text-base shrink-0 select-none mb-0.5">{link.iconEmoji}</span>
-                      )}
+                      {iconTop && iconNode}
                       <div className={`flex items-center w-full ${link.customTextAlign === 'left' ? 'justify-start' : link.customTextAlign === 'right' ? 'justify-end' : 'justify-center'} gap-2`}>
-                        {iconLeft && link.iconEmoji && (
-                          <span className="text-base shrink-0 select-none">{link.iconEmoji}</span>
-                        )}
+                        {iconLeft && iconNode}
                         <span className={`font-extrabold text-xs sm:text-sm tracking-wide truncate ${link.customUppercase ? 'uppercase' : ''}`}>
                           {link.title}
                         </span>
-                        {iconRight && link.iconEmoji && (
-                          <span className="text-base shrink-0 select-none">{link.iconEmoji}</span>
-                        )}
+                        {iconRight && iconNode}
                       </div>
 
                       {link.subtitle && (

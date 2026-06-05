@@ -156,6 +156,7 @@ export interface LinkItem {
   subtitle?: string;       // Subtitle under the main link title
   badgeText?: string;      // A badge text (e.g., "HOT", "NEW", "10% OFF")
   iconEmoji?: string;      // Emoji directly selected for the link
+  iconUrl?: string;        // Custom logo/image for the link (overrides iconEmoji when set)
   animation?: string;      // Attention getter animation: none, pulse, wobble, bounce, glow
 
   // Per-button advanced customization (overrides the profile theme)

@@ -130,6 +130,7 @@ service cloud.firestore {
             optionalString(d.subtitle, 200) &&
             optionalString(d.badgeText, 30) &&
             optionalString(d.iconEmoji, 20) &&
+            optionalString(d.iconUrl, 2048) &&
             (d.animation == 'none' || d.animation == 'pulse' || d.animation == 'wobble' ||
              d.animation == 'bounce' || d.animation == 'glow') &&
             (d.type == 'link' || d.type == 'whatsapp' || d.type == 'telegram' ||

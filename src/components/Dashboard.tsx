@@ -11,6 +11,7 @@ import DiscoverProfiles from './DiscoverProfiles';
 import AdminPanel from './AdminPanel';
 import { Link2, Sparkles, User, LogOut, Check, Copy, ExternalLink, RefreshCw, MessageSquare, Compass, ImageIcon, Crown, Layout, Smartphone, BarChart4 } from 'lucide-react';
 import { ADMIN_EMAIL } from '../types';
+import { compressImage } from '../utils/image';
 
 interface DashboardProps {
   userProfile: UserProfile;
@@ -25,29 +26,6 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
   // Per-link in-progress edit overrides from LinkEditor; merged into links
   // only for the live preview, never persisted until "Aplicar" is clicked.
   const [linkPreviewOverrides, setLinkPreviewOverrides] = useState<Record<string, Partial<LinkItem>>>({});
-  
-  // Compress image to data URI without external storage
-  const compressImage = (file: File, maxW: number, maxH: number, quality: number): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let { width, height } = img;
-        if (width > height) {
-          if (width > maxW) { height *= maxW / width; width = maxW; }
-        } else {
-          if (height > maxH) { width *= maxH / height; height = maxH; }
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) { reject(new Error('ctx')); return; }
-        ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', quality));
-      };
-      img.onerror = () => reject(new Error('img'));
-      img.src = URL.createObjectURL(file);
-    });
 
   // Profile settings state indicators
   const [displayName, setDisplayName] = useState(userProfile.displayName || '');
