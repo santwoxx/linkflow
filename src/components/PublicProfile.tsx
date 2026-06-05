@@ -319,7 +319,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
     >
       {/* Video Background */}
       {theme.wallpaperStyle === 'video' && theme.wallpaperVideoUrl && (
-        <video autoPlay muted loop playsInline className="fixed inset-0 w-full h-full object-cover z-0 pointer-events-none">
+        <video autoPlay muted loop playsInline className={`${previewMode ? 'absolute' : 'fixed'} inset-0 w-full h-full object-cover z-0 pointer-events-none`}>
           <source src={theme.wallpaperVideoUrl} type="video/mp4" />
         </video>
       )}
@@ -327,7 +327,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
       {/* Background Image Layer with optional blur */}
       {bgType === 'image' && theme.backgroundImageUrl && (
         <div
-          className="fixed inset-0 z-0 pointer-events-none"
+          className={`${previewMode ? 'absolute' : 'fixed'} inset-0 z-0 pointer-events-none`}
           style={{
             backgroundImage: `url(${theme.backgroundImageUrl})`,
             backgroundSize: 'cover',
@@ -340,7 +340,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
 
       {/* Optional Dark Overlay for readability when using Images or Video */}
       {((bgType === 'image' && theme.backgroundImageUrl) || (theme.wallpaperStyle === 'video' && theme.wallpaperVideoUrl)) ? (
-        <div className="fixed inset-0 z-[1] bg-black/40 backdrop-blur-[1px] pointer-events-none" />
+        <div className={`${previewMode ? 'absolute' : 'fixed'} inset-0 z-[1] bg-black/40 backdrop-blur-[1px] pointer-events-none`} />
       ) : null}
 
 
@@ -787,7 +787,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
 
       {/* Stickers - floating decorative elements */}
       {theme.stickers && theme.stickers.length > 0 && (
-        <div className="fixed inset-0 pointer-events-none z-20 overflow-hidden">
+        <div className={`${previewMode ? 'absolute' : 'fixed'} inset-0 pointer-events-none z-20 overflow-hidden`}>
           {theme.stickers.map((sticker) => (
             <span
               key={sticker.id}
