@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LinkItem, BlockType, FONTS_LIST } from '../types';
 import { compressImage } from '../utils/image';
-import { Plus, Trash2, ArrowUp, ArrowDown, ExternalLink, Edit2, Check, X, ToggleLeft, ToggleRight, Loader2, Sparkles, Tag, Smile, Zap, MessageCircle, ShoppingBag, Image as ImageIcon, Star, Briefcase, CreditCard, LayoutTemplate, Palette, Type, Square, Droplet, Eye, EyeOff, Maximize, Minimize, AlignLeft, AlignCenter, AlignRight, Upload } from 'lucide-react';
+import { Plus, Trash2, ArrowUp, ArrowDown, ExternalLink, Edit2, Check, X, ToggleLeft, ToggleRight, Loader2, Sparkles, Tag, Smile, Zap, MessageCircle, ShoppingBag, Image as ImageIcon, Star, Briefcase, CreditCard, LayoutTemplate, Palette, Type, Square, Droplet, Eye, EyeOff, Maximize, Minimize, AlignLeft, AlignCenter, AlignRight, Upload, AlertTriangle } from 'lucide-react';
 
 interface LinkEditorProps {
   links: LinkItem[];
@@ -9,6 +9,33 @@ interface LinkEditorProps {
   onUpdate: (linkId: string, updates: Partial<LinkItem>) => Promise<void>;
   onDelete: (linkId: string) => Promise<void>;
   onPreviewChange?: (linkId: string, patch: Partial<LinkItem> | null) => void;
+}
+
+// Translates a Firestore / network error thrown by onUpdate into a short,
+// user-facing message in pt-BR.
+function parseSaveError(err: any): string {
+  const raw: string =
+    (err && typeof err.message === 'string' ? err.message : String(err)) || '';
+  const code: string = err?.code || '';
+
+  if (code === 'permission-denied' || /permission|insufficient permissions/i.test(raw)) {
+    return 'Sem permissão para salvar. Verifique se está logado e se é dono deste link.';
+  }
+  if (code === 'unavailable' || /network|offline|fetch failed/i.test(raw)) {
+    return 'Sem conexão com a internet. Verifique sua rede e tente novamente.';
+  }
+  if (code === 'failed-precondition' || /invalid|validation|ensure|constraint/i.test(raw)) {
+    return 'Algum valor enviado é inválido (cor, tamanho, etc). Revise cor/tamanho/gradiente.';
+  }
+  if (code === 'deadline-exceeded') {
+    return 'A requisição demorou demais. Tente novamente.';
+  }
+  if (code === 'quota-exceeded' || /quota/i.test(raw)) {
+    return 'Limite de armazenamento atingido. Tente reduzir o tamanho das imagens.';
+  }
+  // Fallback: show the raw message but trim long JSON dumps
+  const trimmed = raw.replace(/^Error:\s*/i, '').slice(0, 200);
+  return trimmed || 'Erro desconhecido ao salvar.';
 }
 
 export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreviewChange }: LinkEditorProps) {
@@ -44,6 +71,8 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
   const [showAdvancedStyle, setShowAdvancedStyle] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
+  const [saveError, setSaveError] = useState<string | null>(null);
+
   // Live preview: report all in-progress edit values to parent so the right-side
   // phone preview reflects the customization while the user is editing (before
   // they click "Aplicar"). Pass `null` from save/cancel handlers to clear.
@@ -62,18 +91,18 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
       customTextColor: editCustomTextColor,
       customGradient: editCustomGradient,
       useGradient: editUseGradient,
-      customStyle: (editCustomStyle || undefined) as any,
-      customRadius: (editCustomRadius || undefined) as any,
-      customSize: (editCustomSize || undefined) as any,
+      customStyle: editCustomStyle as any,
+      customRadius: editCustomRadius as any,
+      customSize: editCustomSize as any,
       customShadow: editCustomShadow,
       customGlass: editCustomGlass,
-      customFont: (editCustomFont || undefined) as any,
+      customFont: editCustomFont as any,
       customBorderColor: editCustomBorderColor,
       customBorderWidth: editCustomBorderWidth,
-      customTextAlign: (editCustomTextAlign || undefined) as any,
-      customLetterSpacing: (editCustomLetterSpacing || undefined) as any,
+      customTextAlign: editCustomTextAlign as any,
+      customLetterSpacing: editCustomLetterSpacing as any,
       customUppercase: editCustomUppercase,
-      customIconPosition: (editCustomIconPosition || undefined) as any,
+      customIconPosition: editCustomIconPosition as any,
     });
   }, [
     editingLinkId, onPreviewChange,
@@ -162,6 +191,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
 
   const handleStartEdit = (link: LinkItem) => {
     setEditingLinkId(link.id);
+    setSaveError(null);
     setEditTitle(link.title || '');
     setEditUrl(link.url || '');
     setEditSubtitle(link.subtitle || '');
@@ -210,23 +240,25 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
         customTextColor: editCustomTextColor.trim() || '',
         customGradient: editCustomGradient.trim() || '',
         useGradient: editUseGradient,
-        customStyle: (editCustomStyle || undefined) as any,
-        customRadius: (editCustomRadius || undefined) as any,
-        customSize: (editCustomSize || undefined) as any,
+        customStyle: editCustomStyle as any,
+        customRadius: editCustomRadius as any,
+        customSize: editCustomSize as any,
         customShadow: editCustomShadow,
         customGlass: editCustomGlass,
-        customFont: (editCustomFont || undefined) as any,
+        customFont: editCustomFont as any,
         customBorderColor: editCustomBorderColor.trim() || '',
         customBorderWidth: editCustomBorderWidth || 0,
-        customTextAlign: (editCustomTextAlign || undefined) as any,
-        customLetterSpacing: (editCustomLetterSpacing || undefined) as any,
+        customTextAlign: editCustomTextAlign as any,
+        customLetterSpacing: editCustomLetterSpacing as any,
         customUppercase: editCustomUppercase,
-        customIconPosition: (editCustomIconPosition || undefined) as any,
+        customIconPosition: editCustomIconPosition as any,
       });
       if (onPreviewChange) onPreviewChange(linkId, null);
+      setSaveError(null);
       setEditingLinkId(null);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error('[LinkEditor] save failed:', err);
+      setSaveError(parseSaveError(err));
     } finally {
       setIsSavingEdit(false);
     }
@@ -861,6 +893,32 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                               </div>
                             </div>
                           )}
+                        </div>
+                      )}
+
+                      {/* Save error banner */}
+                      {saveError && (
+                        <div
+                          role="alert"
+                          className="mt-3 flex items-start gap-2 p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl"
+                        >
+                          <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[10px] font-bold text-rose-300 uppercase tracking-wider mb-0.5">
+                              Não foi possível salvar
+                            </p>
+                            <p className="text-[11px] text-rose-200/90 break-words">
+                              {saveError}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setSaveError(null)}
+                            className="shrink-0 text-rose-400 hover:text-rose-200 transition-all cursor-pointer"
+                            title="Fechar"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       )}
 

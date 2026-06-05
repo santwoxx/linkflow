@@ -335,11 +335,20 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
     const merged = { ...updates, updatedAt: new Date() };
 
     if (userProfile.uid === 'demo-user-123') {
+      const previousLinks = links;
       const updated = links.map(l => l.id === linkId ? { ...l, ...merged } : l);
       setLinks(updated);
-      localStorage.setItem('demo_links', JSON.stringify(updated));
+      try {
+        localStorage.setItem('demo_links', JSON.stringify(updated));
+      } catch (err) {
+        setLinks(previousLinks);
+        throw err;
+      }
       return;
     }
+
+    // Snapshot for revert on error
+    const previousLinks = links;
 
     // Optimistic local update so the preview reflects changes instantly,
     // before the Firestore roundtrip completes (onSnapshot will reconcile).
@@ -350,7 +359,10 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
       const docRef = doc(db, 'users', userProfile.uid, 'links', linkId);
       await updateDoc(docRef, merged);
     } catch (err) {
-      handleFirestoreError(err, OperationType.UPDATE, path);
+      // Revert optimistic update so the UI matches persisted state
+      setLinks(previousLinks);
+      // Surface a friendly error to the caller (LinkEditor will show a banner)
+      throw err;
     }
   };
 
