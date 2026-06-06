@@ -669,6 +669,7 @@ export interface SocialPost {
   profilePicUrl: string;
   caption: string;
   imageUrl: string;
+  imageUrls?: string[]; // Suporte para carrossel
   likes: string[]; // array of user UIDs
   likesCount: number;
   commentsCount: number;

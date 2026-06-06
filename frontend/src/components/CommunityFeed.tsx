@@ -34,7 +34,9 @@ import {
   List,
   X,
   MoreHorizontal,
-  AtSign
+  AtSign,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import GoToNatanDevButton from './GoToNatanDevButton';
@@ -47,6 +49,108 @@ interface CommunityFeedProps {
 
 
 
+interface PostCarouselProps {
+  post: SocialPost;
+  handleDoubleTap: (post: SocialPost) => void;
+  heartBurstPostId: string | null;
+}
+
+function PostCarousel({ post, handleDoubleTap, heartBurstPostId }: PostCarouselProps) {
+  const images = post.imageUrls && post.imageUrls.length > 0 ? post.imageUrls : [post.imageUrl];
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const scrollLeft = scrollRef.current.scrollLeft;
+      const width = scrollRef.current.offsetWidth;
+      const newIndex = Math.round(scrollLeft / width);
+      if (newIndex !== currentIndex) {
+        setCurrentIndex(newIndex);
+      }
+    }
+  };
+
+  const scrollTo = (index: number) => {
+    if (scrollRef.current) {
+      const width = scrollRef.current.offsetWidth;
+      scrollRef.current.scrollTo({ left: width * index, behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <div className="relative w-full bg-black flex justify-center items-center overflow-hidden select-none group/carousel aspect-[4/5] md:aspect-square">
+      <div 
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="w-full h-full flex overflow-x-auto snap-x snap-mandatory custom-scrollbar-hide"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        {images.map((url, idx) => (
+          <div 
+            key={idx} 
+            className="w-full h-full shrink-0 snap-center relative cursor-pointer"
+            onDoubleClick={() => handleDoubleTap(post)}
+          >
+            <img 
+              src={url} 
+              alt={`Post content ${idx + 1}`} 
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Nav Arrows (Desktop) */}
+      {images.length > 1 && (
+        <>
+          <button 
+            className={`absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white backdrop-blur-md opacity-0 group-hover/carousel:opacity-100 transition-opacity disabled:opacity-0 ${currentIndex === 0 ? 'hidden' : ''}`}
+            onClick={(e) => { e.stopPropagation(); scrollTo(currentIndex - 1); }}
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button 
+            className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white backdrop-blur-md opacity-0 group-hover/carousel:opacity-100 transition-opacity disabled:opacity-0 ${currentIndex === images.length - 1 ? 'hidden' : ''}`}
+            onClick={(e) => { e.stopPropagation(); scrollTo(currentIndex + 1); }}
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </>
+      )}
+
+      {/* Dots Indicator */}
+      {images.length > 1 && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/30 px-2 py-1.5 rounded-full backdrop-blur-sm">
+          {images.map((_, idx) => (
+            <div 
+              key={idx} 
+              className={`h-1.5 rounded-full transition-all ${idx === currentIndex ? 'w-3 bg-[#a78bfa]' : 'w-1.5 bg-white/50'}`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Sliding Red Heart Popping Overlay */}
+      <AnimatePresence>
+        {heartBurstPostId === post.id && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.3 }}
+            animate={{ opacity: 1, scale: [0.3, 1.25, 0.95, 1.05, 1] }}
+            exit={{ opacity: 0, scale: 0.2, y: -20 }}
+            transition={{ duration: 0.45 }}
+            className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"
+          >
+            <div className="p-5 rounded-full bg-black/45 backdrop-blur-sm">
+              <Heart className="w-20 h-20 text-rose-500 fill-rose-500 filter drop-shadow-[0_0_15px_rgba(244,63,94,0.6)]" />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function CommunityFeed({ currentUserProfile, filterByUserId, previewMode = false }: CommunityFeedProps) {
   const [posts, setPosts] = useState<SocialPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,7 +158,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
   
   // Post publisher states
   const [caption, setCaption] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
   const [showUrlInput, setShowUrlInput] = useState(false);
@@ -200,7 +304,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
   // Publish Post action
   const handlePublishPost = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!caption.trim() && !imageUrl.trim()) return;
+    if (!caption.trim() && imageUrls.length === 0) return;
     if (previewMode && currentUserProfile.uid !== 'demo-user-123') {
       alert("Posts desativados em pré-visualização.");
       return;
@@ -216,7 +320,8 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
         displayName: currentUserProfile.displayName || currentUserProfile.username,
         profilePicUrl: currentUserProfile.profilePicUrl || '',
         caption: caption.trim(),
-        imageUrl: imageUrl.trim(),
+        imageUrl: imageUrls[0] || '',
+        imageUrls: imageUrls,
         likes: [],
         likesCount: 0,
         commentsCount: 0,
@@ -230,7 +335,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
       localStorage.setItem('demo_posts', JSON.stringify(list));
 
       setCaption('');
-      setImageUrl('');
+      setImageUrls([]);
       setIsSelectorOpen(false);
       setIsPublishing(false);
       return;
@@ -247,7 +352,8 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
         displayName: currentUserProfile.displayName || currentUserProfile.username,
         profilePicUrl: currentUserProfile.profilePicUrl || '',
         caption: caption.trim(),
-        imageUrl: imageUrl.trim(),
+        imageUrl: imageUrls[0] || '',
+        imageUrls: imageUrls,
         likes: [],
         likesCount: 0,
         commentsCount: 0,
@@ -262,7 +368,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
       });
 
       setCaption('');
-      setImageUrl('');
+      setImageUrls([]);
       setIsSelectorOpen(false);
     } catch (err) {
       handleFirestoreError(err, OperationType.CREATE, `posts/${id}`);
@@ -590,16 +696,20 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                 autoFocus
               />
 
-              {imageUrl && (
-                <div className="relative rounded-xl overflow-hidden border border-white/10 max-h-72">
-                  <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => setImageUrl('')}
-                    className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-black text-white rounded-full transition-colors cursor-pointer"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+              {imageUrls.length > 0 && (
+                <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                  {imageUrls.map((url, idx) => (
+                    <div key={idx} className="relative w-24 h-24 rounded-xl overflow-hidden shrink-0 border border-white/10">
+                      <img src={url} alt="Preview" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setImageUrls(prev => prev.filter((_, i) => i !== idx))}
+                        className="absolute top-1 right-1 p-1 bg-black/70 hover:bg-black text-white rounded-full transition-colors cursor-pointer"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
 
@@ -607,24 +717,32 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
 
               <div className="flex items-center justify-between pt-3 border-t border-white/5">
                 <div className="flex items-center gap-1">
-                  <input
-                    id="post-image-upload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        try {
-                          const dataUri = await compressImage(file, 1200, 1200, 0.7);
-                          setImageUrl(dataUri);
-                        } catch (err) {
-                          console.error('Erro ao comprimir imagem:', err);
+                    <input
+                      id="post-image-upload"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={async (e) => {
+                        const files = Array.from(e.target.files || []);
+                        if (files.length > 0) {
+                          const remainingSlots = 10 - imageUrls.length;
+                          const filesToProcess = files.slice(0, remainingSlots);
+                          if (files.length > remainingSlots) {
+                            alert(`Você pode adicionar no máximo 10 fotos. Apenas as ${remainingSlots} primeiras foram adicionadas.`);
+                          }
+                          try {
+                            const newUris = await Promise.all(
+                              filesToProcess.map(f => compressImage(f, 1200, 1200, 0.7))
+                            );
+                            setImageUrls(prev => [...prev, ...newUris]);
+                          } catch (err) {
+                            console.error('Erro ao comprimir imagem:', err);
+                          }
                         }
-                      }
-                      e.target.value = '';
-                    }}
-                  />
+                        e.target.value = '';
+                      }}
+                    />
                   <label htmlFor="post-image-upload" className="p-2.5 rounded-full hover:bg-white/5 text-zinc-400 hover:text-sky-400 transition-all cursor-pointer" title="Adicionar foto">
                     <ImageIcon className="w-5 h-5" />
                   </label>
@@ -633,7 +751,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
 
                 <button
                   type="submit"
-                  disabled={isPublishing || (!caption.trim() && !imageUrl.trim())}
+                  disabled={isPublishing || (!caption.trim() && imageUrls.length === 0)}
                   className="py-2 px-5 rounded-full text-sm font-bold bg-[#a78bfa] hover:bg-[#9061f9] disabled:bg-zinc-800 disabled:text-zinc-500 text-white transition-all disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
                 >
                   {isPublishing ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Publicar'}
@@ -793,41 +911,14 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                   </div>
                 )}
 
-                {/* 5C. Post Image (Instagram Style - Edge to Edge) */}
-                {post.imageUrl && (
-                  <div 
-                    onDoubleClick={() => handleDoubleTap(post)}
-                    className="relative bg-black flex justify-center items-center overflow-hidden select-none group cursor-pointer w-full max-h-[600px]"
-                  >
-                    <img 
-                      src={post.imageUrl} 
-                      alt="Post content" 
-                      className="w-full h-auto max-h-[600px] object-cover transition-transform duration-700"
-                    />
-
-                    {/* Sliding Red Heart Popping Overlay */}
-                    <AnimatePresence>
-                      {heartBurstPostId === post.id && (
-                        <motion.div 
-                          initial={{ opacity: 0, scale: 0.3 }}
-                          animate={{ opacity: 1, scale: [0.3, 1.25, 0.95, 1.05, 1] }}
-                          exit={{ opacity: 0, scale: 0.2, y: -20 }}
-                          transition={{ duration: 0.45 }}
-                          className="absolute inset-0 flex items-center justify-center z-10 pointers-events-none"
-                        >
-                          <div className="p-5 rounded-full bg-black/45 backdrop-blur-sm">
-                            <Heart className="w-20 h-20 text-rose-500 fill-rose-500 filter drop-shadow-[0_0_15px_rgba(244,63,94,0.6)]" />
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-
-                    {/* Double tap tutor label */}
-                    <div className="absolute bottom-3 left-3 px-2 py-1 rounded-md bg-black/60 text-[10px] font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider backdrop-blur-sm">
-                      Clique duas vezes para curtir
-                    </div>
-                  </div>
-                )}
+                {/* 5C. Post Image (Instagram Style - Edge to Edge 4:5 Carousel) */}
+                {(post.imageUrls && post.imageUrls.length > 0) || post.imageUrl ? (
+                  <PostCarousel 
+                    post={post}
+                    handleDoubleTap={handleDoubleTap}
+                    heartBurstPostId={heartBurstPostId}
+                  />
+                ) : null}
 
                 {/* 5D. Instagram/LinkedIn Action Bar */}
                 <div className="px-4 py-3 flex items-center justify-between border-b border-white/5">
