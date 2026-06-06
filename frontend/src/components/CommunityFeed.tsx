@@ -603,19 +603,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                 </div>
               )}
 
-              <AnimatePresence>
-                {showUrlInput && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-                    <input
-                      type="url"
-                      placeholder="Cole a URL da imagem aqui (https://...)"
-                      value={imageUrl}
-                      onChange={(e) => setImageUrl(e.target.value)}
-                      className="w-full bg-[#151515] text-xs text-zinc-200 py-3 px-4 rounded-xl border border-white/5 focus:border-[#a78bfa] focus:outline-none transition-all"
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+
 
               <div className="flex items-center justify-between pt-3 border-t border-white/5">
                 <div className="flex items-center gap-1">
@@ -640,14 +628,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                   <label htmlFor="post-image-upload" className="p-2.5 rounded-full hover:bg-white/5 text-zinc-400 hover:text-sky-400 transition-all cursor-pointer" title="Adicionar foto">
                     <ImageIcon className="w-5 h-5" />
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => setShowUrlInput(!showUrlInput)}
-                    className={`p-2.5 rounded-full hover:bg-white/5 transition-all cursor-pointer ${showUrlInput ? 'text-emerald-400 bg-emerald-400/10' : 'text-zinc-400 hover:text-emerald-400'}`}
-                    title="Adicionar por Link"
-                  >
-                    <ExternalLink className="w-5 h-5" />
-                  </button>
+
                 </div>
 
                 <button
