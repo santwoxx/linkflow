@@ -82,12 +82,12 @@ service cloud.firestore {
 
       // Edição do próprio perfil (não pode mudar uid, email, role, banned, contadores)
       allow update: if isOwner(userId) && !isBanned()
-        && request.resource.data.uid == resource.data.uid
-        && request.resource.data.email == resource.data.email
-        && request.resource.data.role == resource.data.role
-        && request.resource.data.banned == resource.data.banned
-        && request.resource.data.followersCount == resource.data.followersCount
-        && request.resource.data.followingCount == resource.data.followingCount
+        && request.resource.data.get('uid', '') == resource.data.get('uid', '')
+        && request.resource.data.get('email', '') == resource.data.get('email', '')
+        && request.resource.data.get('role', 'user') == resource.data.get('role', 'user')
+        && request.resource.data.get('banned', false) == resource.data.get('banned', false)
+        && request.resource.data.get('followersCount', 0) == resource.data.get('followersCount', 0)
+        && request.resource.data.get('followingCount', 0) == resource.data.get('followingCount', 0)
         && validString(request.resource.data.username, 3, 30)
         && isValidUsername(request.resource.data.username)
         && validString(request.resource.data.displayName, 1, 60)
