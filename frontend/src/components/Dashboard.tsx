@@ -11,7 +11,7 @@ import DiscoverProfiles from './DiscoverProfiles';
 const AdminPanel = React.lazy(() => import('./AdminPanel'));
 const ProfessionalDashboard = React.lazy(() => import('./ProfessionalDashboard'));
 import GoToNatanDevButton from './GoToNatanDevButton';
-import { Link2, Sparkles, User, LogOut, Check, Copy, ExternalLink, RefreshCw, MessageSquare, Compass, ImageIcon, Crown, Layout, Smartphone, BarChart4, Briefcase } from 'lucide-react';
+import { Link2, Sparkles, User, LogOut, Check, Copy, ExternalLink, RefreshCw, MessageSquare, Compass, ImageIcon, Crown, Layout, Smartphone, BarChart4, Briefcase, Upload } from 'lucide-react';
 import { ADMIN_EMAIL } from '../types';
 import { compressImage } from '../utils/image';
 
