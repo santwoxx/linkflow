@@ -523,161 +523,143 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
   return (
     <div className="w-full max-w-[620px] mx-auto space-y-4 md:space-y-6">
       
-      {/* 1. PREMIUM POST WIDGET */}
+      {/* 1. PREMIUM POST WIDGET (LinkedIn Style) */}
       {!filterByUserId && (
-        <div className="relative group bg-[#0a0a0a] backdrop-blur-2xl rounded-3xl border border-white/5 shadow-[0_8px_30px_rgb(0,0,0,0.4)] p-5 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#a78bfa]/5 via-transparent to-indigo-900/5 pointer-events-none" />
-          <div className="relative flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-tr from-[#a78bfa] to-indigo-600 rounded-full blur-[6px] opacity-40 group-hover:opacity-70 transition-opacity" />
-                {currentUserProfile.profilePicUrl ? (
-                  <img 
-                    src={currentUserProfile.profilePicUrl} 
-                    alt={currentUserProfile.displayName} 
-                    className="relative w-11 h-11 rounded-full object-cover shrink-0 border-2 border-white/5"
-                  />
-                ) : (
-                  <div className="relative w-11 h-11 rounded-full bg-[#151515] flex items-center justify-center font-bold text-white shrink-0 border-2 border-white/5">
-                    {currentUserProfile.displayName?.charAt(0) || currentUserProfile.username.charAt(0)}
-                  </div>
-                )}
-              </div>
-              <div className="min-w-0">
-                <p className="text-[10px] font-black text-[#a78bfa] uppercase tracking-widest leading-none mb-1">Comunidade</p>
-                <p className="text-sm text-zinc-200 font-semibold">O que você quer compartilhar?</p>
-              </div>
-            </div>
-
-            <button
-              id="open-ig-widget"
-              onClick={() => setIsSelectorOpen(!isSelectorOpen)}
-              className="px-5 py-2.5 bg-white hover:bg-zinc-200 text-black text-xs font-black rounded-xl flex items-center gap-2 cursor-pointer shadow-[0_0_20px_rgba(255,255,255,0.15)] active:scale-95 transition-all shrink-0"
-            >
-              {isSelectorOpen ? <X className="w-4 h-4 stroke-[2.5]" /> : <Plus className="w-4 h-4 stroke-[2.5]" />}
-              <span className="hidden sm:inline">{isSelectorOpen ? 'Cancelar' : 'Criar Post'}</span>
-            </button>
-          </div>
-
-          <AnimatePresence>
-            {isSelectorOpen && (
-              <motion.form 
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-                onSubmit={handlePublishPost}
-                className="relative overflow-hidden mt-5 pt-5 border-t border-white/5 space-y-4"
-              >
-                <div className="relative group/textarea">
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#a78bfa]/20 to-indigo-500/20 rounded-2xl blur-xl opacity-0 group-focus-within/textarea:opacity-100 transition-opacity pointer-events-none" />
-                  <textarea
-                    placeholder="Escreva sua mensagem aqui..."
-                    rows={3}
-                    value={caption}
-                    onChange={(e) => setCaption(e.target.value)}
-                    className="relative w-full bg-[#111111] text-sm text-white py-4 px-5 rounded-2xl border border-white/5 focus:border-[#a78bfa] focus:bg-[#151515] focus:outline-none transition-all placeholder-zinc-600 leading-relaxed resize-none shadow-inner"
-                    maxLength={1000}
-                  />
+        <div className="bg-[#0a0a0a] backdrop-blur-2xl rounded-2xl border border-white/5 shadow-[0_4px_20px_rgb(0,0,0,0.5)] p-4 sm:p-5">
+          {!isSelectorOpen ? (
+            <div className="flex items-center gap-3">
+              {currentUserProfile.profilePicUrl ? (
+                <img 
+                  src={currentUserProfile.profilePicUrl} 
+                  alt={currentUserProfile.displayName} 
+                  className="w-12 h-12 rounded-full object-cover shrink-0 border border-white/10"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-[#1a1a1a] flex items-center justify-center font-bold text-white shrink-0 border border-white/10">
+                  {currentUserProfile.displayName?.charAt(0) || currentUserProfile.username.charAt(0)}
                 </div>
-
-                {imageUrl && (
-                  <div className="relative rounded-2xl overflow-hidden border border-white/10 max-h-72 group/img shadow-lg">
+              )}
+              <button
+                onClick={() => setIsSelectorOpen(true)}
+                className="flex-1 text-left bg-[#151515] hover:bg-[#1a1a1a] text-zinc-400 text-sm font-semibold py-3.5 px-5 rounded-full border border-white/5 transition-colors cursor-text"
+              >
+                Começar uma publicação...
+              </button>
+            </div>
+          ) : (
+            <motion.form 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              onSubmit={handlePublishPost}
+              className="space-y-4"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  {currentUserProfile.profilePicUrl ? (
                     <img 
-                      src={imageUrl} 
-                      alt="Preview" 
-                      className="w-full h-full object-cover"
+                      src={currentUserProfile.profilePicUrl} 
+                      alt={currentUserProfile.displayName} 
+                      className="w-10 h-10 rounded-full object-cover shrink-0"
                     />
-                    <button
-                      type="button"
-                      onClick={() => setImageUrl('')}
-                      className="absolute top-3 right-3 px-3 py-1.5 text-[10px] font-black bg-black/80 hover:bg-black text-white uppercase tracking-wider rounded-xl transition-colors cursor-pointer backdrop-blur-md"
-                    >
-                      Remover foto
-                    </button>
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-[#1a1a1a] flex items-center justify-center font-bold text-white shrink-0">
+                      {currentUserProfile.displayName?.charAt(0) || currentUserProfile.username.charAt(0)}
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm font-bold text-white leading-tight">{currentUserProfile.displayName}</p>
+                    <p className="text-[10px] text-zinc-400 font-semibold bg-white/5 px-2 py-0.5 rounded-full mt-0.5 inline-block">Qualquer pessoa</p>
                   </div>
-                )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsSelectorOpen(false)}
+                  className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-full transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                  <div className="flex-1 p-1 bg-[#111111] rounded-2xl border border-white/5 flex items-center gap-1 shadow-inner">
-                    <input
-                      id="post-image-upload"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          try {
-                            const dataUri = await compressImage(file, 1200, 1200, 0.7);
-                            setImageUrl(dataUri);
-                          } catch (err) {
-                            console.error('Erro ao comprimir imagem:', err);
-                          }
-                        }
-                        e.target.value = '';
-                      }}
-                    />
-                    <label
-                      htmlFor="post-image-upload"
-                      className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl cursor-pointer hover:bg-white/5 text-zinc-400 hover:text-white transition-all group/btn"
-                    >
-                      <ImageIcon className="w-5 h-5 text-[#a78bfa] group-hover/btn:scale-110 transition-transform" />
-                      <span className="text-xs font-bold">Galeria</span>
-                    </label>
-                    <div className="w-px h-6 bg-white/10" />
-                    <button
-                      type="button"
-                      onClick={() => setShowUrlInput(!showUrlInput)}
-                      className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl cursor-pointer transition-all hover:bg-white/5 ${showUrlInput ? 'text-white bg-white/5' : 'text-zinc-400 hover:text-white'}`}
-                      title="Inserir URL de imagem"
-                    >
-                      <ExternalLink className="w-5 h-5" />
-                      <span className="text-xs font-bold">Link URL</span>
-                    </button>
-                  </div>
+              <textarea
+                placeholder="No que você está pensando?"
+                rows={4}
+                value={caption}
+                onChange={(e) => setCaption(e.target.value)}
+                className="w-full bg-transparent text-sm text-white placeholder-zinc-500 leading-relaxed resize-none focus:outline-none"
+                maxLength={1000}
+                autoFocus
+              />
 
+              {imageUrl && (
+                <div className="relative rounded-xl overflow-hidden border border-white/10 max-h-72">
+                  <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
                   <button
-                    type="submit"
-                    disabled={isPublishing || (!caption.trim() && !imageUrl.trim())}
-                    aria-label={isPublishing ? 'Publicando...' : 'Compartilhar publicação'}
-                    className="py-3.5 px-8 rounded-2xl text-xs font-black uppercase tracking-widest bg-gradient-to-r from-[#a78bfa] to-indigo-600 hover:from-[#9061f9] hover:to-indigo-500 disabled:opacity-50 text-white flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_20px_rgba(167,139,250,0.3)] hover:shadow-[0_0_30px_rgba(167,139,250,0.5)] active:scale-95 transition-all disabled:cursor-not-allowed"
+                    type="button"
+                    onClick={() => setImageUrl('')}
+                    className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-black text-white rounded-full transition-colors cursor-pointer"
                   >
-                    {isPublishing ? (
-                      <>
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                        Enviando...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4" />
-                        Publicar
-                      </>
-                    )}
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              <AnimatePresence>
+                {showUrlInput && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                    <input
+                      type="url"
+                      placeholder="Cole a URL da imagem aqui (https://...)"
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      className="w-full bg-[#151515] text-xs text-zinc-200 py-3 px-4 rounded-xl border border-white/5 focus:border-[#a78bfa] focus:outline-none transition-all"
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                <div className="flex items-center gap-1">
+                  <input
+                    id="post-image-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        try {
+                          const dataUri = await compressImage(file, 1200, 1200, 0.7);
+                          setImageUrl(dataUri);
+                        } catch (err) {
+                          console.error('Erro ao comprimir imagem:', err);
+                        }
+                      }
+                      e.target.value = '';
+                    }}
+                  />
+                  <label htmlFor="post-image-upload" className="p-2.5 rounded-full hover:bg-white/5 text-zinc-400 hover:text-sky-400 transition-all cursor-pointer" title="Adicionar foto">
+                    <ImageIcon className="w-5 h-5" />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowUrlInput(!showUrlInput)}
+                    className={`p-2.5 rounded-full hover:bg-white/5 transition-all cursor-pointer ${showUrlInput ? 'text-emerald-400 bg-emerald-400/10' : 'text-zinc-400 hover:text-emerald-400'}`}
+                    title="Adicionar por Link"
+                  >
+                    <ExternalLink className="w-5 h-5" />
                   </button>
                 </div>
 
-                <AnimatePresence>
-                  {showUrlInput && (
-                    <motion.div 
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="overflow-hidden pt-1"
-                    >
-                      <input
-                        type="url"
-                        placeholder="Cole a URL da imagem aqui (https://...)"
-                        value={imageUrl}
-                        onChange={(e) => setImageUrl(e.target.value)}
-                        className="w-full bg-[#151515] text-xs text-zinc-200 py-3 px-4 rounded-xl border border-white/5 focus:border-[#a78bfa] focus:outline-none transition-all shadow-inner"
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.form>
-            )}
-          </AnimatePresence>
+                <button
+                  type="submit"
+                  disabled={isPublishing || (!caption.trim() && !imageUrl.trim())}
+                  className="py-2 px-5 rounded-full text-sm font-bold bg-[#a78bfa] hover:bg-[#9061f9] disabled:bg-zinc-800 disabled:text-zinc-500 text-white transition-all disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
+                >
+                  {isPublishing ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Publicar'}
+                </button>
+              </div>
+            </motion.form>
+          )}
         </div>
       )}
 
@@ -767,73 +749,79 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
             return (
               <article 
                 key={post.id} 
-                className="bg-[#0a0a0a] backdrop-blur-xl rounded-3xl border border-white/5/50 overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.4)] animate-fadeIn group/post relative"
+                className="bg-[#0a0a0a] backdrop-blur-xl rounded-2xl border border-white/5 overflow-hidden shadow-[0_4px_20px_rgb(0,0,0,0.4)] animate-fadeIn group/post relative"
               >
-                {/* 5A. Post Header (IG styled metadata) */}
-                <div className="p-3.5 flex items-center justify-between border-b border-slate-850/20">
+                {/* 5A. Post Header (LinkedIn Style) */}
+                <div className="px-4 py-3 flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-[1.5px] rounded-full bg-gradient-to-tr from-yellow-405 via-pink-500 to-purple-600">
-                      <div className="bg-[#0f172a] p-[1.5px] rounded-full">
-                        {post.profilePicUrl ? (
-                          <img 
-                            src={post.profilePicUrl} 
-                            alt={post.displayName} 
-                            className="w-8.5 h-8.5 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-8.5 h-8.5 rounded-full bg-white/10 flex items-center justify-center font-bold text-white text-xs">
-                            {post.displayName ? post.displayName.charAt(0).toUpperCase() : post.username.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    <a href={`/?u=${post.username}`} className="shrink-0">
+                      {post.profilePicUrl ? (
+                        <img 
+                          src={post.profilePicUrl} 
+                          alt={post.displayName} 
+                          className="w-12 h-12 rounded-full object-cover border border-white/10"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-[#1a1a1a] flex items-center justify-center font-bold text-white text-lg border border-white/10">
+                          {post.displayName ? post.displayName.charAt(0).toUpperCase() : post.username.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </a>
                     
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-white leading-none">
-                          {post.displayName}
-                        </span>
-                        <span className="text-zinc-600 text-xs">·</span>
-                        <a 
-                          href={`/?u=${post.username}`}
-                          className="text-[11px] text-pink-400 font-semibold hover:underline"
-                        >
-                          @{post.username}
-                        </a>
-                      </div>
-                      <span className="text-[9px] text-zinc-500 font-semibold block mt-0.5 tracking-wider uppercase">
-                        SÃO PAULO, BRASIL · LINKFLOW
+                    <div className="flex flex-col justify-center">
+                      <a href={`/?u=${post.username}`} className="text-[15px] font-bold text-white hover:text-[#a78bfa] hover:underline leading-tight transition-colors">
+                        {post.displayName}
+                      </a>
+                      <span className="text-[12px] text-zinc-400 leading-tight mt-0.5">
+                        @{post.username} • Profissional
+                      </span>
+                      <span className="text-[10px] text-zinc-500 font-medium flex items-center gap-1 mt-0.5">
+                        {formatPostDate(post.createdAt)} • <Globe className="w-3 h-3" />
                       </span>
                     </div>
                   </div>
 
-                  {/* Actions dots/delete */}
-                  <div className="flex items-center gap-1">
+                  {/* Actions dots/delete & Follow */}
+                  <div className="flex items-center gap-2">
+                    {(!isMyPost && !isAdmin) && (
+                      <button className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-[#a78bfa] hover:bg-[#a78bfa]/10 transition-colors cursor-pointer">
+                        <Plus className="w-3.5 h-3.5" /> Seguir
+                      </button>
+                    )}
                     {(isMyPost || isAdmin) && !previewMode && (
                       <button
                         onClick={() => handleDeletePost(post.id)}
-                        className="p-1.5 rounded-lg text-slate-550 hover:text-rose-400 hover:bg-slate-900/60 transition-all cursor-pointer"
+                        className="p-1.5 rounded-full text-zinc-500 hover:text-rose-400 hover:bg-white/5 transition-all cursor-pointer"
                         title={isAdmin && !isMyPost ? "Remover (Admin)" : "Remover postagem"}
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     )}
-                    <button className="p-1.5 text-zinc-500 hover:text-white cursor-pointer" title="Opções">
+                    <button className="p-1.5 text-zinc-500 hover:text-white rounded-full hover:bg-white/5 transition-all cursor-pointer" title="Opções">
                       <MoreHorizontal className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
 
-                {/* 5B. Post Image with Double Tap / Double Click like animation */}
+                {/* 5B. Post Caption (LinkedIn Style - Above Image) */}
+                {post.caption && (
+                  <div className="px-4 pb-3">
+                    <p className="text-sm text-zinc-200 leading-relaxed font-normal whitespace-pre-wrap break-words">
+                      {renderStyledText(post.caption)}
+                    </p>
+                  </div>
+                )}
+
+                {/* 5C. Post Image (Instagram Style - Edge to Edge) */}
                 {post.imageUrl && (
                   <div 
                     onDoubleClick={() => handleDoubleTap(post)}
-                    className="relative border-b border-white/5 bg-black/90 flex justify-center items-center overflow-hidden select-none group cursor-pointer min-h-[200px] max-h-[80vh]"
+                    className="relative bg-black flex justify-center items-center overflow-hidden select-none group cursor-pointer w-full max-h-[600px]"
                   >
                     <img 
                       src={post.imageUrl} 
-                      alt="Instagram slide" 
-                      className="w-full h-full object-contain transition-transform duration-700 hover:scale-101"
+                      alt="Post content" 
+                      className="w-full h-auto max-h-[600px] object-cover transition-transform duration-700"
                     />
 
                     {/* Sliding Red Heart Popping Overlay */}
@@ -847,55 +835,53 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                           className="absolute inset-0 flex items-center justify-center z-10 pointers-events-none"
                         >
                           <div className="p-5 rounded-full bg-black/45 backdrop-blur-sm">
-                            <Heart className="w-16 h-16 text-rose-500 fill-rose-500 filter drop-shadow-[0_0_12px_rgba(244,63,94,0.6)]" />
+                            <Heart className="w-20 h-20 text-rose-500 fill-rose-500 filter drop-shadow-[0_0_15px_rgba(244,63,94,0.6)]" />
                           </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
 
                     {/* Double tap tutor label */}
-                    <div className="absolute bottom-2.5 left-2.5 px-2 py-1 rounded bg-black/60 text-[8px] font-bold text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
+                    <div className="absolute bottom-3 left-3 px-2 py-1 rounded-md bg-black/60 text-[10px] font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider backdrop-blur-sm">
                       Clique duas vezes para curtir
                     </div>
                   </div>
                 )}
 
-                {/* 5C. Instagram Icon Interaction Bar */}
-                <div className="px-4 pt-3 pb-2 flex items-center justify-between select-none">
-                  <div className="flex items-center gap-4">
+                {/* 5D. Instagram/LinkedIn Action Bar */}
+                <div className="px-4 py-3 flex items-center justify-between border-b border-white/5">
+                  <div className="flex items-center gap-6">
                     {/* Heart Like */}
                     <button
                       onClick={() => handleLikePost(post)}
-                      className={`transition-transform duration-200 active:scale-75 cursor-pointer ${
+                      className={`flex items-center gap-2 transition-transform active:scale-90 cursor-pointer ${
                         isLikedByMe 
-                          ? 'text-rose-500 hover:text-rose-400' 
-                          : 'text-slate-350 hover:text-white'
+                          ? 'text-rose-500' 
+                          : 'text-zinc-400 hover:text-white'
                       }`}
                       title={isLikedByMe ? "Descurtir" : "Curtir"}
                     >
-                      <Heart className={`w-[23px] h-[23px] ${isLikedByMe ? 'fill-rose-500 text-rose-500 animate-heartBeat' : 'stroke-[2]'}`} />
+                      <Heart className={`w-[26px] h-[26px] ${isLikedByMe ? 'fill-rose-500 animate-heartBeat' : 'stroke-[2]'}`} />
+                      {post.likesCount > 0 && <span className="text-sm font-semibold">{post.likesCount}</span>}
                     </button>
 
                     {/* View Comments drawer trigger */}
                     <button
                       onClick={() => {
-                        if (activeCommentsPostId === post.id) {
-                          setActiveCommentsPostId(null);
-                        } else {
-                          setActiveCommentsPostId(post.id);
-                        }
+                        setActiveCommentsPostId(activeCommentsPostId === post.id ? null : post.id);
                       }}
-                      className="text-slate-350 hover:text-white active:scale-90 transition-transform cursor-pointer"
+                      className="flex items-center gap-2 text-zinc-400 hover:text-white active:scale-95 transition-transform cursor-pointer"
                       title="Comentários"
                     >
-                      <MessageSquare className="w-[22px] h-[22px] stroke-[2]" />
+                      <MessageSquare className="w-[24px] h-[24px] stroke-[2]" />
+                      {post.commentsCount > 0 && <span className="text-sm font-semibold">{post.commentsCount}</span>}
                     </button>
 
                     {/* Direct Sharing */}
                     <button
                       onClick={() => handleSharePost(post)}
-                      className="text-slate-350 hover:text-white active:scale-95 transition-transform cursor-pointer relative"
-                      title="Copiar Link para envio"
+                      className="flex items-center gap-2 text-zinc-400 hover:text-white active:scale-95 transition-transform cursor-pointer relative"
+                      title="Compartilhar"
                     >
                       <AnimatePresence>
                         {copiedPostId === post.id ? (
@@ -903,56 +889,24 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                             initial={{ y: 5, opacity: 0 }}
                             animate={{ y: -16, opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="absolute left-1/2 -translate-x-1/2 text-[9px] bg-green-600 text-white font-bold px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0 min-w-[76px] text-center"
+                            className="absolute left-1/2 -translate-x-1/2 text-[10px] bg-emerald-500 text-white font-bold px-2 py-0.5 rounded shadow-lg uppercase tracking-wider shrink-0 min-w-[76px] text-center"
                           >
                             Copiado!
                           </motion.span>
                         ) : null}
                       </AnimatePresence>
-                      <Send className="w-[22px] h-[22px] stroke-[2]" />
+                      <Send className="w-[24px] h-[24px] stroke-[2]" />
                     </button>
-
-                    {/* Separator + quick-nav to @natanmarinho-dev */}
-                    <span className="w-px h-5 bg-slate-700/60 mx-0.5" aria-hidden="true" />
-                    <a
-                      href="?u=natanmarinho-dev"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sky-400 hover:text-sky-300 active:scale-95 transition-transform cursor-pointer"
-                      title="Visitar @natanmarinho-dev em nova aba"
-                      aria-label="Visitar @natanmarinho-dev em nova aba"
-                    >
-                      <AtSign className="w-[22px] h-[22px] stroke-[2]" />
-                    </a>
                   </div>
 
-                  {/* Bookmark list save mockup */}
+                  {/* Bookmark */}
                   <button
                     onClick={() => handleBookmarkPost(post.id)}
-                    className="text-slate-350 hover:text-white active:scale-90 transition-transform cursor-pointer"
-                    title="Salvar"
+                    className="text-zinc-400 hover:text-white active:scale-90 transition-transform cursor-pointer"
+                    title="Salvar postagem"
                   >
-                    <Bookmark className={`w-[22px] h-[22px] ${bookmarkedPosts.includes(post.id) ? 'fill-white text-white' : 'stroke-[2]'}`} />
+                    <Bookmark className={`w-[24px] h-[24px] ${bookmarkedPosts.includes(post.id) ? 'fill-white text-white' : 'stroke-[2]'}`} />
                   </button>
-                </div>
-
-                {/* 5D. Instagram Info text: Likes counter */}
-                <div className="px-4 select-none">
-                  <p className="text-xs font-extrabold text-slate-205">
-                    {post.likesCount ? (
-                      `${post.likesCount} ${post.likesCount === 1 ? 'curtida' : 'curtidas'}`
-                    ) : (
-                      'Seja o primeiro a curtir'
-                    )}
-                  </p>
-                </div>
-
-                {/* 5E. Instagram Info text: Author bold header & styled description */}
-                <div className="px-4 pt-1.5 space-y-1">
-                  <p className="text-xs text-zinc-300 leading-relaxed text-slate-250 font-normal break-words min-w-0">
-                    <span className="font-extrabold text-white mr-1.5 cursor-pointer hover:underline">{post.username}</span>
-                    {renderStyledText(post.caption)}
-                  </p>
                 </div>
 
                 {/* 5F. Live Inline Comment display */}
