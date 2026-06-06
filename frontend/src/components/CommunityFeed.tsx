@@ -523,35 +523,39 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
   return (
     <div className="w-full max-w-[620px] mx-auto space-y-4 md:space-y-6">
       
-      {/* 1. Top Sleek Instagram Creator Widget */}
+      {/* 1. PREMIUM POST WIDGET */}
       {!filterByUserId && (
-        <div className="bg-[#0f172a]/95 backdrop-blur-md rounded-2xl border border-slate-800/40 shadow-lg p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {currentUserProfile.profilePicUrl ? (
-                <img 
-                  src={currentUserProfile.profilePicUrl} 
-                  alt={currentUserProfile.displayName} 
-                  className="w-10 h-10 rounded-full object-cover shrink-0 border border-slate-700"
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-[#1e293b] flex items-center justify-center font-bold text-white shrink-0">
-                  {currentUserProfile.displayName?.charAt(0) || currentUserProfile.username.charAt(0)}
-                </div>
-              )}
+        <div className="relative group bg-[#0f172a]/80 backdrop-blur-2xl rounded-3xl border border-slate-800/60 shadow-[0_8px_30px_rgb(0,0,0,0.4)] p-5 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#a78bfa]/5 via-transparent to-indigo-900/5 pointer-events-none" />
+          <div className="relative flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-tr from-[#a78bfa] to-indigo-600 rounded-full blur-[6px] opacity-40 group-hover:opacity-70 transition-opacity" />
+                {currentUserProfile.profilePicUrl ? (
+                  <img 
+                    src={currentUserProfile.profilePicUrl} 
+                    alt={currentUserProfile.displayName} 
+                    className="relative w-11 h-11 rounded-full object-cover shrink-0 border-2 border-slate-800"
+                  />
+                ) : (
+                  <div className="relative w-11 h-11 rounded-full bg-[#1e293b] flex items-center justify-center font-bold text-white shrink-0 border-2 border-slate-800">
+                    {currentUserProfile.displayName?.charAt(0) || currentUserProfile.username.charAt(0)}
+                  </div>
+                )}
+              </div>
               <div className="min-w-0">
-                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none">Novidade</p>
-                <p className="text-xs text-slate-300 font-semibold mt-0.5">O que você está pensando hoje?</p>
+                <p className="text-[10px] font-black text-[#a78bfa] uppercase tracking-widest leading-none mb-1">Comunidade</p>
+                <p className="text-sm text-slate-200 font-semibold">O que você quer compartilhar?</p>
               </div>
             </div>
 
             <button
               id="open-ig-widget"
               onClick={() => setIsSelectorOpen(!isSelectorOpen)}
-              className="px-3 sm:px-4 py-2 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer shadow-md shadow-pink-900/10 active:scale-95 transition-all shrink-0"
+              className="px-5 py-2.5 bg-white hover:bg-slate-100 text-slate-900 text-xs font-black rounded-xl flex items-center gap-2 cursor-pointer shadow-[0_0_20px_rgba(255,255,255,0.15)] active:scale-95 transition-all shrink-0"
             >
-              <Plus className="w-4 h-4 stroke-[2.5]" />
-              <span className="hidden sm:inline">{isSelectorOpen ? 'Fechar' : 'Nova Publicação'}</span>
+              {isSelectorOpen ? <X className="w-4 h-4 stroke-[2.5]" /> : <Plus className="w-4 h-4 stroke-[2.5]" />}
+              <span className="hidden sm:inline">{isSelectorOpen ? 'Cancelar' : 'Criar Post'}</span>
             </button>
           </div>
 
@@ -561,40 +565,41 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.25 }}
+                transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
                 onSubmit={handlePublishPost}
-                className="overflow-hidden mt-4 pt-4 border-t border-slate-800/60 space-y-4"
+                className="relative overflow-hidden mt-5 pt-5 border-t border-slate-800/60 space-y-4"
               >
-                <div className="space-y-2">
+                <div className="relative group/textarea">
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#a78bfa]/20 to-indigo-500/20 rounded-2xl blur-xl opacity-0 group-focus-within/textarea:opacity-100 transition-opacity pointer-events-none" />
                   <textarea
-                    placeholder="Escreva uma legenda..."
-                    rows={2}
+                    placeholder="Escreva sua mensagem aqui..."
+                    rows={3}
                     value={caption}
                     onChange={(e) => setCaption(e.target.value)}
-                    className="w-full bg-slate-900/80 text-sm text-slate-100 py-2.5 px-3.5 rounded-xl border border-slate-800 focus:border-purple-500 focus:outline-none transition-colors placeholder-slate-600 leading-normal resize-none"
+                    className="relative w-full bg-[#0a1128]/50 text-sm text-slate-100 py-4 px-5 rounded-2xl border border-slate-700/50 focus:border-[#a78bfa] focus:bg-[#0a1128]/80 focus:outline-none transition-all placeholder-slate-500 leading-relaxed resize-none shadow-inner"
                     maxLength={1000}
                   />
                 </div>
 
                 {imageUrl && (
-                  <div className="relative rounded-xl overflow-hidden border border-slate-800 max-h-60 group">
+                  <div className="relative rounded-2xl overflow-hidden border border-slate-700 max-h-72 group/img shadow-lg">
                     <img 
                       src={imageUrl} 
-                      alt="Simulated crop" 
+                      alt="Preview" 
                       className="w-full h-full object-cover"
                     />
                     <button
                       type="button"
                       onClick={() => setImageUrl('')}
-                      className="absolute top-2 right-2 px-2.5 py-1 text-[10px] font-bold bg-black/75 hover:bg-black text-rose-400 uppercase rounded-lg transition-colors cursor-pointer"
+                      className="absolute top-3 right-3 px-3 py-1.5 text-[10px] font-black bg-black/80 hover:bg-black text-white uppercase tracking-wider rounded-xl transition-colors cursor-pointer backdrop-blur-md"
                     >
                       Remover foto
                     </button>
                   </div>
                 )}
 
-                <div className="p-3 bg-slate-950/40 rounded-xl space-y-3">
-                  <div className="flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <div className="flex-1 p-1 bg-[#0a1128]/50 rounded-2xl border border-slate-800/60 flex items-center gap-1 shadow-inner">
                     <input
                       id="post-image-upload"
                       type="file"
@@ -615,58 +620,61 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                     />
                     <label
                       htmlFor="post-image-upload"
-                      className="flex-1 flex items-center justify-center gap-2 py-4 px-4 border-2 border-dashed border-slate-700 hover:border-pink-500/50 rounded-xl cursor-pointer bg-slate-900/40 hover:bg-slate-800/40 transition-all group"
+                      className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl cursor-pointer hover:bg-white/5 text-slate-400 hover:text-white transition-all group/btn"
                     >
-                      <ImageIcon className="w-6 h-6 text-pink-400 group-hover:scale-110 transition-transform" />
-                      <div className="text-left">
-                        <span className="block text-xs font-bold text-slate-300">Escolher da Galeria</span>
-                        <span className="block text-[9px] text-slate-500 mt-0.5">Toque para abrir o álbum de fotos</span>
-                      </div>
+                      <ImageIcon className="w-5 h-5 text-[#a78bfa] group-hover/btn:scale-110 transition-transform" />
+                      <span className="text-xs font-bold">Galeria</span>
                     </label>
+                    <div className="w-px h-6 bg-slate-800" />
                     <button
                       type="button"
                       onClick={() => setShowUrlInput(!showUrlInput)}
-                      className="p-3 rounded-xl border border-slate-700 hover:border-[#a78bfa]/50 text-slate-400 hover:text-[#a78bfa] transition-all bg-slate-900/40 hover:bg-slate-800/40 cursor-pointer"
+                      className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl cursor-pointer transition-all hover:bg-white/5 ${showUrlInput ? 'text-white bg-white/5' : 'text-slate-400 hover:text-white'}`}
                       title="Inserir URL de imagem"
                     >
                       <ExternalLink className="w-5 h-5" />
+                      <span className="text-xs font-bold">Link URL</span>
                     </button>
                   </div>
 
-                  {showUrlInput && (
-                    <div className="animate-fadeIn">
-                      <label className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1.5">Ou cole uma URL de imagem:</label>
-                      <input
-                        type="url"
-                        placeholder="https://images.unsplash.com/photo-..."
-                        value={imageUrl}
-                        onChange={(e) => setImageUrl(e.target.value)}
-                        className="w-full bg-[#111a30]/80 text-xs text-slate-200 py-2 px-3 rounded-lg border border-slate-850 focus:border-pink-500 focus:outline-none"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-end pt-2">
                   <button
                     type="submit"
                     disabled={isPublishing || (!caption.trim() && !imageUrl.trim())}
                     aria-label={isPublishing ? 'Publicando...' : 'Compartilhar publicação'}
-                    className="py-2.5 px-6 rounded-xl text-xs font-extrabold uppercase tracking-wider bg-white hover:bg-slate-100 disabled:bg-slate-800 disabled:text-slate-500 text-black flex items-center gap-1.5 cursor-pointer shadow-md hover:scale-[1.02] active:scale-95 transition-transform"
+                    className="py-3.5 px-8 rounded-2xl text-xs font-black uppercase tracking-widest bg-gradient-to-r from-[#a78bfa] to-indigo-600 hover:from-[#9061f9] hover:to-indigo-500 disabled:opacity-50 text-white flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_20px_rgba(167,139,250,0.3)] hover:shadow-[0_0_30px_rgba(167,139,250,0.5)] active:scale-95 transition-all disabled:cursor-not-allowed"
                   >
                     {isPublishing ? (
                       <>
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                        Aguarde...
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        Enviando...
                       </>
                     ) : (
                       <>
-                        <Send className="w-3.5 h-3.5" />
-                        Compartilhar
+                        <Send className="w-4 h-4" />
+                        Publicar
                       </>
                     )}
                   </button>
                 </div>
+
+                <AnimatePresence>
+                  {showUrlInput && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden pt-1"
+                    >
+                      <input
+                        type="url"
+                        placeholder="Cole a URL da imagem aqui (https://...)"
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
+                        className="w-full bg-[#0a1128]/80 text-xs text-slate-200 py-3 px-4 rounded-xl border border-slate-700/50 focus:border-[#a78bfa] focus:outline-none transition-all shadow-inner"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.form>
             )}
           </AnimatePresence>
@@ -759,7 +767,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
             return (
               <article 
                 key={post.id} 
-                className="bg-[#0f172a]/95 rounded-2xl border border-slate-800/40 overflow-hidden shadow-xl animate-fadeIn"
+                className="bg-[#0f172a]/80 backdrop-blur-xl rounded-3xl border border-slate-800/50 overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.4)] animate-fadeIn group/post relative"
               >
                 {/* 5A. Post Header (IG styled metadata) */}
                 <div className="p-3.5 flex items-center justify-between border-b border-slate-850/20">

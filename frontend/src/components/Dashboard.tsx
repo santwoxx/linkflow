@@ -701,109 +701,135 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
   }
 
   return (
-    <div id="full-dashboard-panel" className="min-h-screen bg-black text-slate-100 flex">
-      {/* Instagram-style LEFT SIDEBAR */}
-      <aside className="hidden md:flex w-[72px] xl:w-[244px] border-r border-slate-800/60 bg-[#0a1128] flex-col items-center xl:items-start py-4 px-3 xl:px-4 gap-1 shrink-0 h-screen sticky top-0 overflow-y-auto">
+    <div id="full-dashboard-panel" className="min-h-screen bg-[#050b18] text-slate-100 flex selection:bg-[#a78bfa]/30">
+      {/* PREMIUM SAAS LEFT SIDEBAR */}
+      <aside className="hidden md:flex w-[80px] xl:w-[260px] border-r border-slate-800/40 bg-[#0f172a]/80 backdrop-blur-2xl flex-col items-center xl:items-start py-6 px-3 xl:px-5 gap-2 shrink-0 h-screen sticky top-0 overflow-y-auto shadow-2xl z-40">
         {/* Logo */}
-        <div className="flex items-center gap-3 mb-6 px-1 xl:px-3 py-2 w-full">
-          <div className="w-9 h-9 rounded-xl bg-[#a78bfa] flex items-center justify-center text-white shadow-[0_0_12px_rgba(167,139,250,0.25)] shrink-0">
-            <Link2 className="w-5 h-5 rotate-45" />
+        <div className="flex items-center gap-3 mb-8 px-1 xl:px-2 w-full cursor-pointer hover:opacity-80 transition-opacity">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#a78bfa] to-indigo-600 flex items-center justify-center text-white shadow-[0_0_20px_rgba(167,139,250,0.4)] shrink-0">
+            <Link2 className="w-5 h-5 rotate-45 stroke-[2.5]" />
           </div>
-          <span className="hidden xl:block text-sm font-extrabold tracking-wide text-white">LinkFlow</span>
+          <span className="hidden xl:block text-lg font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">LinkFlow</span>
         </div>
 
         {/* Nav Items */}
-        {navItems.map((item: any) => (
-          <button
-            key={item.id}
-            onClick={() => setActiveTab(item.id)}
-            className={`flex items-center justify-center xl:justify-start gap-3 w-full py-2.5 px-3 rounded-xl transition-all cursor-pointer ${
-              activeTab === item.id
-                ? 'bg-[#a78bfa]/10 text-[#a78bfa] font-bold'
-                : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/5'
-            }`}
-            title={item.label}
-          >
-            <span className="shrink-0">{item.icon}</span>
-            <span className="hidden xl:block text-sm">{item.label}</span>
-          </button>
-        ))}
+        <nav className="w-full space-y-1.5">
+          {navItems.map((item: any) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`group flex items-center justify-center xl:justify-start gap-3.5 w-full py-3 px-3 xl:px-4 rounded-xl transition-all cursor-pointer relative overflow-hidden ${
+                activeTab === item.id
+                  ? 'bg-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] border border-white/5'
+                  : 'hover:bg-white/5 border border-transparent'
+              }`}
+              title={item.label}
+            >
+              {activeTab === item.id && (
+                <div className="absolute inset-0 bg-gradient-to-r from-[#a78bfa]/20 to-transparent opacity-50" />
+              )}
+              {activeTab === item.id && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#a78bfa] rounded-r-full shadow-[0_0_10px_rgba(167,139,250,0.8)]" />
+              )}
+              <span className={`shrink-0 relative z-10 transition-colors ${activeTab === item.id ? 'text-[#a78bfa]' : 'text-slate-400 group-hover:text-slate-200'}`}>
+                {item.icon}
+              </span>
+              <span className={`hidden xl:block text-sm font-semibold relative z-10 transition-colors ${activeTab === item.id ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'}`}>
+                {item.label}
+              </span>
+            </button>
+          ))}
+        </nav>
 
         {/* Spacer */}
         <div className="flex-1" />
 
-        {/* Profile link */}
-        <div className="w-full px-1 xl:px-3">
+        {/* Profile widget */}
+        <div className="w-full bg-[#131c31]/50 border border-slate-800/60 rounded-2xl p-2 xl:p-3 space-y-2 mt-4">
           <button
             onClick={handleCopyLink}
-            className="flex items-center justify-center xl:justify-start gap-3 w-full py-2.5 px-3 rounded-xl text-zinc-400 hover:text-zinc-200 hover:bg-white/5 transition-all cursor-pointer"
+            className="group flex items-center justify-center xl:justify-start gap-3 w-full p-2 rounded-xl hover:bg-white/5 transition-all cursor-pointer"
             title="Copiar link do perfil"
           >
-            <User className="w-5 h-5 shrink-0" />
-            <span className="hidden xl:block text-sm truncate">@{userProfile.username}</span>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#a78bfa] to-indigo-500 p-[1.5px] shrink-0">
+              <div className="w-full h-full bg-[#0f172a] rounded-full overflow-hidden flex items-center justify-center">
+                {userProfile.profilePicUrl ? (
+                  <img src={userProfile.profilePicUrl} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-4 h-4 text-slate-300" />
+                )}
+              </div>
+            </div>
+            <div className="hidden xl:block min-w-0 flex-1 text-left">
+              <p className="text-xs font-bold text-white truncate">{userProfile.displayName || userProfile.username}</p>
+              <p className="text-[10px] text-slate-400 truncate group-hover:text-[#a78bfa] transition-colors">@{userProfile.username}</p>
+            </div>
           </button>
-          <a
-            href={`?u=${userProfile.username}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden xl:flex items-center justify-center gap-1.5 mt-1 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 transition-all"
-            title="Abrir minha página pública em nova aba"
-          >
-            <ExternalLink className="w-3 h-3" />
-            <span className="text-[10px] font-bold">Visitar</span>
-          </a>
+          
+          <div className="hidden xl:flex items-center gap-1.5 pt-1">
+            <a
+              href={`?u=${userProfile.username}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[#a78bfa]/10 hover:bg-[#a78bfa]/20 text-[#a78bfa] border border-[#a78bfa]/20 transition-all group"
+            >
+              <ExternalLink className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+              <span className="text-[10px] font-bold">Ver Perfil</span>
+            </a>
+            <button
+              onClick={handleLogout}
+              className="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all cursor-pointer"
+              title="Sair"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+          
+          {/* Mobile bottom row fallback inside sidebar */}
+          <div className="xl:hidden flex items-center justify-center pt-2 border-t border-slate-800/60">
+            <button onClick={handleLogout} className="p-2 rounded-lg text-slate-400 hover:text-rose-400 transition-colors">
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
-
-        {/* Logout */}
-        <button
-          onClick={handleLogout}
-          className="flex items-center justify-center xl:justify-start gap-3 w-full py-2.5 px-3 rounded-xl text-zinc-400 hover:text-rose-400 hover:bg-rose-500/5 transition-all cursor-pointer mt-1"
-          title="Sair"
-        >
-          <LogOut className="w-5 h-5 shrink-0" />
-          <span className="hidden xl:block text-sm">Sair</span>
-        </button>
       </aside>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0a1128]/95 backdrop-blur-md border-t border-slate-800/60 flex items-center justify-around py-2 px-1">
-        {navItems.slice(0, 5).map((item: any) => (
-          <button
-            key={item.id}
-            onClick={() => setActiveTab(item.id)}
-            className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg transition-all cursor-pointer ${
-              activeTab === item.id ? 'text-[#a78bfa]' : 'text-zinc-500'
-            }`}
-          >
-            <span className="w-5 h-5">{item.icon}</span>
-            <span className="text-[8px] font-semibold uppercase tracking-wide">{item.label}</span>
-          </button>
-        ))}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0f172a]/95 backdrop-blur-xl border-t border-slate-800/60 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+        <div className="flex items-center justify-around p-2">
+          {navItems.slice(0, 5).map((item: any) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className="relative flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all cursor-pointer group"
+            >
+              {activeTab === item.id && (
+                <div className="absolute inset-0 bg-[#a78bfa]/10 rounded-xl" />
+              )}
+              <span className={`relative z-10 transition-transform duration-200 ${activeTab === item.id ? 'text-[#a78bfa] -translate-y-0.5 scale-110' : 'text-slate-500 group-hover:text-slate-300'}`}>
+                {item.icon}
+              </span>
+              <span className={`relative z-10 text-[9px] font-bold tracking-wide transition-colors ${activeTab === item.id ? 'text-[#a78bfa]' : 'text-transparent hidden'}`}>
+                {activeTab === item.id && item.label}
+              </span>
+            </button>
+          ))}
+        </div>
       </nav>
 
       {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-[#0a1128]/95 backdrop-blur-md border-b border-slate-800/40 flex items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-[#a78bfa] flex items-center justify-center text-white">
-            <Link2 className="w-4 h-4 rotate-45" />
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-[#0f172a]/90 backdrop-blur-xl border-b border-slate-800/40 flex items-center justify-between px-5 py-3 shadow-md">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#a78bfa] to-indigo-600 flex items-center justify-center text-white shadow-sm">
+            <Link2 className="w-4 h-4 rotate-45 stroke-[2.5]" />
           </div>
-          <span className="text-sm font-extrabold text-white">LinkFlow</span>
+          <span className="text-base font-black text-white tracking-tight">LinkFlow</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <a
-            href={`?u=${userProfile.username}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[10px] text-emerald-400 hover:text-emerald-300 px-2 py-1 rounded-lg border border-emerald-500/20 hover:border-emerald-500/40 transition-all cursor-pointer flex items-center gap-1"
-            title="Abrir minha página pública em nova aba"
-          >
-            <ExternalLink className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Visitar</span>
-          </a>
-          <button onClick={handleCopyLink} className="text-[10px] text-zinc-400 hover:text-white px-2 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer">
-            {copiedNotification ? 'Copiado!' : 'Copiar'}
+        <div className="flex items-center gap-2">
+          <button onClick={handleCopyLink} className="text-[11px] font-bold text-slate-300 hover:text-white px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/50 hover:bg-slate-700 transition-all cursor-pointer flex items-center gap-1.5">
+            {copiedNotification ? 'Copiado!' : <><Copy className="w-3.5 h-3.5" /> Copiar</>}
           </button>
-          <button onClick={handleLogout} className="text-[10px] text-zinc-500 hover:text-rose-400 p-1.5 rounded-lg transition-all cursor-pointer" title="Sair">
+          <button onClick={handleLogout} className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 bg-slate-800/30 hover:bg-rose-500/10 transition-all cursor-pointer" title="Sair">
             <LogOut className="w-4 h-4" />
           </button>
         </div>
