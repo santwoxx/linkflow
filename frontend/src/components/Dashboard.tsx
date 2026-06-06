@@ -838,7 +838,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                     <div className="flex items-center gap-2 min-w-0">
                       <ExternalLink className="w-4 h-4 text-[#a78bfa] shrink-0" />
                       <h3 className="text-xs font-semibold text-slate-300 whitespace-nowrap">Sua página pública</h3>
-                      <span className="text-[10px] text-zinc-500 font-mono truncate bg-black/40 border border-slate-800 px-2 py-1 rounded-lg">{publicProfileUrl}</span>
+                      <span className="text-[9px] text-zinc-500 font-mono truncate bg-black/40 border border-slate-800 px-2 py-1 rounded-lg max-w-[120px] sm:max-w-[200px]">{publicProfileUrl}</span>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <button
