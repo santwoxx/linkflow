@@ -312,7 +312,7 @@ export default function AdminPanel() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         <div className="p-4 bg-black/50 border border-white/5 rounded-xl">
           <div className="flex items-center gap-2 mb-2">
             <Users className="w-4 h-4 text-[#a78bfa]" />

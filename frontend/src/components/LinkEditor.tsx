@@ -601,7 +601,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                 <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
                                   <Square className="w-3 h-3 text-[#a78bfa]" /> Estilo Visual
                                 </label>
-                                <div className="grid grid-cols-4 gap-1.5">
+                                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1.5">
                                   {([
                                     { v: '', l: 'Padrão' },
                                     { v: 'flat', l: 'Flat' },
@@ -693,7 +693,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                               {/* Border radius */}
                               <div>
                                 <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">Arredondamento</label>
-                                <div className="grid grid-cols-5 gap-1.5">
+                                <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
                                   {([
                                     { v: '', l: 'Padrão' },
                                     { v: 'none', l: 'Quadrado' },
@@ -716,7 +716,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                               {/* Size */}
                               <div>
                                 <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">Tamanho</label>
-                                <div className="grid grid-cols-4 gap-1.5">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                                   {([
                                     { v: '', l: 'Padrão' },
                                     { v: 'small', l: 'P' },
@@ -740,7 +740,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                 <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
                                   <Type className="w-3 h-3 text-rose-400" /> Fonte do Botão
                                 </label>
-                                <div className="grid grid-cols-4 gap-1.5">
+                                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-1.5">
                                   {([
                                     { v: '', l: 'Padrão' },
                                     { v: 'sans', l: 'Sans' },
@@ -767,7 +767,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                   <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">Alinhamento do Texto</label>
-                                  <div className="grid grid-cols-3 gap-1.5">
+                                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                                     {([
                                       { v: '', l: 'Padrão', i: <AlignCenter className="w-3 h-3" /> },
                                       { v: 'left', l: 'Esq', i: <AlignLeft className="w-3 h-3" /> },
@@ -786,7 +786,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                 </div>
                                 <div>
                                   <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">Espaçamento Letras</label>
-                                  <div className="grid grid-cols-4 gap-1.5">
+                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                                     {([
                                       { v: '', l: 'Padrão' },
                                       { v: 'tight', l: 'Justo' },
@@ -809,7 +809,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                               {/* Icon position */}
                               <div>
                                 <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">Posição do Ícone (Emoji)</label>
-                                <div className="grid grid-cols-4 gap-1.5">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                                   {([
                                     { v: '', l: 'Padrão' },
                                     { v: 'left', l: '← Esq' },

@@ -819,8 +819,8 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
       </div>
 
       {/* MAIN CONTENT */}
-      <main className={`flex-1 flex pt-0 md:pt-0 pb-16 md:pb-0 ${activeTab === 'design' || activeTab === 'links' ? '' : 'overflow-y-auto'}`}>
-        <div id="controls-panel-container" className={`flex-1 ${activeTab === 'design' || activeTab === 'links' ? 'flex' : 'overflow-y-auto'} ${activeTab === 'feed' ? 'max-w-2xl mx-auto px-4 py-4 md:py-6' : activeTab === 'design' || activeTab === 'links' ? '' : 'p-4 sm:p-5 md:p-6 space-y-6 md:max-w-3xl lg:max-w-4xl mx-auto w-full'}`}>
+      <main className={`flex-1 flex pt-16 md:pt-0 pb-24 md:pb-0 ${activeTab === 'design' || activeTab === 'links' ? '' : 'overflow-y-auto'}`}>
+        <div id="controls-panel-container" className={`flex-1 ${activeTab === 'design' || activeTab === 'links' ? 'flex flex-col lg:flex-row' : 'overflow-y-auto'} ${activeTab === 'feed' ? 'max-w-2xl mx-auto px-4 py-4 md:py-6' : activeTab === 'design' || activeTab === 'links' ? '' : 'p-4 sm:p-5 md:p-6 space-y-6 md:max-w-3xl lg:max-w-4xl mx-auto w-full'}`}>
 
           {/* TAB: SOCIAL COMMUNITY FEED (default) */}
           {activeTab === 'feed' && (
@@ -976,8 +976,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                       </h3>
                       <span className="text-[9px] text-zinc-500 font-mono tracking-wider uppercase border border-white/5 bg-white/5 px-2.5 py-1 rounded-md">Selecione</span>
                     </div>
-                    
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       {LAYOUT_PRESETS.map((p) => {
                         const isActive = activeLayout === p.id;
                         return (

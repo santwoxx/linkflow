@@ -617,7 +617,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                   return (
                     <div key={link.id} className="w-full max-w-md space-y-3 relative">
                       <h3 className="text-sm font-bold text-center uppercase tracking-widest">{link.title}</h3>
-                      <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-6 px-6 w-[calc(100%+3rem)] scroll-px-6">
+                      <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 w-[calc(100%+2rem)] sm:-mx-6 sm:px-6 sm:w-[calc(100%+3rem)] scroll-px-4 sm:scroll-px-6">
                         {products.map((prod: any, idx: number) => (
                           <a
                             key={idx}
@@ -733,7 +733,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                   return (
                     <div key={link.id} className="w-full max-w-md space-y-3 relative">
                       <h3 className="text-sm font-bold text-center uppercase tracking-widest flex items-center justify-center gap-1.5"><Sparkles className="w-4 h-4 text-amber-400"/> {link.title}</h3>
-                      <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-6 px-6 w-[calc(100%+3rem)] scroll-px-6">
+                      <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 w-[calc(100%+2rem)] sm:-mx-6 sm:px-6 sm:w-[calc(100%+3rem)] scroll-px-4 sm:scroll-px-6">
                         {tests.map((t: any, idx: number) => (
                           <div key={idx} className="min-w-[260px] w-[260px] shrink-0 snap-center bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-2xl flex flex-col items-center text-center gap-3">
                             <div className="flex gap-1">
