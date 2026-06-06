@@ -207,11 +207,6 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
     const q = query(collection(db, 'users', userProfile.uid, 'links'), orderBy('order', 'asc'));
 
     const unsubscribe = onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
-      // Skip snapshots that still reflect a pending local write — we only want
-      // the server-confirmed state. This prevents the race where an intermediate
-      // snapshot (fromCache=false, hasPendingWrites=true) carries stale data
-      // and overwrites the optimistic update in `handleUpdateLink`.
-      if (snapshot.metadata.hasPendingWrites) return;
       const items: LinkItem[] = [];
       snapshot.forEach((d) => {
         items.push(d.data() as LinkItem);
@@ -392,27 +387,17 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
     const merged = { ...updates, updatedAt: new Date() };
 
     if (userProfile.uid === 'demo-user-123') {
-      const previousLinks = links;
       const updated = links.map(l => l.id === linkId ? { ...l, ...merged } : l);
       setLinks(updated);
       try {
         localStorage.setItem('demo_links', JSON.stringify(updated));
         window.dispatchEvent(new Event('linkflow_demo_updated'));
       } catch (err) {
-        setLinks(previousLinks);
         throw err;
       }
       return;
     }
 
-    // Snapshot for revert on error
-    const previousLinks = links;
-
-    // Optimistic local update so the preview reflects changes instantly,
-    // before the Firestore roundtrip completes (onSnapshot will reconcile).
-    setLinks(prev => prev.map(l => l.id === linkId ? { ...l, ...merged } : l));
-
-    const path = `users/${userProfile.uid}/links/${linkId}`;
     try {
       const docRef = doc(db, 'users', userProfile.uid, 'links', linkId);
       await updateDoc(docRef, merged);
@@ -433,8 +418,6 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
         }
       } catch {}
     } catch (err) {
-      // Revert optimistic update so the UI matches persisted state
-      setLinks(previousLinks);
       // Surface a friendly error to the caller (LinkEditor will show a banner)
       throw err;
     }
