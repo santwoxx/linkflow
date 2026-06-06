@@ -4,13 +4,9 @@ import {
   collection,
   query,
   where,
-  orderBy,
   getDocs,
   limit,
-  startAfter,
-  onSnapshot,
-  type DocumentData,
-  type QueryDocumentSnapshot,
+  onSnapshot
 } from 'firebase/firestore';
 import { ProfessionalProfile, PRO_CATEGORIES, ProCategory } from '../types';
 import {
@@ -133,18 +129,11 @@ export default function ServicesDiscovery({ onViewProfile }: ServicesDiscoveryPr
   // Stats specific logic to avoid constant recalculations from DB
   const [cachedCities, setCachedCities] = useState<string[]>([]);
   
-  const lastDocRef = useRef<QueryDocumentSnapshot<DocumentData> | null>(null);
-  const cancelledRef = useRef(false);
-
   // Debounced search
   useEffect(() => {
     const t = setTimeout(() => setSearchQuery(searchInput.trim().toLowerCase()), SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(t);
   }, [searchInput]);
-
-  useEffect(() => {
-    lastDocRef.current = null;
-  }, [sort, selectedCategory, selectedCity]);
 
   const tryCache = useCallback((): ProfessionalProfile[] | null => {
     try {
@@ -182,13 +171,10 @@ export default function ServicesDiscovery({ onViewProfile }: ServicesDiscoveryPr
 
   // Main Query
   useEffect(() => {
-    cancelledRef.current = false;
     setProfessionals([]);
-    setHasMore(false);
     setError(null);
     setIsOffline(false);
     setIsLoading(true);
-    lastDocRef.current = null;
 
     const cached = tryCache();
     if (cached && cached.length) {
@@ -196,30 +182,19 @@ export default function ServicesDiscovery({ onViewProfile }: ServicesDiscoveryPr
       setIsLoading(false);
     }
 
-    const sortOpt = SORT_OPTIONS[sort];
     const ref = collection(db, 'professional_profiles');
     
-    // Build query with filters
-    const constraints: any[] = [where('verified', '==', true)];
-    if (selectedCategory) constraints.push(where('category', '==', selectedCategory));
-    if (selectedCity) constraints.push(where('city', '==', selectedCity));
-    
-    constraints.push(orderBy(sortOpt.field, sortOpt.dir));
-    constraints.push(limit(PAGE_SIZE));
-
-    const q = query(ref, ...constraints);
+    // Fetch all verified without ordering to prevent Firebase index errors
+    const q = query(ref, where('verified', '==', true));
 
     const unsub = onSnapshot(
       q,
       { includeMetadataChanges: true },
       (snap) => {
-        if (cancelledRef.current) return;
         if (snap.metadata.fromCache && snap.empty) return;
         
         const items = snap.docs.map((d) => d.data() as ProfessionalProfile);
         setProfessionals(items);
-        lastDocRef.current = snap.docs[snap.docs.length - 1] ?? null;
-        setHasMore(snap.docs.length === PAGE_SIZE);
         setIsLoading(false);
         setIsOffline(false);
         writeCache(items);
@@ -231,7 +206,6 @@ export default function ServicesDiscovery({ onViewProfile }: ServicesDiscoveryPr
         });
       },
       (err) => {
-        if (cancelledRef.current) return;
         if (isOfflineError(err)) {
           setIsOffline(true);
           if (!cached) setError('Você está offline. Conecte-se à internet para buscar profissionais.');
@@ -240,67 +214,57 @@ export default function ServicesDiscovery({ onViewProfile }: ServicesDiscoveryPr
         }
         
         console.error('Firestore Error:', err);
-        // Clean error message instead of missing index raw string
         setError('Estamos atualizando nossa vitrine de profissionais. Tente novamente em alguns instantes.');
         setIsLoading(false);
       },
     );
 
-    return () => {
-      cancelledRef.current = true;
-      unsub();
-    };
-  }, [sort, selectedCategory, selectedCity, tryCache, writeCache]);
+    return () => unsub();
+  }, [tryCache, writeCache]);
 
-  const loadMore = useCallback(async () => {
-    if (!lastDocRef.current || isLoadingMore || isOffline) return;
-    setIsLoadingMore(true);
-    try {
-      const sortOpt = SORT_OPTIONS[sort];
-      const ref = collection(db, 'professional_profiles');
-      
-      const constraints: any[] = [where('verified', '==', true)];
-      if (selectedCategory) constraints.push(where('category', '==', selectedCategory));
-      if (selectedCity) constraints.push(where('city', '==', selectedCity));
-      
-      constraints.push(orderBy(sortOpt.field, sortOpt.dir));
-      constraints.push(startAfter(lastDocRef.current));
-      constraints.push(limit(PAGE_SIZE));
+  // loadMore logic removed since we are fetching all verified at once
 
-      const q = query(ref, ...constraints);
-      const snap = await getDocs(q);
-      
-      if (cancelledRef.current) return;
-      const items = snap.docs.map((d) => d.data() as ProfessionalProfile);
-      setProfessionals((prev) => {
-        const next = [...prev, ...items];
-        writeCache(next);
-        return next;
-      });
-      lastDocRef.current = snap.docs[snap.docs.length - 1] ?? null;
-      setHasMore(snap.docs.length === PAGE_SIZE);
-    } catch (err) {
-      if (isOfflineError(err)) {
-        setIsOffline(true);
-        return;
-      }
-      console.error('Erro ao carregar mais profissionais:', err);
-      // Can optionally set a small toast here instead of page error
-    } finally {
-      setIsLoadingMore(false);
-    }
-  }, [isLoadingMore, isOffline, sort, selectedCategory, selectedCity, writeCache]);
-
-  // Client-side text search filter only
+  // Client-side text search and filtering
   const filtered = useMemo(() => {
-    return professionals.filter((p) => {
-      if (!searchQuery) return true;
-      return p.displayName.toLowerCase().includes(searchQuery)
+    let result = professionals;
+
+    if (selectedCategory) {
+      result = result.filter((p) => p.category === selectedCategory);
+    }
+
+    if (selectedCity) {
+      result = result.filter((p) => p.city === selectedCity);
+    }
+
+    if (searchQuery) {
+      result = result.filter((p) => 
+        p.displayName.toLowerCase().includes(searchQuery)
         || p.profession.toLowerCase().includes(searchQuery)
         || (p.username || '').toLowerCase().includes(searchQuery)
-        || (p.skills || []).some(s => s.toLowerCase().includes(searchQuery));
+        || (p.skills || []).some(s => s.toLowerCase().includes(searchQuery))
+      );
+    }
+
+    // Sort locally
+    result.sort((a, b) => {
+      if (sort === 'recent') {
+        const dA = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : new Date(a.createdAt as any).getTime() || 0;
+        const dB = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : new Date(b.createdAt as any).getTime() || 0;
+        return dB - dA;
+      }
+      if (sort === 'name') {
+        return (a.displayName || '').localeCompare(b.displayName || '');
+      }
+      if (sort === 'rating') {
+        const rA = a.rating || 0;
+        const rB = b.rating || 0;
+        return rB - rA;
+      }
+      return 0;
     });
-  }, [professionals, searchQuery]);
+
+    return result;
+  }, [professionals, searchQuery, selectedCategory, selectedCity, sort]);
 
   const clearFilters = () => {
     setSearchInput('');
@@ -616,23 +580,7 @@ export default function ServicesDiscovery({ onViewProfile }: ServicesDiscoveryPr
               </div>
             </section>
 
-            {/* Load More */}
-            {hasMore && !hasFilters && (
-              <div className="flex justify-center mt-16 pb-12">
-                <button
-                  onClick={loadMore}
-                  disabled={isLoadingMore || isOffline}
-                  className="group relative px-10 py-5 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed border border-white/10 text-white text-base font-bold rounded-2xl transition-all flex items-center justify-center gap-3 overflow-hidden cursor-pointer shadow-lg hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:-translate-y-1"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
-                  {isLoadingMore ? (
-                    <><Loader2 className="w-5 h-5 animate-spin" /> Carregando...</>
-                  ) : (
-                    <>Carregar mais resultados</>
-                  )}
-                </button>
-              </div>
-            )}
+            {/* Load More Removed - Infinite Scroll Not Needed with Local Filters */}
 
             {!hasMore && professionals.length > 0 && !hasFilters && (
               <div className="flex items-center justify-center mt-16 pb-12 opacity-50">
