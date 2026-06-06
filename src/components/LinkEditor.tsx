@@ -253,7 +253,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
         imageUrl: imageUrlVal || '',
         customColor: editCustomColor.trim() || '',
         customTextColor: editCustomTextColor.trim() || '',
-        customGradient: editCustomGradient.trim() || '',
+        customGradient: editCustomGradient.trim() || (editUseGradient ? 'linear-gradient(135deg, #1e3a8a, #7c3aed)' : ''),
         useGradient: editUseGradient,
         customStyle: editCustomStyle as any,
         customRadius: editCustomRadius as any,
@@ -271,12 +271,19 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
       // [diagnóstico] ajuda a confirmar no DevTools que TODOS os campos
       // customizados estão sendo enviados antes do onUpdate().
       console.log('[LinkEditor] saving link', linkId, updatePayload);
-      await onUpdate(linkId, updatePayload);
+      
+      // OTIMIZAÇÃO: Como o Dashboard já faz um update otimista no estado local,
+      // podemos fechar o editor imediatamente sem esperar o roundtrip do servidor.
       if (onPreviewChange) onPreviewChange(linkId, null);
       setSaveError(null);
       setEditingLinkId(null);
+
+      onUpdate(linkId, updatePayload).catch((err: any) => {
+        console.error('[LinkEditor] background save failed:', err);
+        alert(`Não foi possível salvar as alterações do botão:\n${parseSaveError(err)}`);
+      });
     } catch (err: any) {
-      console.error('[LinkEditor] save failed:', err);
+      console.error('[LinkEditor] prepare save failed:', err);
       setSaveError(parseSaveError(err));
     } finally {
       setIsSavingEdit(false);

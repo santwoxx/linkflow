@@ -21,8 +21,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "verified", "order": "ASCENDING" },
-        { "fieldPath": "rating", "order": "DESCENDING" },
-        { "fieldPath": "ratingCount", "order": "DESCENDING" }
+        { "fieldPath": "rating", "order": "DESCENDING" }
       ]
     }
   ],

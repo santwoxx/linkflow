@@ -954,265 +954,286 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
               {/* LEFT COLUMN — scrollable controls */}
               <div className="flex-1 min-w-0 p-4 sm:p-5 md:p-6 space-y-6">
 
-              <div className="bg-[#0f172a] p-4 rounded-2xl border border-slate-800/50 shadow-lg">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xs font-bold text-slate-300 flex items-center gap-2">
-                    <Layout className="w-3.5 h-3.5 text-[#a78bfa]" />
-                    Layout do Perfil
-                  </h3>
-                  <span className="text-[10px] text-zinc-500">Clique para aplicar</span>
-                </div>
-                <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
-                  {LAYOUT_PRESETS.map((p) => {
-                    const isActive = activeLayout === p.id;
-                    return (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => handleLayoutChange(p.layout)}
-                        className={`flex-shrink-0 w-28 p-3 rounded-xl border-2 transition-all cursor-pointer text-left ${
-                          isActive ? 'border-[#a78bfa] bg-[#a78bfa]/10 shadow-[0_0_12px_rgba(167,139,250,0.3)]' : 'border-slate-800 hover:border-slate-600 bg-black/20'
-                        }`}
-                      >
-                        <div className={`text-lg mb-1 ${isActive ? 'text-[#a78bfa]' : 'text-zinc-500'}`}>{p.icon}</div>
-                        <div className={`text-[11px] font-bold ${isActive ? 'text-[#a78bfa]' : 'text-zinc-300'}`}>{p.name}</div>
-                        <div className="text-[8px] text-zinc-500 mt-0.5">{p.desc}</div>
-                      </button>
-                    );
-                  })}
+              <div className="relative overflow-hidden bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-3xl p-5 sm:p-7 shadow-2xl group">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#a78bfa]/5 via-transparent to-indigo-900/5 pointer-events-none" />
+                <div className="absolute -right-20 -top-20 w-40 h-40 bg-indigo-500/10 blur-[60px] rounded-full pointer-events-none group-hover:bg-indigo-500/20 transition-colors duration-500" />
+                
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 flex items-center gap-2">
+                      <Layout className="w-4 h-4 text-[#a78bfa]" />
+                      Layout do Perfil
+                    </h3>
+                    <span className="text-[10px] text-zinc-500 bg-black/20 px-2 py-1 rounded-md border border-white/5">Clique para aplicar</span>
+                  </div>
+                  <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                    {LAYOUT_PRESETS.map((p) => {
+                      const isActive = activeLayout === p.id;
+                      return (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => handleLayoutChange(p.layout)}
+                          className={`flex-shrink-0 w-32 p-4 rounded-2xl border transition-all cursor-pointer text-left relative overflow-hidden ${
+                            isActive ? 'border-[#a78bfa] bg-[#a78bfa]/10 shadow-[0_0_20px_rgba(167,139,250,0.2)]' : 'border-white/10 hover:border-white/20 bg-black/20'
+                          }`}
+                        >
+                          {isActive && <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(167,139,250,0.15)_0%,transparent_50%)] pointer-events-none" />}
+                          <div className={`relative text-2xl mb-2 ${isActive ? 'text-[#a78bfa]' : 'text-slate-500'}`}>{p.icon}</div>
+                          <div className={`relative text-xs font-bold ${isActive ? 'text-white' : 'text-slate-300'}`}>{p.name}</div>
+                          <div className="relative text-[9px] text-slate-500 mt-1 leading-relaxed">{p.desc}</div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-6">
                 {/* Editor Controls */}
                 <div className="space-y-6 min-w-0">
-                  <form id="profile-editor-form" onSubmit={handleSaveProfile} className="bg-[#0f172a] p-5 rounded-2xl border border-slate-800/50 shadow-lg">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-5">
-                      <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2 font-sans">
-                        <User className="w-4 h-4 text-[#a78bfa]" />
+                  <form id="profile-editor-form" onSubmit={handleSaveProfile} className="relative overflow-hidden bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-3xl p-5 sm:p-7 shadow-2xl">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-24 bg-[#a78bfa]/5 blur-[60px] pointer-events-none" />
+                    
+                    <div className="relative z-10 flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+                      <h3 className="text-base font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 flex items-center gap-2">
+                        <User className="w-5 h-5 text-[#a78bfa]" />
                         Editor Visual
                       </h3>
-                      <span className="text-[11px] font-bold text-[#a78bfa] bg-[#a78bfa]/10 px-2 py-0.5 rounded-full uppercase tracking-wider font-mono">Canva Editor</span>
+                      <span className="text-[10px] font-bold text-[#a78bfa] bg-gradient-to-r from-[#a78bfa]/10 to-indigo-500/10 border border-[#a78bfa]/20 px-3 py-1 rounded-full uppercase tracking-wider font-mono shadow-inner">Canva Editor</span>
                     </div>
-                    <div className="flex flex-col gap-6">
-                      <div className="flex-1 space-y-5 min-w-0">
-                    <div className="bg-black/30 rounded-xl p-4 border border-slate-900 space-y-3">
-                      <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <span className="w-3 h-3 rounded-full bg-gradient-to-br from-[#a78bfa] to-purple-500" /> Cor de Fundo
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {['#0f172a','#1e1b4b','#1a1a2e','#0d1117','#111827','#1c1917','#171717','#1f2937','#020617','#000000','#2d1b69','#1a3a5c','#3b0764','#164e63','#0b3d0b','#3d0c0c','#7c2d12','#4c1d95','#0f0f0f','#262626'].map((c) => (
-                          <button key={c} type="button" onClick={() => handlePickColor(c)}
-                            className={`w-7 h-7 rounded-full border-2 transition-all cursor-pointer hover:scale-110 ${
-                              theme.backgroundColor === c ? 'border-[#a78bfa] scale-110 ring-2 ring-[#a78bfa]/30' : 'border-transparent hover:border-zinc-500'
-                            }`}
-                            style={{ backgroundColor: c }} title={c} />
-                        ))}
-                      </div>
-                    </div>
-                    <div className="bg-black/30 rounded-xl p-4 border border-slate-900 space-y-3">
-                      <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <Layout className="w-3 h-3 text-[#a78bfa]" /> Posição & Estrutura
-                      </h4>
-                      <div className="grid grid-cols-2 gap-3">
-                        {[{label:'Avatar',key:'avatarAlignment',opts:[{k:'left',l:'← Esq'},{k:'center',l:'Centro'},{k:'right',l:'Dir →'}]},{label:'Tamanho',key:'avatarSize',opts:[{k:'small',l:'P'},{k:'medium',l:'M'},{k:'large',l:'G'}]},{label:'Largura',key:'contentWidth',opts:[{k:'narrow',l:'Estreito'},{k:'medium',l:'Médio'},{k:'wide',l:'Largo'}]},{label:'Espaçamento',key:'elementSpacing',opts:[{k:'compact',l:'Compacto'},{k:'normal',l:'Normal'},{k:'spacious',l:'Espaçoso'}]}].map(g => (
-                          <div key={g.key}>
-                            <label className="text-[9px] text-zinc-500 block mb-1">{g.label}</label>
-                            <div className="flex gap-1">
-                              {g.opts.map((o:any) => (
-                                <button key={o.k} type="button" onClick={() => handleLayoutChange({[g.key]: o.k})}
-                                  className={`flex-1 py-1.5 rounded-lg text-[9px] font-bold border transition-all cursor-pointer ${
-                                    ((theme.layout as any)?.[g.key] || g.opts[1]?.k) === o.k
-                                      ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
-                                      : 'bg-black/40 border-slate-800 text-zinc-500 hover:border-slate-600'
-                                  }`}>{o.l}</button>
-                              ))}
+                    
+                    <div className="relative z-10 flex flex-col gap-6">
+                      <div className="flex-1 space-y-6 min-w-0">
+                        {/* Cor de fundo */}
+                        <div className="bg-black/20 rounded-2xl p-5 border border-white/5 space-y-4 shadow-inner">
+                          <h4 className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                            <span className="w-3.5 h-3.5 rounded-full bg-gradient-to-br from-[#a78bfa] to-indigo-500 shadow-sm" /> Cor de Fundo
+                          </h4>
+                          <div className="flex flex-wrap gap-2.5">
+                            {['#0f172a','#1e1b4b','#1a1a2e','#0d1117','#111827','#1c1917','#171717','#1f2937','#020617','#000000','#2d1b69','#1a3a5c','#3b0764','#164e63','#0b3d0b','#3d0c0c','#7c2d12','#4c1d95','#0f0f0f','#262626'].map((c) => (
+                              <button key={c} type="button" onClick={() => handlePickColor(c)}
+                                className={`w-8 h-8 rounded-full border-2 transition-all cursor-pointer hover:scale-110 shadow-sm ${
+                                  theme.backgroundColor === c ? 'border-[#a78bfa] scale-110 ring-4 ring-[#a78bfa]/20' : 'border-white/10 hover:border-white/30'
+                                }`}
+                                style={{ backgroundColor: c }} title={c} />
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Posicao e Estrutura */}
+                        <div className="bg-black/20 rounded-2xl p-5 border border-white/5 space-y-4 shadow-inner">
+                          <h4 className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                            <Layout className="w-4 h-4 text-[#a78bfa]" /> Posição & Estrutura
+                          </h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {[{label:'Avatar',key:'avatarAlignment',opts:[{k:'left',l:'← Esq'},{k:'center',l:'Centro'},{k:'right',l:'Dir →'}]},{label:'Tamanho',key:'avatarSize',opts:[{k:'small',l:'P'},{k:'medium',l:'M'},{k:'large',l:'G'}]},{label:'Largura',key:'contentWidth',opts:[{k:'narrow',l:'Estreito'},{k:'medium',l:'Médio'},{k:'wide',l:'Largo'}]},{label:'Espaçamento',key:'elementSpacing',opts:[{k:'compact',l:'Compacto'},{k:'normal',l:'Normal'},{k:'spacious',l:'Espaçoso'}]}].map(g => (
+                              <div key={g.key} className="space-y-1.5">
+                                <label className="text-[10px] text-slate-500 font-medium">{g.label}</label>
+                                <div className="flex gap-1 bg-black/40 p-1 rounded-xl border border-white/5">
+                                  {g.opts.map((o:any) => (
+                                    <button key={o.k} type="button" onClick={() => handleLayoutChange({[g.key]: o.k})}
+                                      className={`flex-1 py-2 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                                        ((theme.layout as any)?.[g.key] || g.opts[1]?.k) === o.k
+                                          ? 'bg-[#a78bfa] text-white shadow-md'
+                                          : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                                      }`}>{o.l}</button>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex items-center justify-between pt-2">
+                            <label className="text-[11px] font-medium text-slate-300">Mostrar Banner de Capa</label>
+                            <button type="button" onClick={() => handleLayoutChange({ showCover: !(theme.layout?.showCover ?? true) })}
+                              className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer ${(theme.layout?.showCover ?? true) ? 'bg-[#a78bfa]' : 'bg-slate-700'}`}>
+                              <span className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${(theme.layout?.showCover ?? true) ? 'left-6' : 'left-1'}`} />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Perfil */}
+                        <div className="bg-black/20 rounded-2xl p-5 border border-white/5 space-y-4 shadow-inner">
+                          <h4 className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                            <User className="w-4 h-4 text-[#a78bfa]" /> Informações do Perfil
+                          </h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-[10px] text-slate-400 block mb-1.5 font-medium">Nome de Exibição</label>
+                              <input type="text" placeholder="Seu nome ou marca" value={displayName} onChange={(e) => setDisplayName(e.target.value)}
+                                className="w-full bg-black/40 text-xs text-slate-200 py-3 px-4 rounded-xl border border-white/10 hover:border-white/20 focus:border-[#a78bfa]/60 focus:bg-black/60 focus:ring-4 focus:ring-[#a78bfa]/10 transition-all placeholder-slate-500" required />
+                            </div>
+                            <div>
+                              <label className="text-[10px] text-slate-400 block mb-1.5 font-medium">Link Personalizado</label>
+                              <div className="flex items-center gap-2 bg-black/40 border border-white/10 hover:border-white/20 rounded-xl px-4 focus-within:border-[#a78bfa]/60 focus-within:ring-4 focus-within:ring-[#a78bfa]/10 transition-all">
+                                <span className="text-xs text-slate-500 font-mono shrink-0">/?u=</span>
+                                <input type="text" placeholder="seu-nome" value={username} onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_-]/g, ''))}
+                                  className="w-full bg-transparent text-xs text-slate-200 py-3 focus:outline-none transition-all placeholder-slate-500 font-mono" required />
+                              </div>
+                            </div>
+                            <div className="sm:col-span-2">
+                              <label className="text-[10px] text-slate-400 block mb-1.5 font-medium">Biografia</label>
+                              <textarea rows={2} placeholder="Uma breve descrição" value={bio} onChange={(e) => setBio(e.target.value)}
+                                className="w-full bg-black/40 text-xs text-slate-200 py-3 px-4 rounded-xl border border-white/10 hover:border-white/20 focus:border-[#a78bfa]/60 focus:bg-black/60 focus:ring-4 focus:ring-[#a78bfa]/10 transition-all placeholder-slate-500 resize-none" />
                             </div>
                           </div>
-                        ))}
+                        </div>
+
+                        {/* Foto */}
+                        <div className="bg-black/20 rounded-2xl p-5 border border-white/5 space-y-4 shadow-inner">
+                          <h4 className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                            <ImageIcon className="w-4 h-4 text-emerald-400" /> Foto de Perfil
+                          </h4>
+                          <div className="flex flex-col sm:flex-row gap-3">
+                            <input type="text" placeholder="URL da foto" value={profilePicUrl} onChange={(e) => setProfilePicUrl(e.target.value)}
+                              className="flex-1 bg-black/40 text-[11px] text-slate-200 py-3 px-4 rounded-xl border border-white/10 hover:border-white/20 focus:border-[#a78bfa]/60 focus:bg-black/60 focus:ring-4 focus:ring-[#a78bfa]/10 transition-all placeholder-slate-500 font-mono" />
+                            <div className="flex gap-2">
+                              <input id="file-upload-avatar" type="file" accept="image/*" className="hidden"
+                                onChange={async (e) => { const file = e.target.files?.[0]; if (file) { try { setProfilePicUrl(await compressImage(file, 150, 150, 0.6)); } catch {} } e.target.value = ''; }} />
+                              <label htmlFor="file-upload-avatar" className="bg-gradient-to-r from-[#a78bfa]/10 to-indigo-500/10 hover:from-[#a78bfa]/20 hover:to-indigo-500/20 text-[#a78bfa] text-[11px] font-bold px-4 py-3 rounded-xl border border-[#a78bfa]/20 transition-all cursor-pointer flex-1 sm:flex-none flex items-center justify-center gap-1.5 shadow-sm">
+                                <ImageIcon className="w-3.5 h-3.5" /> Upload
+                              </label>
+                              {profilePicUrl && (
+                                <button type="button" onClick={() => setProfilePicUrl('')} className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold px-4 py-3 rounded-xl border border-rose-500/20 transition-all cursor-pointer flex-1 sm:flex-none">Limpar</button>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap gap-2.5 pt-1">
+                            {AVATAR_TEMPLATES.map((url, idx) => (
+                              <button key={idx} type="button" onClick={() => setProfilePicUrl(url)}
+                                className={`w-10 h-10 rounded-full overflow-hidden border-2 transition-all cursor-pointer hover:scale-105 shrink-0 ${
+                                  profilePicUrl === url ? 'border-[#a78bfa] scale-110 shadow-[0_0_12px_rgba(167,139,250,0.4)]' : 'border-white/10 hover:border-white/30'
+                                }`}>
+                                <img src={url} alt="" className="w-full h-full object-cover" />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Banner */}
+                        <div className="bg-black/20 rounded-2xl p-5 border border-white/5 space-y-4 shadow-inner">
+                          <h4 className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                            <ImageIcon className="w-4 h-4 text-[#a78bfa]" /> Banner de Capa
+                          </h4>
+                          <div className="flex flex-col sm:flex-row gap-3">
+                            <input type="text" placeholder="URL da imagem de capa" value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)}
+                              className="flex-1 bg-black/40 text-[11px] text-slate-200 py-3 px-4 rounded-xl border border-white/10 hover:border-white/20 focus:border-[#a78bfa]/60 focus:bg-black/60 focus:ring-4 focus:ring-[#a78bfa]/10 transition-all placeholder-slate-500 font-mono" />
+                            <div className="flex gap-2">
+                              <input id="file-upload-cover" type="file" accept="image/*" className="hidden"
+                                onChange={async (e) => { const file = e.target.files?.[0]; if (file) { try { setCoverUrl(await compressImage(file, 800, 320, 0.7)); } catch {} } e.target.value = ''; }} />
+                              <label htmlFor="file-upload-cover" className="bg-gradient-to-r from-[#a78bfa]/10 to-indigo-500/10 hover:from-[#a78bfa]/20 hover:to-indigo-500/20 text-[#a78bfa] text-[11px] font-bold px-4 py-3 rounded-xl border border-[#a78bfa]/20 transition-all cursor-pointer flex-1 sm:flex-none flex items-center justify-center gap-1.5 shadow-sm">
+                                <ImageIcon className="w-3.5 h-3.5" /> Upload
+                              </label>
+                              {coverUrl && (
+                                <button type="button" onClick={() => setCoverUrl('')} className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold px-4 py-3 rounded-xl border border-rose-500/20 transition-all cursor-pointer flex-1 sm:flex-none">Limpar</button>
+                              )}
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 pt-1">
+                            {COVER_TEMPLATES.map((url, idx) => (
+                              <button key={idx} type="button" onClick={() => setCoverUrl(url)}
+                                className={`h-12 rounded-xl overflow-hidden border-2 transition-all cursor-pointer hover:scale-105 shrink-0 ${
+                                  coverUrl === url ? 'border-[#a78bfa] shadow-[0_0_12px_rgba(167,139,250,0.3)]' : 'border-white/10 hover:border-white/30'
+                                }`}>
+                                <img src={url} alt="" className="w-full h-full object-cover" />
+                              </button>
+                            ))}
+                          </div>
+
+                          <div className="pt-4 border-t border-white/5 space-y-4">
+                            <div className="flex flex-col sm:flex-row gap-4">
+                              <div className="flex-1 space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-2.5 h-2.5 rounded-full bg-pink-400 shadow-[0_0_8px_rgba(244,114,182,0.6)]" />
+                                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Cor Sólida</span>
+                                </div>
+                                <div className="flex gap-2">
+                                  <input
+                                    type="color"
+                                    value={(() => {
+                                      const c = (coverColor || '').trim();
+                                      if (/^#[0-9a-fA-F]{6}$/.test(c)) return c;
+                                      return '#0a1128';
+                                    })()}
+                                    onChange={(e) => { setCoverColor(e.target.value); setCoverGradient(''); }}
+                                    className="w-11 h-11 rounded-xl border border-white/10 bg-transparent cursor-pointer shrink-0"
+                                    title="Cor sólida da capa"
+                                  />
+                                  <input
+                                    type="text"
+                                    placeholder="#0a1128"
+                                    value={coverColor}
+                                    onChange={(e) => { setCoverColor(e.target.value); if (e.target.value) setCoverGradient(''); }}
+                                    className="flex-1 bg-black/40 text-[11px] text-slate-200 py-3 px-3 rounded-xl border border-white/10 hover:border-white/20 focus:border-[#a78bfa]/60 focus:bg-black/60 focus:ring-4 focus:ring-[#a78bfa]/10 transition-all placeholder-slate-500 font-mono"
+                                  />
+                                </div>
+                              </div>
+                              <div className="flex-1 space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-2.5 h-2.5 rounded-full bg-[#a78bfa] shadow-[0_0_8px_rgba(167,139,250,0.6)]" />
+                                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Gradiente</span>
+                                </div>
+                                <div className="flex gap-2">
+                                  <input
+                                    type="text"
+                                    placeholder="linear-gradient(...)"
+                                    value={coverGradient}
+                                    onChange={(e) => { setCoverGradient(e.target.value); if (e.target.value) setCoverColor(''); }}
+                                    className="flex-1 bg-black/40 text-[11px] text-slate-200 py-3 px-3 rounded-xl border border-white/10 hover:border-white/20 focus:border-[#a78bfa]/60 focus:bg-black/60 focus:ring-4 focus:ring-[#a78bfa]/10 transition-all placeholder-slate-500 font-mono"
+                                  />
+                                  {(coverGradient || coverColor) && (
+                                    <button type="button" onClick={() => { setCoverGradient(''); setCoverColor(''); }} className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold px-3 py-3 rounded-xl border border-rose-500/20 transition-all cursor-pointer shrink-0">Limpar</button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="h-12 w-full rounded-xl border border-white/10 shadow-inner" style={{ background: coverGradient || coverColor || 'transparent' }} />
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                              <div className="space-y-2">
+                                <label className="text-[10px] text-slate-400 font-medium">Posição da imagem</label>
+                                <div className="flex gap-1 bg-black/40 p-1 rounded-xl border border-white/5">
+                                  {(['top','center','bottom'] as const).map((p) => (
+                                    <button key={p} type="button" onClick={() => setCoverPosition(p)}
+                                      className={`flex-1 py-2 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                                        coverPosition === p ? 'bg-[#a78bfa] text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                                      }`}>{p === 'top' ? 'Topo' : p === 'center' ? 'Centro' : 'Baixo'}</button>
+                                  ))}
+                                </div>
+                              </div>
+                              <div className="space-y-2">
+                                <label className="text-[10px] text-slate-400 font-medium">Overlay escuro: {coverOverlay}%</label>
+                                <input
+                                  type="range"
+                                  min="0"
+                                  max="80"
+                                  value={coverOverlay}
+                                  onChange={(e) => setCoverOverlay(Number(e.target.value))}
+                                  className="w-full h-2 bg-black/40 rounded-lg appearance-none cursor-pointer accent-[#a78bfa]"
+                                />
+                                <p className="text-[9px] text-slate-500">Aplica um tom escuro sobre a imagem para destacar textos.</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
                       </div>
-                      <div className="flex items-center gap-3 pt-1">
-                        <label className="text-[9px] text-zinc-500">Mostrar Banner de Capa</label>
-                        <button type="button" onClick={() => handleLayoutChange({ showCover: !(theme.layout?.showCover ?? true) })}
-                          className={`relative w-9 h-5 rounded-full transition-all cursor-pointer ${(theme.layout?.showCover ?? true) ? 'bg-[#a78bfa]' : 'bg-zinc-700'}`}>
-                          <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${(theme.layout?.showCover ?? true) ? 'left-4' : 'left-0.5'}`} />
+                      
+                      <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10">
+                        <span className="text-[10px] text-slate-500 italic">As alterações são salvas ao clicar no botão.</span>
+                        <button type="submit" disabled={isSavingProfile}
+                          className="w-full sm:w-auto relative group overflow-hidden flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-[#a78bfa] to-indigo-600 hover:from-[#9061f9] hover:to-indigo-500 disabled:opacity-60 text-white font-bold text-sm rounded-xl transition-all shadow-[0_0_20px_rgba(167,139,250,0.3)] cursor-pointer disabled:cursor-not-allowed">
+                          <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+                          <span className="relative flex items-center gap-2">
+                            {isSavingProfile ? <><RefreshCw className="w-4 h-4 animate-spin" /><span>Salvando...</span></> : 'Salvar Perfil'}
+                          </span>
                         </button>
                       </div>
                     </div>
-                    <div className="bg-black/30 rounded-xl p-4 border border-slate-900 space-y-3">
-                      <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <User className="w-3 h-3 text-[#a78bfa]" /> Informações do Perfil
-                      </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-[9px] text-zinc-500 block mb-1">Nome de Exibição</label>
-                          <input type="text" placeholder="Seu nome ou marca" value={displayName} onChange={(e) => setDisplayName(e.target.value)}
-                            className="w-full bg-black text-xs text-slate-200 py-2 px-3 rounded-lg border border-slate-800 focus:border-[#a78bfa] focus:outline-none transition-all placeholder-slate-700" required />
-                        </div>
-                        <div>
-                          <label className="text-[9px] text-zinc-500 block mb-1">Link Personalizado</label>
-                          <div className="flex items-center gap-1.5 bg-black border border-slate-800 rounded-lg px-3 focus-within:border-[#a78bfa] transition-all">
-                            <span className="text-[11px] text-zinc-600 font-mono shrink-0">/?u=</span>
-                            <input type="text" placeholder="seu-nome" value={username} onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_-]/g, ''))}
-                              className="w-full bg-transparent text-xs text-slate-200 py-2 focus:outline-none transition-all placeholder-slate-700 font-mono" required />
-                          </div>
-                        </div>
-                        <div className="sm:col-span-2">
-                          <label className="text-[9px] text-zinc-500 block mb-1">Biografia</label>
-                          <textarea rows={1} placeholder="Uma breve descrição" value={bio} onChange={(e) => setBio(e.target.value)}
-                            className="w-full bg-black text-xs text-slate-200 py-2 px-3 rounded-lg border border-slate-800 focus:border-[#a78bfa] focus:outline-none transition-all placeholder-slate-700 resize-none" />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-black/30 rounded-xl p-4 border border-slate-900 space-y-3">
-                      <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <ImageIcon className="w-3 h-3 text-emerald-400" /> Foto de Perfil
-                      </h4>
-                      <div className="flex gap-2">
-                        <input type="text" placeholder="URL da foto" value={profilePicUrl} onChange={(e) => setProfilePicUrl(e.target.value)}
-                          className="flex-1 bg-black text-[10px] text-slate-300 py-2 px-3 rounded-lg border border-slate-800 focus:border-[#a78bfa] focus:outline-none transition-all placeholder-slate-700 font-mono" />
-                        <input id="file-upload-avatar" type="file" accept="image/*" className="hidden"
-                          onChange={async (e) => { const file = e.target.files?.[0]; if (file) { try { setProfilePicUrl(await compressImage(file, 150, 150, 0.6)); } catch {} } e.target.value = ''; }} />
-                        <label htmlFor="file-upload-avatar" className="bg-[#a78bfa]/10 hover:bg-[#a78bfa]/20 text-[#a78bfa] text-[10px] font-bold px-2.5 py-2 rounded-lg border border-[#a78bfa]/20 transition-all cursor-pointer shrink-0 flex items-center gap-1">
-                          <ImageIcon className="w-3 h-3" /> Upload
-                        </label>
-                        {profilePicUrl && (
-                          <button type="button" onClick={() => setProfilePicUrl('')} className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[10px] font-bold px-2.5 py-2 rounded-lg border border-rose-500/20 transition-all cursor-pointer shrink-0">Limpar</button>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {AVATAR_TEMPLATES.map((url, idx) => (
-                          <button key={idx} type="button" onClick={() => setProfilePicUrl(url)}
-                            className={`w-8 h-8 rounded-full overflow-hidden border-2 transition-all cursor-pointer hover:scale-105 shrink-0 ${
-                              profilePicUrl === url ? 'border-[#a78bfa] scale-110 shadow-[0_0_6px_rgba(167,139,250,0.5)]' : 'border-slate-800 hover:border-slate-600'
-                            }`}>
-                            <img src={url} alt="" className="w-full h-full object-cover" />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="bg-black/30 rounded-xl p-4 border border-slate-900 space-y-3">
-                      <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <ImageIcon className="w-3 h-3 text-[#a78bfa]" /> Banner de Capa
-                      </h4>
-                      <div className="flex gap-2">
-                        <input type="text" placeholder="URL da imagem de capa" value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)}
-                          className="flex-1 bg-black text-[10px] text-slate-300 py-2 px-3 rounded-lg border border-slate-800 focus:border-[#a78bfa] focus:outline-none transition-all placeholder-slate-700 font-mono" />
-                        <input id="file-upload-cover" type="file" accept="image/*" className="hidden"
-                          onChange={async (e) => { const file = e.target.files?.[0]; if (file) { try { setCoverUrl(await compressImage(file, 800, 320, 0.7)); } catch {} } e.target.value = ''; }} />
-                        <label htmlFor="file-upload-cover" className="bg-[#a78bfa]/10 hover:bg-[#a78bfa]/20 text-[#a78bfa] text-[10px] font-bold px-2.5 py-2 rounded-lg border border-[#a78bfa]/20 transition-all cursor-pointer shrink-0 flex items-center gap-1">
-                          <ImageIcon className="w-3 h-3" /> Upload
-                        </label>
-                        {coverUrl && (
-                          <button type="button" onClick={() => setCoverUrl('')} className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[10px] font-bold px-2.5 py-2 rounded-lg border border-rose-500/20 transition-all cursor-pointer shrink-0">Remover</button>
-                        )}
-                      </div>
-                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
-                        {COVER_TEMPLATES.map((url, idx) => (
-                          <button key={idx} type="button" onClick={() => setCoverUrl(url)}
-                            className={`h-10 rounded-lg overflow-hidden border-2 transition-all cursor-pointer hover:scale-105 shrink-0 ${
-                              coverUrl === url ? 'border-[#a78bfa] shadow-[0_0_6px_rgba(167,139,250,0.4)]' : 'border-slate-800 hover:border-slate-600'
-                            }`}>
-                            <img src={url} alt="" className="w-full h-full object-cover" />
-                          </button>
-                        ))}
-                      </div>
-
-                      <div className="pt-2 border-t border-slate-800/60 space-y-3">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-pink-400" />
-                          <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Cor de fundo do banner (sem imagem)</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <input
-                            type="color"
-                            value={(() => {
-                              const c = (coverColor || '').trim();
-                              if (/^#[0-9a-fA-F]{6}$/.test(c)) return c;
-                              return '#0a1128';
-                            })()}
-                            onChange={(e) => { setCoverColor(e.target.value); setCoverGradient(''); }}
-                            className="w-9 h-9 rounded border border-slate-800 bg-transparent cursor-pointer shrink-0"
-                            title="Cor sólida da capa"
-                          />
-                          <input
-                            type="text"
-                            placeholder="#0a1128 ou rgba(0,0,0,0.5)"
-                            value={coverColor}
-                            onChange={(e) => { setCoverColor(e.target.value); if (e.target.value) setCoverGradient(''); }}
-                            className="flex-1 bg-black text-[10px] text-slate-300 py-2 px-3 rounded-lg border border-slate-800 focus:border-[#a78bfa] focus:outline-none transition-all placeholder-slate-700 font-mono"
-                          />
-                          {coverColor && (
-                            <button type="button" onClick={() => setCoverColor('')} className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[10px] font-bold px-2.5 py-2 rounded-lg border border-rose-500/20 transition-all cursor-pointer shrink-0">Limpar</button>
-                          )}
-                        </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {['#0a1128','#1e1b4b','#1a1a2e','#0d1117','#111827','#000000','#3b0764','#164e63','#0b3d0b','#3d0c0c','#7c2d12','#4c1d95','#7f1d1d','#831843','#ffffff','#f8fafc','#f0fdf4','#fef2f2','#fefce8','#f5f3ff','#ecfeff','#fff7ed','#fdf2f8','#0f172a','#020617','#262626','#0f0f0f','#1c1917','#171717','#1f2937','#0d9488','#f59e0b','#ec4899','#8b5cf6','#06b6d4','#10b981','#f43f5e','#3b82f6','#a855f7'].map((c) => (
-                            <button key={c} type="button" onClick={() => { setCoverColor(c); setCoverGradient(''); }}
-                              className={`w-6 h-6 rounded-full border-2 transition-all cursor-pointer hover:scale-110 ${
-                                coverColor === c ? 'border-[#a78bfa] scale-110 ring-2 ring-[#a78bfa]/30' : 'border-transparent hover:border-zinc-500'
-                              }`}
-                              style={{ backgroundColor: c }} title={c} />
-                          ))}
-                        </div>
-
-                        <div className="flex items-center gap-2 pt-1">
-                          <span className="w-2 h-2 rounded-full bg-purple-400" />
-                          <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Gradiente do banner</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            placeholder="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
-                            value={coverGradient}
-                            onChange={(e) => { setCoverGradient(e.target.value); if (e.target.value) setCoverColor(''); }}
-                            className="flex-1 bg-black text-[10px] text-slate-300 py-2 px-3 rounded-lg border border-slate-800 focus:border-[#a78bfa] focus:outline-none transition-all placeholder-slate-700 font-mono"
-                          />
-                          {coverGradient && (
-                            <button type="button" onClick={() => setCoverGradient('')} className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[10px] font-bold px-2.5 py-2 rounded-lg border border-rose-500/20 transition-all cursor-pointer shrink-0">Limpar</button>
-                          )}
-                        </div>
-                        <div className="h-8 w-full rounded-lg border border-slate-800 transition-all" style={{ background: coverGradient || coverColor || 'transparent' }} />
-
-                        <div className="pt-1 space-y-3">
-                          <div>
-                            <label className="text-[9px] text-zinc-500 block mb-1">Posição da imagem</label>
-                            <div className="grid grid-cols-3 gap-1.5">
-                              {(['top','center','bottom'] as const).map((p) => (
-                                <button key={p} type="button" onClick={() => setCoverPosition(p)}
-                                  className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all cursor-pointer ${
-                                    coverPosition === p ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]' : 'bg-black/40 border-slate-800 text-zinc-500 hover:border-slate-600'
-                                  }`}>{p === 'top' ? 'Topo' : p === 'center' ? 'Centro' : 'Baixo'}</button>
-                              ))}
-                            </div>
-                          </div>
-                          <div>
-                            <label className="text-[9px] text-zinc-500 block mb-1">Overlay escuro: {coverOverlay}%</label>
-                            <input
-                              type="range"
-                              min="0"
-                              max="80"
-                              value={coverOverlay}
-                              onChange={(e) => setCoverOverlay(Number(e.target.value))}
-                              className="w-full accent-[#a78bfa]"
-                            />
-                            <p className="text-[8px] text-zinc-600">Aplica um tom escuro sobre a imagem para destacar o conteúdo.</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="pt-1 flex items-center justify-end gap-3">
-                      <span className="text-[9px] text-zinc-600 italic">Todas as alterações são salvas ao clicar em Salvar</span>
-                      <button type="submit" disabled={isSavingProfile}
-                        className="px-5 py-3 bg-[#a78bfa] hover:bg-[#c4b5fd] disabled:bg-slate-800 disabled:text-slate-500 text-white font-bold text-xs uppercase rounded-xl flex items-center gap-2 transition-all cursor-pointer shadow-[0_0_15px_rgba(167,139,250,0.25)]">
-                        {isSavingProfile ? <><RefreshCw className="w-3.5 h-3.5 animate-spin" /><span>Salvando...</span></> : 'Salvar Perfil'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
                   </form>
 
-                  <div className="bg-[#0f172a] p-5 rounded-2xl border border-slate-800/50 shadow-lg">
+                  <div className="relative overflow-hidden bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-3xl p-5 sm:p-7 shadow-2xl">
                     <ThemeSelector currentTheme={theme} onChange={handleThemeChange} />
                   </div>
                 </div>
