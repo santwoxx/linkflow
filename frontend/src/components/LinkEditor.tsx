@@ -322,44 +322,54 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
   ] as const;
 
   return (
-    <div id="link-editor-container" className="space-y-6">
+    <div id="link-editor-container" className="space-y-8">
       {/* 1. Add Block Grid */}
-      <div className="bg-[#0f172a] p-5 rounded-2xl border border-slate-800/50 space-y-4 shadow-lg">
-        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 font-sans">
-          <Plus className="w-4 h-4 text-blue-500" />
-          Adicionar Bloco de Landing Page
-        </h3>
+      <div className="relative bg-[#0a0a0a] border border-white/5 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden group">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none group-hover:bg-indigo-500/20 transition-all duration-700" />
         
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          {BLOCKS_MENU.map((item) => (
-            <button
-              key={item.type}
-              onClick={() => handleAddBlock(item.type)}
-              disabled={isAdding}
-              className="flex flex-col items-center justify-center p-3 gap-2 bg-slate-900/50 border border-slate-800 rounded-xl hover:bg-slate-800 hover:border-slate-700 transition-all cursor-pointer group"
-            >
-              <div className="p-2 rounded-lg bg-slate-950 group-hover:scale-110 transition-transform">
-                {item.icon}
-              </div>
-              <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider">{item.label}</span>
-            </button>
-          ))}
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-[13px] font-bold text-white uppercase tracking-widest flex items-center gap-2">
+              <Plus className="w-4 h-4 text-[#a78bfa]" />
+              Adicionar Bloco
+            </h3>
+            <span className="text-[9px] text-zinc-500 font-mono tracking-wider uppercase border border-white/5 bg-white/5 px-2.5 py-1 rounded-md">Construtor</span>
+          </div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {BLOCKS_MENU.map((item) => (
+              <button
+                key={item.type}
+                onClick={() => handleAddBlock(item.type)}
+                disabled={isAdding}
+                className="relative flex flex-col p-4 sm:p-5 rounded-2xl border border-white/5 bg-[#111111] hover:border-[#a78bfa]/50 hover:bg-[#a78bfa]/5 hover:shadow-[0_0_30px_rgba(167,139,250,0.15)] transition-all cursor-pointer text-left overflow-hidden group/btn disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <div className="relative text-2xl mb-3 transition-transform group-hover/btn:scale-110">
+                  {item.icon}
+                </div>
+                <span className="relative text-xs font-bold tracking-wide text-zinc-300 group-hover/btn:text-white transition-colors">{item.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* 2. List of existing active/inactive blocks */}
-      <div id="links-management-list" className="space-y-3">
-        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
-          Seus Blocos ({sortedLinks.length})
+      <div id="links-management-list" className="space-y-4">
+        <h3 className="text-[13px] font-bold text-white uppercase tracking-widest flex items-center gap-2 mb-2">
+          <LayoutTemplate className="w-4 h-4 text-[#a78bfa]" />
+          Seus Blocos <span className="text-zinc-500 font-mono ml-1">({sortedLinks.length})</span>
         </h3>
 
         {sortedLinks.length === 0 ? (
-          <div className="text-center py-8 rounded-xl border border-dashed border-slate-800 bg-[#0d1527] bg-opacity-30">
-            <p className="text-sm text-slate-500">Nenhum bloco adicionado ainda.</p>
-            <p className="text-xs text-slate-600 mt-1">Escolha uma opção acima para começar!</p>
+          <div className="relative bg-[#0a0a0a] border border-white/5 border-dashed rounded-3xl p-10 text-center shadow-lg">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.02)_0%,transparent_100%)] pointer-events-none" />
+            <p className="relative text-sm text-zinc-400 font-medium">Nenhum bloco adicionado ainda.</p>
+            <p className="relative text-[11px] text-zinc-500 mt-2 uppercase tracking-wide">Escolha uma opção acima para começar!</p>
           </div>
         ) : (
-          <div id="links-group" className="space-y-3">
+          <div id="links-group" className="space-y-4">
             {sortedLinks.map((link, idx) => {
               const isEditing = editingLinkId === link.id;
               const blockName = BLOCKS_MENU.find(b => b.type === link.type)?.label || 'Bloco';
@@ -368,18 +378,21 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                 <div
                   key={link.id}
                   id={`link-row-${link.id}`}
-                  className={`p-4 rounded-2xl border transition-all shadow-md ${
+                  className={`relative p-5 rounded-3xl border transition-all shadow-xl overflow-hidden group/card ${
                     link.active
-                      ? 'border-slate-800 bg-[#0f172a] hover:border-slate-700'
-                      : 'border-slate-900 bg-[#060c1c] opacity-50'
+                      ? isEditing 
+                        ? 'border-[#a78bfa]/50 bg-[#0a0a0a] ring-1 ring-[#a78bfa]/20'
+                        : 'border-white/5 bg-[#0a0a0a] hover:border-white/10'
+                      : 'border-white/5 bg-[#050505] opacity-60 hover:opacity-100'
                   }`}
                 >
+                  {isEditing && <div className="absolute top-0 right-0 w-32 h-32 bg-[#a78bfa]/10 blur-[40px] pointer-events-none" />}
                   {isEditing ? (
                     /* EDIT STATE UI */
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between border-b border-slate-850 pb-2">
-                        <span className="text-xs font-bold text-blue-400 font-sans flex items-center gap-1.5 uppercase tracking-wider">
-                          <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
+                    <div className="relative z-10 space-y-5">
+                      <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                        <span className="text-xs font-bold text-[#a78bfa] uppercase tracking-widest flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 text-emerald-400" />
                           Configurar: {blockName}
                         </span>
                         <div className="flex gap-1">
@@ -389,7 +402,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                             if (onPreviewChange && editingLinkId) onPreviewChange(editingLinkId, null);
                             setEditingLinkId(null);
                           }}
-                            className="p-1 text-slate-400 hover:text-slate-200"
+                            className="p-1.5 rounded-lg border border-transparent hover:border-white/10 hover:bg-white/5 text-zinc-500 hover:text-white transition-all cursor-pointer"
                             title="Cancelar"
                           >
                             <X className="w-4 h-4" />
@@ -400,24 +413,24 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                       {/* Common fields (Title/URL) */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[10px] text-slate-400 font-semibold mb-1">Título principal *</label>
+                          <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">Título principal *</label>
                           <input
                             type="text"
                             value={editTitle}
                             onChange={(e) => setEditTitle(e.target.value)}
-                            className="w-full bg-black text-xs text-slate-200 py-2.5 px-3 rounded-xl border border-slate-800 focus:outline-none focus:border-blue-500 font-medium"
+                            className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-600 font-medium"
                             required
                           />
                         </div>
 
                         {(link.type === 'link' || link.type === 'whatsapp' || link.type === 'telegram' || link.type === 'buy_now' || link.type === 'promo_banner') && (
                           <div>
-                            <label className="block text-[10px] text-slate-400 font-semibold mb-1">Link de Destino / URL</label>
+                            <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">Link de Destino / URL</label>
                             <input
                               type="text"
                               value={editUrl}
                               onChange={(e) => setEditUrl(e.target.value)}
-                              className="w-full bg-black text-xs text-slate-200 py-2.5 px-3 rounded-xl border border-slate-800 focus:outline-none focus:border-blue-500 font-mono"
+                              className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-600 font-mono"
                             />
                           </div>
                         )}
@@ -426,13 +439,13 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                       {/* Promo Banner specific */}
                       {link.type === 'promo_banner' && (
                         <div>
-                          <label className="block text-[10px] text-slate-400 font-semibold mb-1">URL da Imagem do Banner</label>
+                          <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">URL da Imagem do Banner</label>
                           <input
                             type="text"
                             value={editImageUrl}
                             onChange={(e) => setEditImageUrl(e.target.value)}
                             placeholder="https://..."
-                            className="w-full bg-black text-xs text-slate-200 py-2.5 px-3 rounded-xl border border-slate-800 focus:outline-none focus:border-blue-500 font-mono"
+                            className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-600 font-mono"
                           />
                         </div>
                       )}
@@ -442,8 +455,8 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                         <>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                             <div>
-                              <label className="block text-[10px] text-slate-400 font-semibold mb-1 flex items-center gap-1">
-                                <Tag className="w-3 h-3 text-slate-500" />
+                              <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
+                                <Tag className="w-3 h-3 text-zinc-500" />
                                 Subtítulo Auxiliar (Opcional)
                               </label>
                               <input
@@ -451,12 +464,12 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                 placeholder="Ex: Receba em até 5 minutos"
                                 value={editSubtitle}
                                 onChange={(e) => setEditSubtitle(e.target.value)}
-                                className="w-full bg-black text-xs text-slate-200 py-2.5 px-3 rounded-xl border border-slate-800 focus:outline-none focus:border-blue-500 placeholder-slate-800"
+                                className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-600 placeholder-slate-800"
                               />
                             </div>
 
                             <div>
-                              <label className="block text-[10px] text-slate-400 font-semibold mb-1 flex items-center gap-1">
+                              <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
                                 <Sparkles className="w-3 h-3 text-emerald-400" />
                                 Texto do Badge (Tag)
                               </label>
@@ -465,14 +478,14 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                 placeholder="Ex: HOT, NOVO, 20% OFF"
                                 value={editBadgeText}
                                 onChange={(e) => setEditBadgeText(e.target.value)}
-                                className="w-full bg-black text-xs text-slate-200 py-2.5 px-3 rounded-xl border border-slate-800 focus:outline-none focus:border-blue-500 placeholder-slate-800 font-sans"
+                                className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-600 placeholder-slate-800 font-sans"
                               />
                             </div>
                           </div>
 
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                             <div>
-                              <label className="block text-[10px] text-slate-400 font-semibold mb-1 flex items-center gap-1">
+                              <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
                                 <Smile className="w-3 h-3 text-amber-400" />
                                 Ícone do Link (Emoji)
                               </label>
@@ -483,13 +496,13 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                   placeholder="Ex: 🚀, 💬"
                                   value={editIconEmoji}
                                   onChange={(e) => setEditIconEmoji(e.target.value)}
-                                  className="w-full bg-black text-xs text-slate-200 py-2.5 px-3 rounded-xl border border-slate-800 focus:outline-none focus:border-blue-500 placeholder-slate-800"
+                                  className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-600 placeholder-slate-800"
                                 />
                               </div>
                             </div>
 
                             <div>
-                              <label className="block text-[10px] text-slate-400 font-semibold mb-1 flex items-center gap-1">
+                              <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
                                 <Upload className="w-3 h-3 text-[#a78bfa]" />
                                 Logo / Imagem
                               </label>
@@ -498,7 +511,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                   {editIconUrl ? (
                                     <img src={editIconUrl} alt="logo" className="w-full h-full object-contain" />
                                   ) : (
-                                    <Upload className="w-4 h-4 text-slate-500" />
+                                    <Upload className="w-4 h-4 text-zinc-500" />
                                   )}
                                   <input
                                     type="file"
@@ -520,7 +533,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                   placeholder="ou cole uma URL"
                                   value={editIconUrl}
                                   onChange={(e) => setEditIconUrl(e.target.value)}
-                                  className="flex-1 min-w-0 bg-black text-[10px] text-slate-300 py-2 px-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-[#a78bfa] placeholder-slate-700 font-mono"
+                                  className="flex-1 min-w-0 bg-[#0a0a0a] text-[10px] text-white py-3 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-slate-700 font-mono"
                                 />
                                 {editIconUrl && (
                                   <button
@@ -535,14 +548,14 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                             </div>
 
                             <div>
-                              <label className="block text-[10px] text-slate-400 font-semibold mb-1 flex items-center gap-1">
+                              <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
                                 <Zap className="w-3 h-3 text-yellow-500" />
                                 Animação de Atenção
                               </label>
                               <select
                                 value={editAnimation}
                                 onChange={(e) => setEditAnimation(e.target.value)}
-                                className="w-full bg-black text-xs text-slate-300 py-2.5 px-3 rounded-xl border border-slate-800 focus:outline-none focus:border-blue-500 cursor-pointer font-sans"
+                                className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none cursor-pointer font-sans"
                               >
                                 <option value="none">Fixo</option>
                                 <option value="pulse">Pulse</option>
@@ -566,7 +579,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
 
                       {/* Advanced per-button customization */}
                       {(link.type === 'link' || link.type === 'whatsapp' || link.type === 'buy_now' || link.type === 'telegram' || link.type === 'payment') && (
-                        <div className="bg-gradient-to-br from-[#a78bfa]/5 to-purple-500/5 border border-[#a78bfa]/20 rounded-xl overflow-hidden">
+                        <div className="bg-[#111111] border border-white/5 rounded-2xl overflow-hidden">
                           <button
                             type="button"
                             onClick={() => setShowAdvancedStyle(v => !v)}
@@ -575,17 +588,17 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                             <span className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-wider flex items-center gap-1.5">
                               <Palette className="w-3.5 h-3.5" /> Personalização Avançada do Botão
                             </span>
-                            <span className="text-[9px] text-slate-500 flex items-center gap-1">
+                            <span className="text-[9px] text-zinc-500 flex items-center gap-1">
                               {showAdvancedStyle ? 'Ocultar' : 'Mostrar'}
                               {showAdvancedStyle ? <Minimize className="w-3 h-3" /> : <Maximize className="w-3 h-3" />}
                             </span>
                           </button>
 
                           {showAdvancedStyle && (
-                            <div className="px-4 pb-4 space-y-4 border-t border-[#a78bfa]/10 pt-3">
+                            <div className="px-4 pb-4 space-y-4 border-t border-white/5 pt-4">
                               {/* Visual style preset */}
                               <div>
-                                <label className="block text-[10px] text-slate-400 font-semibold mb-1.5 flex items-center gap-1">
+                                <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
                                   <Square className="w-3 h-3 text-[#a78bfa]" /> Estilo Visual
                                 </label>
                                 <div className="grid grid-cols-4 gap-1.5">
@@ -605,7 +618,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                       className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all cursor-pointer ${
                                         editCustomStyle === o.v
                                           ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
-                                          : 'bg-black/40 border-slate-800 text-zinc-500 hover:border-slate-600'
+                                          : 'bg-[#0a0a0a] border-white/5 text-zinc-500 hover:border-white/10 hover:text-zinc-300 hover:bg-white/5'
                                       }`}>{o.l}</button>
                                   ))}
                                 </div>
@@ -614,24 +627,24 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                               {/* Color customization */}
                               <div className="space-y-2">
                                 <div className="flex items-center justify-between">
-                                  <label className="text-[10px] text-slate-400 font-semibold flex items-center gap-1">
+                                  <label className="text-[10px] text-zinc-400 font-semibold flex items-center gap-1">
                                     <Droplet className="w-3 h-3 text-blue-400" /> Cor de Fundo
                                   </label>
-                                  <label className="flex items-center gap-1.5 text-[9px] text-slate-500 cursor-pointer">
+                                  <label className="flex items-center gap-1.5 text-[9px] text-zinc-500 cursor-pointer">
                                     <input type="checkbox" checked={editUseGradient} onChange={(e) => setEditUseGradient(e.target.checked)} className="accent-[#a78bfa] w-3 h-3" />
                                     Usar gradiente
                                   </label>
                                 </div>
                                 {!editUseGradient ? (
                                   <div className="flex gap-2">
-                                    <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(editCustomColor) ? editCustomColor : '#111a36'} onChange={(e) => setEditCustomColor(e.target.value)} className="w-9 h-9 rounded border border-slate-800 bg-transparent cursor-pointer shrink-0" title="Cor sólida" />
-                                    <input type="text" placeholder="#111a36 ou rgba(...)" value={editCustomColor} onChange={(e) => setEditCustomColor(e.target.value)} className="flex-1 bg-black text-[10px] text-slate-300 py-2 px-3 rounded-lg border border-slate-800 focus:border-[#a78bfa] focus:outline-none font-mono" />
+                                    <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(editCustomColor) ? editCustomColor : '#111a36'} onChange={(e) => setEditCustomColor(e.target.value)} className="w-9 h-9 rounded border border-white/5 bg-transparent cursor-pointer shrink-0" title="Cor sólida" />
+                                    <input type="text" placeholder="#111a36 ou rgba(...)" value={editCustomColor} onChange={(e) => setEditCustomColor(e.target.value)} className="flex-1 bg-[#0a0a0a] text-[10px] text-white py-3 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none font-mono" />
                                     {editCustomColor && <button type="button" onClick={() => setEditCustomColor('')} className="bg-rose-500/10 text-rose-400 text-[10px] font-bold px-2 rounded-lg border border-rose-500/20 cursor-pointer">Limpar</button>}
                                   </div>
                                 ) : (
                                   <div className="space-y-2">
                                     <div className="flex gap-2">
-                                      <input type="text" placeholder="linear-gradient(135deg, #f00, #00f)" value={editCustomGradient} onChange={(e) => setEditCustomGradient(e.target.value)} className="flex-1 bg-black text-[10px] text-slate-300 py-2 px-3 rounded-lg border border-slate-800 focus:border-[#a78bfa] focus:outline-none font-mono" />
+                                      <input type="text" placeholder="linear-gradient(135deg, #f00, #00f)" value={editCustomGradient} onChange={(e) => setEditCustomGradient(e.target.value)} className="flex-1 bg-[#0a0a0a] text-[10px] text-white py-3 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none font-mono" />
                                       {editCustomGradient && <button type="button" onClick={() => setEditCustomGradient('')} className="bg-rose-500/10 text-rose-400 text-[10px] font-bold px-2 rounded-lg border border-rose-500/20 cursor-pointer">Limpar</button>}
                                     </div>
                                     <div className="h-7 w-full rounded-lg border border-slate-800 transition-all" style={{ background: editCustomGradient || 'linear-gradient(135deg, #1e3a8a, #7c3aed)' }} />
@@ -646,12 +659,12 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
 
                               {/* Text color */}
                               <div>
-                                <label className="block text-[10px] text-slate-400 font-semibold mb-1.5 flex items-center gap-1">
+                                <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
                                   <Type className="w-3 h-3 text-emerald-400" /> Cor do Texto
                                 </label>
                                 <div className="flex gap-2">
-                                  <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(editCustomTextColor) ? editCustomTextColor : '#ffffff'} onChange={(e) => setEditCustomTextColor(e.target.value)} className="w-9 h-9 rounded border border-slate-800 bg-transparent cursor-pointer shrink-0" title="Cor do texto" />
-                                  <input type="text" placeholder="#ffffff" value={editCustomTextColor} onChange={(e) => setEditCustomTextColor(e.target.value)} className="flex-1 bg-black text-[10px] text-slate-300 py-2 px-3 rounded-lg border border-slate-800 focus:border-[#a78bfa] focus:outline-none font-mono" />
+                                  <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(editCustomTextColor) ? editCustomTextColor : '#ffffff'} onChange={(e) => setEditCustomTextColor(e.target.value)} className="w-9 h-9 rounded border border-white/5 bg-transparent cursor-pointer shrink-0" title="Cor do texto" />
+                                  <input type="text" placeholder="#ffffff" value={editCustomTextColor} onChange={(e) => setEditCustomTextColor(e.target.value)} className="flex-1 bg-[#0a0a0a] text-[10px] text-white py-3 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none font-mono" />
                                   {editCustomTextColor && <button type="button" onClick={() => setEditCustomTextColor('')} className="bg-rose-500/10 text-rose-400 text-[10px] font-bold px-2 rounded-lg border border-rose-500/20 cursor-pointer">Limpar</button>}
                                 </div>
                                 <div className="flex flex-wrap gap-1 mt-1.5">
@@ -663,15 +676,15 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
 
                               {/* Border */}
                               <div>
-                                <label className="block text-[10px] text-slate-400 font-semibold mb-1.5 flex items-center gap-1">
+                                <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
                                   <Square className="w-3 h-3 text-amber-400" /> Borda
                                 </label>
                                 <div className="flex gap-2">
-                                  <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(editCustomBorderColor) ? editCustomBorderColor : '#a78bfa'} onChange={(e) => setEditCustomBorderColor(e.target.value)} className="w-9 h-9 rounded border border-slate-800 bg-transparent cursor-pointer shrink-0" />
-                                  <input type="text" placeholder="#a78bfa" value={editCustomBorderColor} onChange={(e) => setEditCustomBorderColor(e.target.value)} className="flex-1 bg-black text-[10px] text-slate-300 py-2 px-3 rounded-lg border border-slate-800 focus:border-[#a78bfa] focus:outline-none font-mono" />
-                                  <div className="flex items-center gap-1.5 bg-black border border-slate-800 rounded-lg px-2 shrink-0">
+                                  <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(editCustomBorderColor) ? editCustomBorderColor : '#a78bfa'} onChange={(e) => setEditCustomBorderColor(e.target.value)} className="w-9 h-9 rounded border border-white/5 bg-transparent cursor-pointer shrink-0" />
+                                  <input type="text" placeholder="#a78bfa" value={editCustomBorderColor} onChange={(e) => setEditCustomBorderColor(e.target.value)} className="flex-1 bg-[#0a0a0a] text-[10px] text-white py-3 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none font-mono" />
+                                  <div className="flex items-center gap-1.5 bg-black border border-white/5 rounded-xl px-2 shrink-0">
                                     <span className="text-[9px] text-zinc-500">Esp:</span>
-                                    <input type="number" min="0" max="8" value={editCustomBorderWidth} onChange={(e) => setEditCustomBorderWidth(Math.max(0, Math.min(8, Number(e.target.value))))} className="w-10 bg-transparent text-[10px] text-slate-300 py-2 focus:outline-none text-center font-mono" />
+                                    <input type="number" min="0" max="8" value={editCustomBorderWidth} onChange={(e) => setEditCustomBorderWidth(Math.max(0, Math.min(8, Number(e.target.value))))} className="w-10 bg-transparent text-[10px] text-zinc-300 py-2 focus:outline-none text-center font-mono" />
                                     <span className="text-[9px] text-zinc-500">px</span>
                                   </div>
                                 </div>
@@ -679,7 +692,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
 
                               {/* Border radius */}
                               <div>
-                                <label className="block text-[10px] text-slate-400 font-semibold mb-1.5">Arredondamento</label>
+                                <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">Arredondamento</label>
                                 <div className="grid grid-cols-5 gap-1.5">
                                   {([
                                     { v: '', l: 'Padrão' },
@@ -694,7 +707,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                       className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all cursor-pointer ${
                                         editCustomRadius === o.v
                                           ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
-                                          : 'bg-black/40 border-slate-800 text-zinc-500 hover:border-slate-600'
+                                          : 'bg-[#0a0a0a] border-white/5 text-zinc-500 hover:border-white/10 hover:text-zinc-300 hover:bg-white/5'
                                       }`}>{o.l}</button>
                                   ))}
                                 </div>
@@ -702,7 +715,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
 
                               {/* Size */}
                               <div>
-                                <label className="block text-[10px] text-slate-400 font-semibold mb-1.5">Tamanho</label>
+                                <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">Tamanho</label>
                                 <div className="grid grid-cols-4 gap-1.5">
                                   {([
                                     { v: '', l: 'Padrão' },
@@ -716,7 +729,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                       className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all cursor-pointer ${
                                         editCustomSize === o.v
                                           ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
-                                          : 'bg-black/40 border-slate-800 text-zinc-500 hover:border-slate-600'
+                                          : 'bg-[#0a0a0a] border-white/5 text-zinc-500 hover:border-white/10 hover:text-zinc-300 hover:bg-white/5'
                                       }`}>{o.l}</button>
                                   ))}
                                 </div>
@@ -724,7 +737,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
 
                               {/* Font */}
                               <div>
-                                <label className="block text-[10px] text-slate-400 font-semibold mb-1.5 flex items-center gap-1">
+                                <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
                                   <Type className="w-3 h-3 text-rose-400" /> Fonte do Botão
                                 </label>
                                 <div className="grid grid-cols-4 gap-1.5">
@@ -744,7 +757,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                       className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all cursor-pointer ${
                                         editCustomFont === o.v
                                           ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
-                                          : 'bg-black/40 border-slate-800 text-zinc-500 hover:border-slate-600'
+                                          : 'bg-[#0a0a0a] border-white/5 text-zinc-500 hover:border-white/10 hover:text-zinc-300 hover:bg-white/5'
                                       }`}>{o.l}</button>
                                   ))}
                                 </div>
@@ -753,7 +766,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                               {/* Text alignment + letter spacing + uppercase */}
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
-                                  <label className="block text-[10px] text-slate-400 font-semibold mb-1.5">Alinhamento do Texto</label>
+                                  <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">Alinhamento do Texto</label>
                                   <div className="grid grid-cols-3 gap-1.5">
                                     {([
                                       { v: '', l: 'Padrão', i: <AlignCenter className="w-3 h-3" /> },
@@ -766,13 +779,13 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                         className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all cursor-pointer flex items-center justify-center gap-1 ${
                                           editCustomTextAlign === o.v
                                             ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
-                                            : 'bg-black/40 border-slate-800 text-zinc-500 hover:border-slate-600'
+                                            : 'bg-[#0a0a0a] border-white/5 text-zinc-500 hover:border-white/10 hover:text-zinc-300 hover:bg-white/5'
                                         }`}>{o.i}{o.l}</button>
                                     ))}
                                   </div>
                                 </div>
                                 <div>
-                                  <label className="block text-[10px] text-slate-400 font-semibold mb-1.5">Espaçamento Letras</label>
+                                  <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">Espaçamento Letras</label>
                                   <div className="grid grid-cols-4 gap-1.5">
                                     {([
                                       { v: '', l: 'Padrão' },
@@ -786,7 +799,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                         className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all cursor-pointer ${
                                           editCustomLetterSpacing === o.v
                                             ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
-                                            : 'bg-black/40 border-slate-800 text-zinc-500 hover:border-slate-600'
+                                            : 'bg-[#0a0a0a] border-white/5 text-zinc-500 hover:border-white/10 hover:text-zinc-300 hover:bg-white/5'
                                         }`}>{o.l}</button>
                                     ))}
                                   </div>
@@ -795,7 +808,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
 
                               {/* Icon position */}
                               <div>
-                                <label className="block text-[10px] text-slate-400 font-semibold mb-1.5">Posição do Ícone (Emoji)</label>
+                                <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">Posição do Ícone (Emoji)</label>
                                 <div className="grid grid-cols-4 gap-1.5">
                                   {([
                                     { v: '', l: 'Padrão' },
@@ -809,7 +822,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                       className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all cursor-pointer ${
                                         editCustomIconPosition === o.v
                                           ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
-                                          : 'bg-black/40 border-slate-800 text-zinc-500 hover:border-slate-600'
+                                          : 'bg-[#0a0a0a] border-white/5 text-zinc-500 hover:border-white/10 hover:text-zinc-300 hover:bg-white/5'
                                       }`}>{o.l}</button>
                                   ))}
                                 </div>
@@ -851,7 +864,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
 
                               {/* Live mini-preview */}
                               <div className="pt-2 border-t border-[#a78bfa]/10">
-                                <label className="block text-[10px] text-slate-400 font-semibold mb-1.5">Pré-visualização</label>
+                                <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">Pré-visualização</label>
                                 <div className="bg-black/30 rounded-xl p-4 border border-slate-800 flex items-center justify-center min-h-[70px]">
                                   <span
                                     className={`px-4 font-bold text-xs tracking-wide flex items-center gap-2 ${
@@ -958,7 +971,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                             }
                             setEditingLinkId(null);
                           }}
-                          className="px-4 py-2 text-xs border border-slate-800 text-slate-400 rounded-xl hover:bg-slate-900 transition-all cursor-pointer font-bold"
+                          className="px-4 py-2 text-xs border border-slate-800 text-zinc-400 rounded-xl hover:bg-slate-900 transition-all cursor-pointer font-bold"
                         >
                           Cancelar
                         </button>
@@ -991,7 +1004,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                           <button
                             onClick={() => handleMoveOrder(idx, 'up')}
                             disabled={idx === 0}
-                            className="p-1 rounded text-slate-600 hover:text-blue-400 disabled:opacity-20 cursor-pointer transition-all min-h-[32px] min-w-[32px] flex items-center justify-center"
+                            className="p-1 rounded text-zinc-600 hover:text-blue-400 disabled:opacity-20 cursor-pointer transition-all min-h-[32px] min-w-[32px] flex items-center justify-center"
                             title="Mover para cima"
                           >
                             <ArrowUp className="w-3.5 h-3.5" />
@@ -999,7 +1012,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                           <button
                             onClick={() => handleMoveOrder(idx, 'down')}
                             disabled={idx === sortedLinks.length - 1}
-                            className="p-1 rounded text-slate-600 hover:text-blue-400 disabled:opacity-20 cursor-pointer transition-all min-h-[32px] min-w-[32px] flex items-center justify-center"
+                            className="p-1 rounded text-zinc-600 hover:text-blue-400 disabled:opacity-20 cursor-pointer transition-all min-h-[32px] min-w-[32px] flex items-center justify-center"
                             title="Mover para baixo"
                           >
                             <ArrowDown className="w-3.5 h-3.5" />
@@ -1008,7 +1021,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
 
                         <div className="min-w-0 space-y-1">
                           <div className="flex items-center gap-1.5 mb-1">
-                            <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">
+                            <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-slate-800 text-zinc-300">
                               {blockName}
                             </span>
                           </div>
@@ -1022,7 +1035,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                           </h4>
 
                           {link.url && (
-                            <p className="text-[10px] text-slate-500 truncate font-mono">{link.url}</p>
+                            <p className="text-[10px] text-zinc-500 truncate font-mono">{link.url}</p>
                           )}
                         </div>
                       </div>
@@ -1032,7 +1045,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                         <button
                           onClick={() => onUpdate(link.id, { active: !link.active })}
                           className={`p-2 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg transition-all ${
-                            link.active ? 'text-blue-500' : 'text-slate-600'
+                            link.active ? 'text-blue-500' : 'text-zinc-600'
                           }`}
                           title={link.active ? 'Ativo (Exibindo)' : 'Oculto'}
                         >
@@ -1041,7 +1054,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
 
                         <button
                           onClick={() => handleStartEdit(link)}
-                          className="p-2 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl bg-slate-800/40 text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all cursor-pointer border border-slate-800/50"
+                          className="p-2 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl bg-slate-800/40 text-zinc-400 hover:text-slate-200 hover:bg-slate-800 transition-all cursor-pointer border border-slate-800/50"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>

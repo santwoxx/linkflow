@@ -525,7 +525,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
       
       {/* 1. PREMIUM POST WIDGET */}
       {!filterByUserId && (
-        <div className="relative group bg-[#0f172a]/80 backdrop-blur-2xl rounded-3xl border border-slate-800/60 shadow-[0_8px_30px_rgb(0,0,0,0.4)] p-5 overflow-hidden">
+        <div className="relative group bg-[#0a0a0a] backdrop-blur-2xl rounded-3xl border border-white/5 shadow-[0_8px_30px_rgb(0,0,0,0.4)] p-5 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-[#a78bfa]/5 via-transparent to-indigo-900/5 pointer-events-none" />
           <div className="relative flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -535,24 +535,24 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                   <img 
                     src={currentUserProfile.profilePicUrl} 
                     alt={currentUserProfile.displayName} 
-                    className="relative w-11 h-11 rounded-full object-cover shrink-0 border-2 border-slate-800"
+                    className="relative w-11 h-11 rounded-full object-cover shrink-0 border-2 border-white/5"
                   />
                 ) : (
-                  <div className="relative w-11 h-11 rounded-full bg-[#1e293b] flex items-center justify-center font-bold text-white shrink-0 border-2 border-slate-800">
+                  <div className="relative w-11 h-11 rounded-full bg-[#151515] flex items-center justify-center font-bold text-white shrink-0 border-2 border-white/5">
                     {currentUserProfile.displayName?.charAt(0) || currentUserProfile.username.charAt(0)}
                   </div>
                 )}
               </div>
               <div className="min-w-0">
                 <p className="text-[10px] font-black text-[#a78bfa] uppercase tracking-widest leading-none mb-1">Comunidade</p>
-                <p className="text-sm text-slate-200 font-semibold">O que você quer compartilhar?</p>
+                <p className="text-sm text-zinc-200 font-semibold">O que você quer compartilhar?</p>
               </div>
             </div>
 
             <button
               id="open-ig-widget"
               onClick={() => setIsSelectorOpen(!isSelectorOpen)}
-              className="px-5 py-2.5 bg-white hover:bg-slate-100 text-slate-900 text-xs font-black rounded-xl flex items-center gap-2 cursor-pointer shadow-[0_0_20px_rgba(255,255,255,0.15)] active:scale-95 transition-all shrink-0"
+              className="px-5 py-2.5 bg-white hover:bg-zinc-200 text-black text-xs font-black rounded-xl flex items-center gap-2 cursor-pointer shadow-[0_0_20px_rgba(255,255,255,0.15)] active:scale-95 transition-all shrink-0"
             >
               {isSelectorOpen ? <X className="w-4 h-4 stroke-[2.5]" /> : <Plus className="w-4 h-4 stroke-[2.5]" />}
               <span className="hidden sm:inline">{isSelectorOpen ? 'Cancelar' : 'Criar Post'}</span>
@@ -567,7 +567,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
                 onSubmit={handlePublishPost}
-                className="relative overflow-hidden mt-5 pt-5 border-t border-slate-800/60 space-y-4"
+                className="relative overflow-hidden mt-5 pt-5 border-t border-white/5 space-y-4"
               >
                 <div className="relative group/textarea">
                   <div className="absolute inset-0 bg-gradient-to-r from-[#a78bfa]/20 to-indigo-500/20 rounded-2xl blur-xl opacity-0 group-focus-within/textarea:opacity-100 transition-opacity pointer-events-none" />
@@ -576,13 +576,13 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                     rows={3}
                     value={caption}
                     onChange={(e) => setCaption(e.target.value)}
-                    className="relative w-full bg-[#0a1128]/50 text-sm text-slate-100 py-4 px-5 rounded-2xl border border-slate-700/50 focus:border-[#a78bfa] focus:bg-[#0a1128]/80 focus:outline-none transition-all placeholder-slate-500 leading-relaxed resize-none shadow-inner"
+                    className="relative w-full bg-[#111111] text-sm text-white py-4 px-5 rounded-2xl border border-white/5 focus:border-[#a78bfa] focus:bg-[#151515] focus:outline-none transition-all placeholder-zinc-600 leading-relaxed resize-none shadow-inner"
                     maxLength={1000}
                   />
                 </div>
 
                 {imageUrl && (
-                  <div className="relative rounded-2xl overflow-hidden border border-slate-700 max-h-72 group/img shadow-lg">
+                  <div className="relative rounded-2xl overflow-hidden border border-white/10 max-h-72 group/img shadow-lg">
                     <img 
                       src={imageUrl} 
                       alt="Preview" 
@@ -599,7 +599,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                 )}
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                  <div className="flex-1 p-1 bg-[#0a1128]/50 rounded-2xl border border-slate-800/60 flex items-center gap-1 shadow-inner">
+                  <div className="flex-1 p-1 bg-[#111111] rounded-2xl border border-white/5 flex items-center gap-1 shadow-inner">
                     <input
                       id="post-image-upload"
                       type="file"
@@ -620,16 +620,16 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                     />
                     <label
                       htmlFor="post-image-upload"
-                      className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl cursor-pointer hover:bg-white/5 text-slate-400 hover:text-white transition-all group/btn"
+                      className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl cursor-pointer hover:bg-white/5 text-zinc-400 hover:text-white transition-all group/btn"
                     >
                       <ImageIcon className="w-5 h-5 text-[#a78bfa] group-hover/btn:scale-110 transition-transform" />
                       <span className="text-xs font-bold">Galeria</span>
                     </label>
-                    <div className="w-px h-6 bg-slate-800" />
+                    <div className="w-px h-6 bg-white/10" />
                     <button
                       type="button"
                       onClick={() => setShowUrlInput(!showUrlInput)}
-                      className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl cursor-pointer transition-all hover:bg-white/5 ${showUrlInput ? 'text-white bg-white/5' : 'text-slate-400 hover:text-white'}`}
+                      className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl cursor-pointer transition-all hover:bg-white/5 ${showUrlInput ? 'text-white bg-white/5' : 'text-zinc-400 hover:text-white'}`}
                       title="Inserir URL de imagem"
                     >
                       <ExternalLink className="w-5 h-5" />
@@ -670,7 +670,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                         placeholder="Cole a URL da imagem aqui (https://...)"
                         value={imageUrl}
                         onChange={(e) => setImageUrl(e.target.value)}
-                        className="w-full bg-[#0a1128]/80 text-xs text-slate-200 py-3 px-4 rounded-xl border border-slate-700/50 focus:border-[#a78bfa] focus:outline-none transition-all shadow-inner"
+                        className="w-full bg-[#151515] text-xs text-zinc-200 py-3 px-4 rounded-xl border border-white/5 focus:border-[#a78bfa] focus:outline-none transition-all shadow-inner"
                       />
                     </motion.div>
                   )}
@@ -683,31 +683,31 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
 
       {/* 3. Feed Header - If on Profile, show Grid/List Layout Mode Toggles */}
       <div className="flex items-center justify-between mt-1 px-1">
-        <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 select-none">
+        <h3 className="text-xs font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1.5 select-none">
           <Globe className="w-4 h-4 text-pink-500 animate-pulse" />
           {filterByUserId ? 'Publicações do Perfil' : 'Feed do Momento'}
         </h3>
         
         {/* Responsive layout selectors for profiles */}
         {filterByUserId ? (
-          <div className="flex bg-slate-900 border border-slate-800 p-0.5 rounded-lg">
+          <div className="flex bg-slate-900 border border-white/5 p-0.5 rounded-lg">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-1.5 rounded-md cursor-pointer transition-colors ${viewMode === 'grid' ? 'bg-[#1e293b] text-pink-500' : 'text-slate-450 hover:text-white'}`}
+              className={`p-1.5 rounded-md cursor-pointer transition-colors ${viewMode === 'grid' ? 'bg-[#151515] text-pink-500' : 'text-slate-450 hover:text-white'}`}
               title="Visualização em Grid (Instagram)"
             >
               <Grid className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-1.5 rounded-md cursor-pointer transition-colors ${viewMode === 'list' ? 'bg-[#1e293b] text-pink-500' : 'text-slate-450 hover:text-white'}`}
+              className={`p-1.5 rounded-md cursor-pointer transition-colors ${viewMode === 'list' ? 'bg-[#151515] text-pink-500' : 'text-slate-450 hover:text-white'}`}
               title="Visualização em Lista"
             >
               <List className="w-4 h-4" />
             </button>
           </div>
         ) : (
-          <span className="text-[10px] font-mono text-slate-500">
+          <span className="text-[10px] font-mono text-zinc-500">
             {posts.length} {posts.length === 1 ? 'postagem' : 'postagens'}
           </span>
         )}
@@ -719,10 +719,10 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
           <p className="text-sm font-semibold uppercase tracking-widest text-slate-450">Buscando do Banco...</p>
         </div>
       ) : posts.length === 0 ? (
-        <div className="text-center py-12 rounded-2xl border border-dashed border-slate-800 bg-[#0d1527]/20 p-6 animate-fadeIn">
+        <div className="text-center py-12 rounded-2xl border border-dashed border-white/5 bg-[#0d1527]/20 p-6 animate-fadeIn">
           <Sparkles className="w-10 h-10 text-pink-500/30 mx-auto mb-3" />
-          <p className="text-sm font-medium text-slate-400">Nenhum post publicado por aqui.</p>
-          <p className="text-xs text-slate-600 mt-1">Abra "Nova Publicação" para postar a primeira foto!</p>
+          <p className="text-sm font-medium text-zinc-400">Nenhum post publicado por aqui.</p>
+          <p className="text-xs text-zinc-600 mt-1">Abra "Nova Publicação" para postar a primeira foto!</p>
         </div>
       ) : filterByUserId && viewMode === 'grid' ? (
         
@@ -767,7 +767,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
             return (
               <article 
                 key={post.id} 
-                className="bg-[#0f172a]/80 backdrop-blur-xl rounded-3xl border border-slate-800/50 overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.4)] animate-fadeIn group/post relative"
+                className="bg-[#0a0a0a] backdrop-blur-xl rounded-3xl border border-white/5/50 overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.4)] animate-fadeIn group/post relative"
               >
                 {/* 5A. Post Header (IG styled metadata) */}
                 <div className="p-3.5 flex items-center justify-between border-b border-slate-850/20">
@@ -781,7 +781,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                             className="w-8.5 h-8.5 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="w-8.5 h-8.5 rounded-full bg-slate-800 flex items-center justify-center font-bold text-white text-xs">
+                          <div className="w-8.5 h-8.5 rounded-full bg-white/10 flex items-center justify-center font-bold text-white text-xs">
                             {post.displayName ? post.displayName.charAt(0).toUpperCase() : post.username.charAt(0).toUpperCase()}
                           </div>
                         )}
@@ -790,10 +790,10 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                     
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-slate-100 leading-none">
+                        <span className="text-xs font-bold text-white leading-none">
                           {post.displayName}
                         </span>
-                        <span className="text-slate-600 text-xs">·</span>
+                        <span className="text-zinc-600 text-xs">·</span>
                         <a 
                           href={`/?u=${post.username}`}
                           className="text-[11px] text-pink-400 font-semibold hover:underline"
@@ -801,7 +801,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                           @{post.username}
                         </a>
                       </div>
-                      <span className="text-[9px] text-slate-500 font-semibold block mt-0.5 tracking-wider uppercase">
+                      <span className="text-[9px] text-zinc-500 font-semibold block mt-0.5 tracking-wider uppercase">
                         SÃO PAULO, BRASIL · LINKFLOW
                       </span>
                     </div>
@@ -818,7 +818,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     )}
-                    <button className="p-1.5 text-slate-500 hover:text-white cursor-pointer" title="Opções">
+                    <button className="p-1.5 text-zinc-500 hover:text-white cursor-pointer" title="Opções">
                       <MoreHorizontal className="w-4 h-4" />
                     </button>
                   </div>
@@ -828,7 +828,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                 {post.imageUrl && (
                   <div 
                     onDoubleClick={() => handleDoubleTap(post)}
-                    className="relative border-b border-slate-900 bg-black/90 flex justify-center items-center overflow-hidden select-none group cursor-pointer min-h-[200px] max-h-[80vh]"
+                    className="relative border-b border-white/5 bg-black/90 flex justify-center items-center overflow-hidden select-none group cursor-pointer min-h-[200px] max-h-[80vh]"
                   >
                     <img 
                       src={post.imageUrl} 
@@ -854,7 +854,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                     </AnimatePresence>
 
                     {/* Double tap tutor label */}
-                    <div className="absolute bottom-2.5 left-2.5 px-2 py-1 rounded bg-black/60 text-[8px] font-bold text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
+                    <div className="absolute bottom-2.5 left-2.5 px-2 py-1 rounded bg-black/60 text-[8px] font-bold text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
                       Clique duas vezes para curtir
                     </div>
                   </div>
@@ -949,8 +949,8 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
 
                 {/* 5E. Instagram Info text: Author bold header & styled description */}
                 <div className="px-4 pt-1.5 space-y-1">
-                  <p className="text-xs text-slate-300 leading-relaxed text-slate-250 font-normal break-words min-w-0">
-                    <span className="font-extrabold text-slate-100 mr-1.5 cursor-pointer hover:underline">{post.username}</span>
+                  <p className="text-xs text-zinc-300 leading-relaxed text-slate-250 font-normal break-words min-w-0">
+                    <span className="font-extrabold text-white mr-1.5 cursor-pointer hover:underline">{post.username}</span>
                     {renderStyledText(post.caption)}
                   </p>
                 </div>
@@ -964,7 +964,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                       onClick={() => {
                         setActiveCommentsPostId(post.id === activeCommentsPostId ? null : post.id);
                       }}
-                      className="text-[11px] text-slate-500 font-semibold hover:text-slate-400 cursor-pointer block border-none outline-none text-left mb-1"
+                      className="text-[11px] text-zinc-500 font-semibold hover:text-zinc-400 cursor-pointer block border-none outline-none text-left mb-1"
                     >
                       Ver {post.commentsCount === 1 ? 'o único comentário' : `todos os ${post.commentsCount} comentários`}
                     </button>
@@ -977,11 +977,11 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="overflow-hidden border-t border-slate-900/60 mt-3 pt-3 space-y-2.5 bg-black/15 p-3 rounded-xl mb-1"
+                        className="overflow-hidden border-t border-white/5/60 mt-3 pt-3 space-y-2.5 bg-black/15 p-3 rounded-xl mb-1"
                       >
                         <div className="max-h-52 overflow-y-auto pr-1 space-y-2.5">
                           {!(commentsMap[post.id]?.length) ? (
-                            <p className="text-[10px] text-slate-500 italic">Carregando comentários ou sem mensagens registradas.</p>
+                            <p className="text-[10px] text-zinc-500 italic">Carregando comentários ou sem mensagens registradas.</p>
                           ) : (
                             commentsMap[post.id].map((comment) => {
                               const isMyComment = comment.userId === currentUserProfile.uid;
@@ -1001,8 +1001,8 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
 
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-1.5 flex-wrap">
-                                      <span className="font-extrabold text-slate-200">{comment.username}</span>
-                                      <span className="text-[9px] text-slate-500">· {formatTimeAgo(comment.createdAt)}</span>
+                                      <span className="font-extrabold text-zinc-200">{comment.username}</span>
+                                      <span className="text-[9px] text-zinc-500">· {formatTimeAgo(comment.createdAt)}</span>
                                     </div>
                                     <p className="text-slate-350 mt-0.5 break-words text-[11px] font-medium leading-relaxed">
                                       {comment.text}
@@ -1013,7 +1013,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                                     <button
                                       type="button"
                                       onClick={() => handleDeleteComment(post.id, comment.id)}
-                                      className="p-1 text-slate-600 hover:text-red-400 cursor-pointer"
+                                      className="p-1 text-zinc-600 hover:text-red-400 cursor-pointer"
                                       title="Excluir"
                                     >
                                       <Trash2 className="w-3 h-3" />
@@ -1031,7 +1031,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
 
                 {/* 5G. Time Elapsed display (IG style: bottom small date) */}
                 <div className="px-4 py-2 opacity-50">
-                  <span className="text-[9px] font-bold text-slate-500 tracking-wider">
+                  <span className="text-[9px] font-bold text-zinc-500 tracking-wider">
                     {formatTimeAgo(post.createdAt)}
                   </span>
                 </div>
@@ -1058,7 +1058,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                     </div>
 
                     <div className="flex items-center px-4 py-3 gap-2">
-                      <Smile className="w-4 h-4 text-slate-500 shrink-0" />
+                      <Smile className="w-4 h-4 text-zinc-500 shrink-0" />
                       <input
                         type="text"
                         placeholder="Adicione um comentário público..."
@@ -1072,7 +1072,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                             handleAddComment(post.id);
                           }
                         }}
-                        className="flex-1 bg-transparent text-xs text-slate-200 placeholder-slate-600 focus:outline-none min-w-0"
+                        className="flex-1 bg-transparent text-xs text-zinc-200 placeholder-slate-600 focus:outline-none min-w-0"
                       />
                       <button
                         type="button"
@@ -1105,7 +1105,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
               initial={{ scale: 0.95, y: 15 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 15 }}
-              className="bg-[#0f172a] border border-slate-800 w-full max-w-[920px] rounded-2xl md:rounded-3xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] md:h-[620px] relative shadow-2xl"
+              className="bg-[#0f172a] border border-white/5 w-full max-w-[920px] rounded-2xl md:rounded-3xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] md:h-[620px] relative shadow-2xl"
             >
               
               {/* Close Button top-right */}
@@ -1160,7 +1160,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                       className="w-8 h-8 rounded-full border border-pink-500 object-cover"
                     />
                     <div>
-                      <span className="text-xs font-bold text-slate-100 block leading-tight">{selectedPostLightbox.displayName}</span>
+                      <span className="text-xs font-bold text-white block leading-tight">{selectedPostLightbox.displayName}</span>
                       <span className="text-[10px] text-pink-400 font-semibold block leading-none">@{selectedPostLightbox.username}</span>
                     </div>
                   </div>
@@ -1170,7 +1170,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                       setSelectedPostLightbox(null);
                       setActiveCommentsPostId(null);
                     }}
-                    className="hidden md:inline-flex text-slate-400 hover:text-white p-1 rounded-full cursor-pointer"
+                    className="hidden md:inline-flex text-zinc-400 hover:text-white p-1 rounded-full cursor-pointer"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -1188,17 +1188,17 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                     />
                     <div className="text-xs">
                       <p className="text-slate-350 leading-relaxed">
-                        <span className="font-extrabold text-slate-100 mr-1.5">{selectedPostLightbox.username}</span>
+                        <span className="font-extrabold text-white mr-1.5">{selectedPostLightbox.username}</span>
                         {renderStyledText(selectedPostLightbox.caption)}
                       </p>
-                      <span className="text-[9px] text-slate-500 font-bold block mt-1 uppercase tracking-wider">{formatTimeAgo(selectedPostLightbox.createdAt)}</span>
+                      <span className="text-[9px] text-zinc-500 font-bold block mt-1 uppercase tracking-wider">{formatTimeAgo(selectedPostLightbox.createdAt)}</span>
                     </div>
                   </div>
 
                   {/* Subcollection Comments list */}
                   <div className="border-t border-slate-850/40 pt-4 space-y-3.5">
                     {!(commentsMap[selectedPostLightbox.id]?.length) ? (
-                      <p className="text-[11px] text-slate-500 italic">Pesquisando ou sem comentários ainda.</p>
+                      <p className="text-[11px] text-zinc-500 italic">Pesquisando ou sem comentários ainda.</p>
                     ) : (
                       commentsMap[selectedPostLightbox.id].map((comment) => {
                         const isMyComment = comment.userId === currentUserProfile.uid;
@@ -1210,17 +1210,17 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                               className="w-7 h-7 rounded-full object-cover shrink-0"
                             />
                             <div className="flex-1 min-w-0">
-                              <p className="text-slate-300 leading-relaxed text-[11.5px]">
+                              <p className="text-zinc-300 leading-relaxed text-[11.5px]">
                                 <span className="font-extrabold text-white mr-1.5">{comment.username}</span>
                                 {comment.text}
                               </p>
-                              <span className="text-[9px] text-slate-500 font-bold mt-0.5 block">{formatTimeAgo(comment.createdAt)}</span>
+                              <span className="text-[9px] text-zinc-500 font-bold mt-0.5 block">{formatTimeAgo(comment.createdAt)}</span>
                             </div>
 
                             {(isMyComment || selectedPostLightbox.userId === currentUserProfile.uid) && !previewMode && (
                               <button
                                 onClick={() => handleDeleteComment(selectedPostLightbox.id, comment.id)}
-                                className="text-slate-600 hover:text-rose-400 p-0.5 cursor-pointer"
+                                className="text-zinc-600 hover:text-rose-400 p-0.5 cursor-pointer"
                               >
                                 <Trash2 className="w-3 h-3" />
                               </button>
@@ -1261,17 +1261,17 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                     </button>
                   </div>
 
-                  <p className="text-[11px] font-black text-slate-200">
+                  <p className="text-[11px] font-black text-zinc-200">
                     {selectedPostLightbox.likesCount || 0} {selectedPostLightbox.likesCount === 1 ? 'curtida' : 'curtidas'}
                   </p>
-                  <span className="text-[8px] font-black text-slate-500 tracking-wider block mt-0.5 uppercase">
+                  <span className="text-[8px] font-black text-zinc-500 tracking-wider block mt-0.5 uppercase">
                     {formatTimeAgo(selectedPostLightbox.createdAt)}
                   </span>
                 </div>
 
                 {/* Lightbox Comment entry input bar */}
                 {!previewMode && (
-                  <div className="p-3 bg-slate-950/60 border-t border-slate-850/40 shrink-0 flex items-center gap-2">
+                  <div className="p-3 bg-[#050505]/60 border-t border-slate-850/40 shrink-0 flex items-center gap-2">
                     <input
                       type="text"
                       placeholder="Adicione um comentário..."
@@ -1285,7 +1285,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                           handleAddComment(selectedPostLightbox.id);
                         }
                       }}
-                      className="flex-1 bg-transparent text-xs text-slate-200 focus:outline-none placeholder-slate-705"
+                      className="flex-1 bg-transparent text-xs text-zinc-200 focus:outline-none placeholder-slate-705"
                     />
                     <button
                       type="button"
