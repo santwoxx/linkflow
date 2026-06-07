@@ -733,7 +733,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                           }
                           try {
                             const newUris = await Promise.all(
-                              filesToProcess.map(f => compressImage(f, 1200, 1200, 0.7))
+                              filesToProcess.map((f: any) => compressImage(f, 1200, 1200, 0.7))
                             );
                             setImageUrls(prev => [...prev, ...newUris]);
                           } catch (err) {
@@ -875,7 +875,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                         @{post.username} • Profissional
                       </span>
                       <span className="text-[10px] text-zinc-500 font-medium flex items-center gap-1 mt-0.5">
-                        {formatPostDate(post.createdAt)} • <Globe className="w-3 h-3" />
+                        {formatTimeAgo(post.createdAt)} • <Globe className="w-3 h-3" />
                       </span>
                     </div>
                   </div>

@@ -151,7 +151,7 @@ export interface ProfessionalProfile {
 }
 
 
-export type BlockType = 'link' | 'whatsapp' | 'telegram' | 'buy_now' | 'payment' | 'products' | 'services' | 'service_card' | 'testimonials' | 'gallery' | 'promo_banner';
+export type BlockType = 'link' | 'whatsapp' | 'telegram' | 'buy_now' | 'payment' | 'products' | 'services' | 'service_card' | 'testimonials' | 'gallery' | 'promo_banner' | 'scheduling';
 
 export interface ProductItem {
   id: string;
@@ -236,6 +236,39 @@ export interface ClickLog {
 }
 
 export const AVAILABLE_THEMES: ThemeConfig[] = [
+  {
+    id: 'cherry-blossom',
+    name: 'Cerejeira Delicada 🌸',
+    backgroundClass: 'bg-gradient-to-b from-pink-50 via-rose-100 to-pink-50 text-rose-900',
+    buttonClass: 'bg-white/80 border border-pink-200 text-rose-600 hover:bg-white hover:border-pink-300 transition-all duration-300 shadow-sm shadow-pink-100/50',
+    textColorClass: 'text-rose-900',
+    buttonColor: '#ffffff',
+    buttonTextColor: '#db2777',
+    fontClass: 'font-sans',
+    cardStyle: 'rounded'
+  },
+  {
+    id: 'soft-pink-white',
+    name: 'Rosa & Branco Clean 💮',
+    backgroundClass: 'bg-white text-zinc-800',
+    buttonClass: 'bg-pink-50/50 border border-pink-100 text-pink-600 hover:bg-pink-50 hover:border-pink-200 transition-all duration-300 shadow-sm',
+    textColorClass: 'text-zinc-800',
+    buttonColor: '#fdf2f8',
+    buttonTextColor: '#db2777',
+    fontClass: 'font-sans',
+    cardStyle: 'rounded'
+  },
+  {
+    id: 'rose-gold-luxury',
+    name: 'Rosa Gold Luxo ✨',
+    backgroundClass: 'bg-gradient-to-tr from-[#fff1f2] via-[#ffe4e6] to-[#fecdd3] text-[#9f1239]',
+    buttonClass: 'bg-white/95 border-2 border-[#fb7185]/20 text-[#be123c] hover:bg-white hover:border-[#fb7185] transition-all duration-300 shadow-md shadow-rose-200/50 font-cinzel',
+    textColorClass: 'text-[#9f1239]',
+    buttonColor: '#ffffff',
+    buttonTextColor: '#be123c',
+    fontClass: 'font-cinzel',
+    cardStyle: 'shadow'
+  },
   {
     id: 'sophisticated-dark',
     name: 'Azul e Branco Premium',

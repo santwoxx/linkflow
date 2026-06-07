@@ -601,7 +601,7 @@ export default function ServicesDiscovery({ onViewProfile }: ServicesDiscoveryPr
 function ProCard({ pro, onViewProfile, isFeatured }: { pro: ProfessionalProfile, onViewProfile: (u: string) => void, isFeatured?: boolean }) {
   const hasRating = (pro.ratingCount ?? 0) > 0 && typeof pro.rating === 'number';
   // Check if phone or whatsapp exists
-  const rawNumber = pro.whatsapp || pro.phone || '';
+  const rawNumber = pro.whatsapp || '';
   const waNumber = rawNumber.replace(/\D/g, '');
   const waLink = waNumber ? `https://wa.me/55${waNumber}?text=Olá! Encontrei seu perfil no LinkFlow e gostaria de saber mais sobre seus serviços.` : null;
 

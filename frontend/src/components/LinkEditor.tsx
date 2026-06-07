@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LinkItem, BlockType, FONTS_LIST } from '../types';
 import { compressImage } from '../utils/image';
-import { Plus, Trash2, ArrowUp, ArrowDown, ExternalLink, Edit2, Check, X, ToggleLeft, ToggleRight, Loader2, Sparkles, Tag, Smile, Zap, MessageCircle, ShoppingBag, Image as ImageIcon, Star, Briefcase, CreditCard, LayoutTemplate, Palette, Type, Square, Droplet, Eye, EyeOff, Maximize, Minimize, AlignLeft, AlignCenter, AlignRight, Upload, AlertTriangle } from 'lucide-react';
+import { Plus, Trash2, ArrowUp, ArrowDown, ExternalLink, Edit2, Check, X, ToggleLeft, ToggleRight, Loader2, Sparkles, Tag, Smile, Zap, MessageCircle, ShoppingBag, Image as ImageIcon, Star, Briefcase, CreditCard, LayoutTemplate, Palette, Type, Square, Droplet, Eye, EyeOff, Maximize, Minimize, AlignLeft, AlignCenter, AlignRight, Upload, AlertTriangle, Calendar, Clock, PlusCircle } from 'lucide-react';
 
 interface LinkEditorProps {
   links: LinkItem[];
@@ -72,6 +72,42 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  // Scheduling states
+  const [editContent, setEditContent] = useState<any[]>([]);
+  const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
+  const [svcName, setSvcName] = useState('');
+  const [svcDuration, setSvcDuration] = useState('');
+  const [svcPrice, setSvcPrice] = useState('');
+  const [svcDescription, setSvcDescription] = useState('');
+
+  const startEditService = (svc: any) => {
+    setEditingServiceId(svc.id);
+    setSvcName(svc.name || '');
+    setSvcDuration(svc.duration || '');
+    setSvcPrice(svc.price || '');
+    setSvcDescription(svc.description || '');
+  };
+
+  const saveService = (id: string) => {
+    setEditContent(prev => prev.map(s => s.id === id ? { ...s, name: svcName, duration: svcDuration, price: svcPrice, description: svcDescription } : s));
+    setEditingServiceId(null);
+  };
+
+  const deleteService = (id: string) => {
+    setEditContent(prev => prev.filter(s => s.id !== id));
+  };
+
+  const addService = () => {
+    const newId = `svc-${Date.now()}`;
+    const newSvc = { id: newId, name: 'Novo Serviço', duration: '1h', price: 'R$ 100,00', description: 'Descrição do serviço.' };
+    setEditContent(prev => [...prev, newSvc]);
+    setEditingServiceId(newId);
+    setSvcName(newSvc.name);
+    setSvcDuration(newSvc.duration);
+    setSvcPrice(newSvc.price);
+    setSvcDescription(newSvc.description);
+  };
 
   // Live preview: report all in-progress edit values to parent so the right-side
   // phone preview reflects the customization while the user is editing (before
@@ -169,6 +205,18 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
             ]
           };
           break;
+        case 'scheduling':
+          defaultTitle = 'Agendar Horário';
+          defaultUrl = '5511999999999';
+          extraData = {
+            iconEmoji: '🌸',
+            content: [
+              { id: '1', name: 'Alongamento de Unha em Gel', duration: '1h 30m', price: 'R$ 120,00', description: 'Aplicação completa com cutilagem e esmaltação.' },
+              { id: '2', name: 'Design de Sobrancelha', duration: '45m', price: 'R$ 50,00', description: 'Design com henna e pinçamento cuidadoso.' },
+              { id: '3', name: 'Corte & Escova', duration: '1h', price: 'R$ 150,00', description: 'Corte moderno feminino + lavagem e escova finalizadora.' }
+            ]
+          };
+          break;
         case 'gallery':
           defaultTitle = 'Galeria de Fotos';
           defaultUrl = '';
@@ -216,6 +264,8 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
     setEditCustomLetterSpacing((link.customLetterSpacing as any) || '');
     setEditCustomUppercase(!!link.customUppercase);
     setEditCustomIconPosition((link.customIconPosition as any) || '');
+    setEditContent(link.content || []);
+    setEditingServiceId(null);
     setShowAdvancedStyle(false);
   };
 
@@ -238,8 +288,10 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
 
     setIsSavingEdit(true);
     try {
+      const currentLink = links.find(l => l.id === linkId);
+      const isScheduling = currentLink?.type === 'scheduling';
       let url = editUrl.trim();
-      if (url && !/^https?:\/\//i.test(url)) {
+      if (url && !isScheduling && !/^https?:\/\//i.test(url)) {
         url = 'https://' + url;
       }
       const updatePayload = {
@@ -267,6 +319,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
         customLetterSpacing: editCustomLetterSpacing as any,
         customUppercase: editCustomUppercase,
         customIconPosition: editCustomIconPosition as any,
+        content: editContent,
       };
       // [diagnóstico] ajuda a confirmar no DevTools que TODOS os campos
       // customizados estão sendo enviados antes do onUpdate().
@@ -319,6 +372,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
     { type: 'gallery', label: 'Galeria', icon: <ImageIcon className="w-4 h-4 text-rose-400" /> },
     { type: 'testimonials', label: 'Depoimentos', icon: <Star className="w-4 h-4 text-yellow-400" /> },
     { type: 'services', label: 'Serviços', icon: <Briefcase className="w-4 h-4 text-emerald-400" /> },
+    { type: 'scheduling', label: 'Agendamento', icon: <Calendar className="w-4 h-4 text-pink-400" /> },
   ] as const;
 
   return (
@@ -431,6 +485,19 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                               value={editUrl}
                               onChange={(e) => setEditUrl(e.target.value)}
                               className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-600 font-mono"
+                            />
+                          </div>
+                        )}
+
+                        {link.type === 'scheduling' && (
+                          <div>
+                            <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">WhatsApp para Agendamentos (com DDD, apenas números)</label>
+                            <input
+                              type="text"
+                              value={editUrl}
+                              onChange={(e) => setEditUrl(e.target.value)}
+                              placeholder="Ex: 5511999999999"
+                              className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-650 font-mono"
                             />
                           </div>
                         )}
@@ -574,6 +641,81 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                           <p className="text-[11px] text-blue-400">
                             A edição avançada de itens internos (fotos da galeria, depoimentos individuais) será feita em uma janela modal nas próximas atualizações. O bloco base já está pronto para receber dados via código!
                           </p>
+                        </div>
+                      )}
+
+                      {/* Scheduling Block Services Editor */}
+                      {link.type === 'scheduling' && (
+                        <div className="space-y-4 p-4 bg-[#111] border border-white/5 rounded-2xl">
+                          <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                            <span className="text-xs font-bold text-pink-400 uppercase tracking-widest flex items-center gap-1.5 font-sans">
+                              <Calendar className="w-4 h-4" /> Serviços do Agendamento
+                            </span>
+                            <button
+                              type="button"
+                              onClick={addService}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-pink-600 hover:bg-pink-500 text-white text-[10px] font-bold rounded-lg transition-all cursor-pointer"
+                            >
+                              <PlusCircle className="w-3.5 h-3.5" /> Adicionar Serviço
+                            </button>
+                          </div>
+
+                          <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                            {editContent.map((svc) => {
+                              const isEditingSvc = editingServiceId === svc.id;
+                              return (
+                                <div key={svc.id} className="p-3 bg-black/40 border border-white/5 rounded-xl space-y-2">
+                                  {isEditingSvc ? (
+                                    <div className="space-y-2 text-left">
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                          <label className="block text-[8px] text-zinc-500 uppercase">Nome do Serviço</label>
+                                          <input type="text" value={svcName} onChange={(e) => setSvcName(e.target.value)} className="w-full bg-[#0a0a0a] text-xs text-white p-2 rounded-lg border border-white/5" />
+                                        </div>
+                                        <div>
+                                          <label className="block text-[8px] text-zinc-500 uppercase">Preço</label>
+                                          <input type="text" value={svcPrice} onChange={(e) => setSvcPrice(e.target.value)} className="w-full bg-[#0a0a0a] text-xs text-white p-2 rounded-lg border border-white/5" placeholder="R$ 100,00" />
+                                        </div>
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                          <label className="block text-[8px] text-zinc-500 uppercase">Duração</label>
+                                          <input type="text" value={svcDuration} onChange={(e) => setSvcDuration(e.target.value)} className="w-full bg-[#0a0a0a] text-xs text-white p-2 rounded-lg border border-white/5" placeholder="1h 30m" />
+                                        </div>
+                                        <div>
+                                          <label className="block text-[8px] text-zinc-500 uppercase">Descrição</label>
+                                          <input type="text" value={svcDescription} onChange={(e) => setSvcDescription(e.target.value)} className="w-full bg-[#0a0a0a] text-xs text-white p-2 rounded-lg border border-white/5" />
+                                        </div>
+                                      </div>
+                                      <div className="flex gap-1.5 justify-end pt-1">
+                                        <button type="button" onClick={() => setEditingServiceId(null)} className="px-2 py-1 text-[10px] text-zinc-400 bg-zinc-900 rounded border border-white/5 cursor-pointer">Cancelar</button>
+                                        <button type="button" onClick={() => saveService(svc.id)} className="px-2.5 py-1 text-[10px] text-white bg-pink-600 hover:bg-pink-500 rounded font-bold cursor-pointer">Salvar</button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-start justify-between gap-2 text-left">
+                                      <div className="min-w-0 flex-1">
+                                        <h5 className="text-xs font-bold text-white truncate">{svc.name}</h5>
+                                        <p className="text-[10px] text-zinc-400 truncate">{svc.description}</p>
+                                        <div className="flex gap-3 mt-1 text-[9px] font-semibold text-zinc-500">
+                                          <span className="text-pink-400">{svc.price}</span>
+                                          <span className="flex items-center gap-0.5"><Clock className="w-3 h-3" /> {svc.duration}</span>
+                                        </div>
+                                      </div>
+                                      <div className="flex gap-1 shrink-0">
+                                        <button type="button" onClick={() => startEditService(svc)} className="p-1 text-zinc-400 hover:text-white bg-zinc-900 rounded border border-white/5 cursor-pointer">
+                                          <Edit2 className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button type="button" onClick={() => deleteService(svc.id)} className="p-1 text-zinc-400 hover:text-red-400 bg-zinc-900 rounded border border-white/5 cursor-pointer">
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
                       )}
 

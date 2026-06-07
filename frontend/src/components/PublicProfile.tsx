@@ -3,7 +3,7 @@ import { UserProfile, LinkItem, ADMIN_EMAIL, DEFAULT_LAYOUT } from '../types';
 import { db, auth } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { ExternalLink, Copy, Check, Sparkles, MessageSquare, Link as LinkIcon, LogIn, Star, Crown, UserPlus, UserCheck, Briefcase, ShoppingBag, Clock, ShieldCheck, Music } from 'lucide-react';
+import { ExternalLink, Copy, Check, Sparkles, MessageSquare, Link as LinkIcon, LogIn, Star, Crown, UserPlus, UserCheck, Briefcase, ShoppingBag, Clock, ShieldCheck, Music, Calendar, X } from 'lucide-react';
 import CommunityFeed from './CommunityFeed';
 import { isFollowing, followUser, unfollowUser } from '../utils/follow';
 import GoToNatanDevButton from './GoToNatanDevButton';
@@ -21,6 +21,63 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
   const [sessionUser, setSessionUser] = useState<any>(null);
   const [sessionProfile, setSessionProfile] = useState<UserProfile | null>(null);
   const [proData, setProData] = useState<any>(null);
+
+  // Booking Modal State
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<any>(null);
+  const [whatsappDestination, setWhatsappDestination] = useState('');
+  
+  // Booking Form State
+  const [bookingDate, setBookingDate] = useState('');
+  const [bookingTime, setBookingTime] = useState('');
+  const [clientName, setClientName] = useState('');
+  const [clientPhone, setClientPhone] = useState('');
+
+  const handleOpenBooking = (svc: any, whatsappUrl: string) => {
+    setSelectedService(svc);
+    // Extract phone number from link.url or fallback to profile whatsapp or default
+    const rawNumber = (whatsappUrl || '').replace(/\D/g, '') || '5511999999999';
+    setWhatsappDestination(rawNumber);
+    
+    // Clear form
+    setBookingDate('');
+    setBookingTime('');
+    setClientName('');
+    setClientPhone('');
+    
+    setIsBookingOpen(true);
+  };
+
+  const handleConfirmBooking = () => {
+    if (!bookingDate || !bookingTime || !clientName) {
+      alert('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    // Format date in PT-BR style
+    const [year, month, day] = bookingDate.split('-');
+    const formattedDate = `${day}/${month}/${year}`;
+
+    // Format phone number string if available
+    const phoneInfo = clientPhone ? `\nTelefone: ${clientPhone}` : '';
+
+    // Message text
+    const message = `Olá! Gostaria de agendar o seguinte serviço:
+- *Serviço:* ${selectedService.name}
+- *Preço:* ${selectedService.price}
+- *Duração:* ${selectedService.duration}
+- *Data:* ${formattedDate} às ${bookingTime}h
+
+*Meus dados:*
+- *Nome:* ${clientName}${phoneInfo}`;
+
+    const encodedText = encodeURIComponent(message);
+    const waUrl = `https://wa.me/${whatsappDestination}?text=${encodedText}`;
+    
+    // Open whatsapp in new tab
+    window.open(waUrl, '_blank');
+    setIsBookingOpen(false);
+  };
 
   // Check professional profile
   useEffect(() => {
@@ -590,7 +647,9 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                 const animClass = link.animation === 'pulse' ? ' anim-pulse' :
                                   link.animation === 'wobble' ? ' anim-wobble' :
                                   link.animation === 'bounce' ? ' anim-bounce' :
-                                  link.animation === 'glow' ? ' anim-glow' : '';
+                                  link.animation === 'glow' ? ' anim-glow' :
+                                  link.animation === 'glow-pink' ? ' anim-glow-pink' :
+                                  link.animation === 'float-delicate' ? ' anim-float-delicate' : '';
                 
                 // --- SPECIALIZED BLOCKS RENDER ---
                 
@@ -741,6 +800,43 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                             </div>
                             <p className="text-xs italic text-white/80 leading-relaxed">"{t.text}"</p>
                             <h4 className="text-[10px] font-bold text-white/50 uppercase tracking-widest">{t.name}</h4>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Scheduling Block (Agendamento Feminino/Delicado)
+                if (link.type === 'scheduling') {
+                  const services = link.content || [];
+                  if (services.length === 0) return null;
+                  return (
+                    <div key={link.id} className="w-full max-w-md space-y-3 relative text-left">
+                      <h3 className="text-sm font-bold text-center uppercase tracking-widest flex items-center justify-center gap-1.5 font-sans" style={{ color: titleColor }}>
+                        <Calendar className="w-4 h-4 text-pink-400" /> {link.title}
+                      </h3>
+                      <div className="space-y-3">
+                        {services.map((svc: any, idx: number) => (
+                          <div key={idx} className="bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-2xl hover:bg-white/10 hover:border-pink-300/30 transition-all duration-300 shadow-md">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0 flex-1">
+                                <h4 className="text-sm font-bold text-white font-sans">{svc.name}</h4>
+                                <p className="text-[11px] text-zinc-300 leading-relaxed mt-1">{svc.description}</p>
+                                <div className="flex items-center gap-4 mt-2.5">
+                                  <span className="text-sm font-extrabold text-pink-400 font-sans">{svc.price}</span>
+                                  <span className="text-[10px] text-zinc-400 flex items-center gap-1">
+                                    <Clock className="w-3.5 h-3.5 text-pink-300" /> {svc.duration}
+                                  </span>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => handleOpenBooking(svc, link.url)}
+                                className="shrink-0 py-2 px-4 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-400 hover:to-rose-400 text-white text-[11px] font-bold rounded-xl flex items-center justify-center gap-1 transition-all cursor-pointer shadow-md shadow-pink-500/15 hover:scale-105 active:scale-95"
+                              >
+                                Agendar
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -958,6 +1054,107 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
           </a>
         )}
       </div>
+      {/* Booking Modal */}
+      {isBookingOpen && selectedService && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white text-zinc-800 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-pink-100 flex flex-col animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="relative bg-gradient-to-r from-pink-50 to-rose-50 px-6 py-5 border-b border-pink-100">
+              <h3 className="text-base font-extrabold text-zinc-900 flex items-center gap-2 font-sans">
+                <Calendar className="w-5 h-5 text-pink-500" />
+                Agendar Horário
+              </h3>
+              <p className="text-xs text-zinc-500 mt-0.5">Solicite o seu horário com praticidade</p>
+              <button
+                onClick={() => setIsBookingOpen(false)}
+                className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-black/5 text-zinc-400 hover:text-zinc-600 transition-all cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-4 overflow-y-auto max-h-[60vh] text-left">
+              {/* Selected Service Card */}
+              <div className="bg-pink-50/40 border border-pink-100/50 rounded-2xl p-4">
+                <span className="text-[9px] font-bold text-pink-600 uppercase tracking-widest bg-pink-100/60 px-2.5 py-0.5 rounded-full">Serviço Selecionado</span>
+                <h4 className="text-sm font-extrabold text-zinc-855 mt-1.5">{selectedService.name}</h4>
+                <div className="flex gap-4 mt-2 text-xs font-semibold text-zinc-600">
+                  <span className="text-pink-600">{selectedService.price}</span>
+                  <span className="flex items-center gap-0.5"><Clock className="w-3.5 h-3.5 text-pink-400" /> {selectedService.duration}</span>
+                </div>
+              </div>
+
+              {/* Inputs */}
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-[10px] text-zinc-500 font-bold uppercase tracking-wide mb-1">Seu Nome *</label>
+                  <input
+                    type="text"
+                    required
+                    value={clientName}
+                    onChange={(e) => setClientName(e.target.value)}
+                    placeholder="Digite seu nome completo"
+                    className="w-full bg-zinc-50 text-xs text-zinc-800 py-3 px-4 rounded-xl border border-zinc-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-100 transition-all outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] text-zinc-500 font-bold uppercase tracking-wide mb-1">Seu WhatsApp / Telefone (Opcional)</label>
+                  <input
+                    type="text"
+                    value={clientPhone}
+                    onChange={(e) => setClientPhone(e.target.value)}
+                    placeholder="Ex: (11) 99999-9999"
+                    className="w-full bg-zinc-50 text-xs text-zinc-800 py-3 px-4 rounded-xl border border-zinc-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-100 transition-all outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] text-zinc-500 font-bold uppercase tracking-wide mb-1">Data do Agendamento *</label>
+                    <input
+                      type="date"
+                      required
+                      value={bookingDate}
+                      onChange={(e) => setBookingDate(e.target.value)}
+                      className="w-full bg-zinc-50 text-xs text-zinc-800 py-3 px-4 rounded-xl border border-zinc-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-100 transition-all outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-zinc-500 font-bold uppercase tracking-wide mb-1">Horário *</label>
+                    <input
+                      type="time"
+                      required
+                      value={bookingTime}
+                      onChange={(e) => setBookingTime(e.target.value)}
+                      className="w-full bg-zinc-50 text-xs text-zinc-800 py-3 px-4 rounded-xl border border-zinc-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-100 transition-all outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="bg-zinc-50 px-6 py-4 border-t border-zinc-150 flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => setIsBookingOpen(false)}
+                className="px-4 py-2.5 text-xs text-zinc-500 rounded-xl hover:bg-zinc-200 font-bold transition-all cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmBooking}
+                className="px-5 py-2.5 text-xs bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-extrabold rounded-xl transition-all shadow-md shadow-pink-500/20 cursor-pointer"
+              >
+                Confirmar no WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

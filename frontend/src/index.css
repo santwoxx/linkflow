@@ -113,3 +113,23 @@
 .sticker-hover:hover {
   transform: scale(1.15) !important;
 }
+
+/* Efeitos Femininos Delicados */
+@keyframes glow-pink-delicate {
+  0%, 100% { box-shadow: 0 0 6px rgba(244, 63, 94, 0.15), 0 0 10px rgba(244, 63, 94, 0.08); }
+  50% { box-shadow: 0 0 14px rgba(244, 63, 94, 0.45), 0 0 18px rgba(244, 63, 94, 0.25); border-color: rgba(244, 63, 94, 0.4) !important; }
+}
+
+@keyframes float-delicate {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-3px) scale(1.005); }
+}
+
+.anim-glow-pink {
+  animation: glow-pink-delicate 2.2s infinite ease-in-out;
+}
+
+.anim-float-delicate {
+  animation: float-delicate 3.2s infinite ease-in-out;
+}
+
