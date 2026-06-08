@@ -1225,12 +1225,10 @@ export default function App() {
         {/* Catchy headline */}
         <div className="space-y-4">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white max-w-3xl leading-tight font-sans">
-            Sua página de links, seus serviços e <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#a78bfa] via-[#c4b5fd] to-white">sua rede social</span> em um só lugar
+            Sua página de links (Link na Bio), seus serviços e <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#a78bfa] via-[#c4b5fd] to-white">sua rede social</span> em um só lugar
           </h1>
           <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto leading-relaxed font-light">
-            Crie sua página no LinkFlow, <strong class="text-slate-300">divulgue seus serviços</strong>, publique fotos e atualizações, 
-            interaja com curtidas e comentários, monitore cliques em tempo real e personalize tudo — 
-            <strong class="text-slate-300"> sem mensalidades e sem intermediários</strong>.
+            Crie sua página de links grátis no LinkFlow, a melhor <strong className="text-[#a78bfa]">alternativa ao Linktree</strong> para Instagram, TikTok e WhatsApp. Centralize seus contatos, <strong className="text-slate-300">divulgue portfólios</strong>, publique atualizações no feed e agende clientes — <strong className="text-slate-300">tudo sem mensalidades e 100% gratuito</strong>.
           </p>
         </div>
 
