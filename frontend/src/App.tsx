@@ -223,109 +223,103 @@ export default function App() {
       }
     };
 
-    // Support nails_camilebezerra bypass profile
-    if (publicSlug === 'nails_camilebezerra') {
-      const applyCamile = () => {
-        const defaultProfile: UserProfile = {
-          uid: 'camile-bezerra-123',
-          username: 'nails_camilebezerra',
-          displayName: 'Camile Bezerra',
-          bio: 'Nails Designer | Especialista em Alongamentos de Unha, Blindagem e Nail Art Delicadas ✨🌸\nEntre em contato e agende seu horário abaixo!',
-          profilePicUrl: 'https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=400&auto=format&fit=crop&q=80',
-          email: 'camilebezerra92@gmail.com',
-          role: 'user',
-          verifiedProfessional: true,
-          serviceEnabled: true,
-          theme: {
-            themeId: 'cherry-blossom',
-            cardStyle: 'rounded',
-            fontFamily: 'sans',
-            buttonColor: '#ffffff',
-            buttonTextColor: '#db2777',
-            backgroundColor: 'bg-gradient-to-b from-pink-50 via-rose-100 to-pink-50 text-rose-900',
-          },
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-
-        const defaultLinks: LinkItem[] = [
-          {
-            id: 'camile-booking',
-            userId: 'camile-bezerra-123',
-            title: 'Agendamento de Serviços',
-            url: '5581999999999',
-            active: true,
-            order: 1,
-            type: 'scheduling',
-            animation: 'glow-pink',
-            content: [
-              {
-                id: 'svc-1',
-                name: 'Alongamento em Gel (Fibra/Tip)',
-                description: 'Alongamento super resistente com acabamento natural e delicado.',
-                price: 'R$ 130,00',
-                duration: '2h 00m'
-              },
-              {
-                id: 'svc-2',
-                name: 'Manicure & Pedicure Completa',
-                description: 'Cutilagem russa, esmaltação e hidratação das mãos e pés.',
-                price: 'R$ 50,00',
-                duration: '1h 00m'
-              },
-              {
-                id: 'svc-3',
-                name: 'Blindagem de Unha Natural',
-                description: 'Capa de gel protetora para evitar quebras e garantir maior duração do esmalte.',
-                price: 'R$ 80,00',
-                duration: '1h 00m'
-              },
-              {
-                id: 'svc-4',
-                name: 'Nail Art Personalizada (por unha)',
-                description: 'Pedraria, glitter, encapsulada ou desenhos manuais exclusivos.',
-                price: 'R$ 10,00',
-                duration: '15m'
-              }
-            ],
-            createdAt: new Date(),
-            updatedAt: new Date()
-          },
-          {
-            id: 'camile-instagram',
-            userId: 'camile-bezerra-123',
-            title: 'Instagram Profissional',
-            url: 'https://instagram.com/nails_camilebezerra',
-            active: true,
-            order: 2,
-            type: 'link',
-            animation: 'float-delicate',
-            iconEmoji: '📸',
-            createdAt: new Date(),
-            updatedAt: new Date()
-          },
-          {
-            id: 'camile-whatsapp',
-            userId: 'camile-bezerra-123',
-            title: 'Falar no WhatsApp Comercial',
-            url: 'https://wa.me/5581999999999',
-            active: true,
-            order: 3,
-            type: 'whatsapp',
-            iconEmoji: '💬',
-            createdAt: new Date(),
-            updatedAt: new Date()
-          }
-        ];
-
-        setPublicProfile(defaultProfile);
-        setPublicLinks(defaultLinks);
-        finishInitialLoad();
+    const applyCamileMock = () => {
+      const defaultProfile: UserProfile = {
+        uid: 'camile-bezerra-123',
+        username: 'nails_camilebezerra',
+        displayName: 'Camile Bezerra',
+        bio: 'Nails Designer | Especialista em Alongamentos de Unha, Blindagem e Nail Art Delicadas ✨🌸\nEntre em contato e agende seu horário abaixo!',
+        profilePicUrl: 'https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=400&auto=format&fit=crop&q=80',
+        email: 'camilebezerra92@gmail.com',
+        role: 'user',
+        verifiedProfessional: true,
+        serviceEnabled: true,
+        theme: {
+          themeId: 'cherry-blossom',
+          cardStyle: 'rounded',
+          fontFamily: 'sans',
+          buttonColor: '#ffffff',
+          buttonTextColor: '#db2777',
+          backgroundColor: 'bg-gradient-to-b from-pink-50 via-rose-100 to-pink-50 text-rose-900',
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
-      applyCamile();
-      return;
-    }
+      const defaultLinks: LinkItem[] = [
+        {
+          id: 'camile-booking',
+          userId: 'camile-bezerra-123',
+          title: 'Agendamento de Serviços',
+          url: '73981177122',
+          active: true,
+          order: 1,
+          type: 'scheduling',
+          animation: 'glow-pink',
+          content: [
+            {
+              id: 'svc-1',
+              name: 'Alongamento em Gel (Fibra/Tip)',
+              description: 'Alongamento super resistente com acabamento natural e delicado.',
+              price: 'R$ 130,00',
+              duration: '2h 00m'
+            },
+            {
+              id: 'svc-2',
+              name: 'Manicure & Pedicure Completa',
+              description: 'Cutilagem russa, esmaltação e hidratação das mãos e pés.',
+              price: 'R$ 50,00',
+              duration: '1h 00m'
+            },
+            {
+              id: 'svc-3',
+              name: 'Blindagem de Unha Natural',
+              description: 'Capa de gel protetora para evitar quebras e garantir maior duração do esmalte.',
+              price: 'R$ 80,00',
+              duration: '1h 00m'
+            },
+            {
+              id: 'svc-4',
+              name: 'Nail Art Personalizada (por unha)',
+              description: 'Pedraria, glitter, encapsulada ou desenhos manuais exclusivos.',
+              price: 'R$ 10,00',
+              duration: '15m'
+            }
+          ],
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          id: 'camile-instagram',
+          userId: 'camile-bezerra-123',
+          title: 'Instagram Profissional',
+          url: 'https://instagram.com/nails_camilebezerra',
+          active: true,
+          order: 2,
+          type: 'link',
+          animation: 'float-delicate',
+          iconEmoji: '📸',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          id: 'camile-whatsapp',
+          userId: 'camile-bezerra-123',
+          title: 'Falar no WhatsApp Comercial',
+          url: 'https://wa.me/5573981177122',
+          active: true,
+          order: 3,
+          type: 'whatsapp',
+          iconEmoji: '💬',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      ];
+
+      setPublicProfile(defaultProfile);
+      setPublicLinks(defaultLinks);
+      finishInitialLoad();
+    };
 
     // Support sandbox demo bypass (kept in sync with dashboard via storage events)
     if (publicSlug === 'usuario_demo') {
@@ -429,6 +423,10 @@ export default function App() {
         if (cancelled) return;
 
         if (querySnapshot.empty) {
+          if (publicSlug === 'nails_camilebezerra') {
+            applyCamileMock();
+            return;
+          }
           setPublicError('Página não encontrada.');
           setPublicLinks([]);
           finishInitialLoad();
@@ -493,6 +491,10 @@ export default function App() {
           return;
         }
         if (querySnapshot.empty) {
+          if (publicSlug === 'nails_camilebezerra') {
+            applyCamileMock();
+            return;
+          }
           setPublicError('Página não encontrada.');
           return;
         }

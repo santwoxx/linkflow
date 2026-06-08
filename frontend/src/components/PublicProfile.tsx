@@ -82,30 +82,42 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
   // Check professional profile
   useEffect(() => {
     if (profile.serviceEnabled && profile.verifiedProfessional && profile.uid) {
-      if (profile.username === 'nails_camilebezerra' || profile.email === 'camilebezerra92@gmail.com') {
-        setProData({
-          uid: profile.uid,
-          username: 'nails_camilebezerra',
-          displayName: 'Camile Bezerra',
-          profession: 'Nails Designer',
-          category: 'Outros',
-          bio: 'Especialista em Alongamentos de Unha, Blindagem e Nail Art Delicadas ✨🌸',
-          whatsapp: '5581999999999',
-          skills: ['Gel', 'Nail Art', 'Manicure', 'Blindagem', 'Cutilagem'],
-          verified: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
-        return;
-      }
       getDoc(doc(db, 'professional_profiles', profile.uid))
         .then(snap => {
           if (snap.exists()) {
             setProData(snap.data());
+          } else if (profile.username === 'nails_camilebezerra' || profile.email === 'camilebezerra92@gmail.com') {
+            setProData({
+              uid: profile.uid,
+              username: 'nails_camilebezerra',
+              displayName: 'Camile Bezerra',
+              profession: 'Nails Designer',
+              category: 'Outros',
+              bio: 'Especialista em Alongamentos de Unha, Blindagem e Nail Art Delicadas ✨🌸',
+              whatsapp: '73981177122',
+              skills: ['Gel', 'Nail Art', 'Manicure', 'Blindagem', 'Cutilagem'],
+              verified: true,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            });
           }
         })
         .catch(err => {
-          if (!String(err).includes('offline')) {
+          if (profile.username === 'nails_camilebezerra' || profile.email === 'camilebezerra92@gmail.com') {
+            setProData({
+              uid: profile.uid,
+              username: 'nails_camilebezerra',
+              displayName: 'Camile Bezerra',
+              profession: 'Nails Designer',
+              category: 'Outros',
+              bio: 'Especialista em Alongamentos de Unha, Blindagem e Nail Art Delicadas ✨🌸',
+              whatsapp: '73981177122',
+              skills: ['Gel', 'Nail Art', 'Manicure', 'Blindagem', 'Cutilagem'],
+              verified: true,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            });
+          } else if (!String(err).includes('offline')) {
             console.error('Erro ao buscar perfil profissional:', err);
           }
         });

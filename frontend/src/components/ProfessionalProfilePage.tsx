@@ -30,26 +30,6 @@ export default function ProfessionalProfilePage({ username, onBack }: Profession
       setIsLoading(true);
       setNotFound(false);
       try {
-        if (username === 'nails_camilebezerra') {
-          setPro({
-            uid: 'camile-bezerra-123',
-            username: 'nails_camilebezerra',
-            displayName: 'Camile Bezerra',
-            profilePicUrl: 'https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=400&auto=format&fit=crop&q=80',
-            profession: 'Nails Designer',
-            category: 'Outros',
-            bio: 'Especialista em Alongamentos de Unha, Blindagem e Nail Art Delicadas ✨🌸',
-            whatsapp: '5581999999999',
-            instagram: 'nails_camilebezerra',
-            city: 'Recife',
-            skills: ['Gel', 'Nail Art', 'Manicure', 'Blindagem', 'Cutilagem'],
-            verified: true,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          });
-          setIsLoading(false);
-          return;
-        }
         const q = query(
           collection(db, 'professional_profiles'),
           where('username', '==', username),
@@ -58,7 +38,26 @@ export default function ProfessionalProfilePage({ username, onBack }: Profession
         );
         const snap = await getDocs(q);
         if (snap.empty) {
-          setNotFound(true);
+          if (username === 'nails_camilebezerra') {
+            setPro({
+              uid: 'camile-bezerra-123',
+              username: 'nails_camilebezerra',
+              displayName: 'Camile Bezerra',
+              profilePicUrl: 'https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=400&auto=format&fit=crop&q=80',
+              profession: 'Nails Designer',
+              category: 'Outros',
+              bio: 'Especialista em Alongamentos de Unha, Blindagem e Nail Art Delicadas ✨🌸',
+              whatsapp: '73981177122',
+              instagram: 'nails_camilebezerra',
+              city: 'Itabuna BA',
+              skills: ['Gel', 'Nail Art', 'Manicure', 'Blindagem', 'Cutilagem'],
+              verified: true,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            });
+          } else {
+            setNotFound(true);
+          }
         } else {
           setPro(snap.docs[0].data() as ProfessionalProfile);
         }
