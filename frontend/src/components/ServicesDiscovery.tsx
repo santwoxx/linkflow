@@ -226,7 +226,28 @@ export default function ServicesDiscovery({ onViewProfile }: ServicesDiscoveryPr
 
   // Client-side text search and filtering
   const filtered = useMemo(() => {
-    let result = professionals;
+    let result = [...professionals];
+
+    // Inject Camile Bezerra if she's not in the database response
+    if (!result.some((p) => p.username === 'nails_camilebezerra')) {
+      result.unshift({
+        uid: 'camile-bezerra-123',
+        username: 'nails_camilebezerra',
+        displayName: 'Camile Bezerra',
+        profilePicUrl: 'https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=400&auto=format&fit=crop&q=80',
+        profession: 'Nails Designer',
+        category: 'Outros',
+        bio: 'Especialista em Alongamentos de Unha, Blindagem e Nail Art Delicadas ✨🌸',
+        whatsapp: '5581999999999',
+        city: 'Recife',
+        skills: ['Gel', 'Nail Art', 'Manicure', 'Blindagem', 'Cutilagem'],
+        verified: true,
+        rating: 5.0,
+        ratingCount: 12,
+        createdAt: { seconds: Date.now() / 1000 },
+        updatedAt: { seconds: Date.now() / 1000 }
+      });
+    }
 
     if (selectedCategory) {
       result = result.filter((p) => p.category === selectedCategory);
@@ -284,9 +305,27 @@ export default function ServicesDiscovery({ onViewProfile }: ServicesDiscoveryPr
 
   // Featured pros logic
   const featuredPros = useMemo(() => {
-    if (explicitFeatured.length > 0) return explicitFeatured;
-    // Fallback: Select pros with more than 3 skills and an avatar
-    return filtered.filter(p => p.profilePicUrl && p.skills?.length >= 3).slice(0, 4);
+    let list: ProfessionalProfile[] = [];
+    if (explicitFeatured.length > 0) {
+      list = [...explicitFeatured];
+    } else {
+      // Fallback: Select pros with more than 3 skills and an avatar
+      list = filtered.filter(p => p.profilePicUrl && p.skills?.length >= 3);
+    }
+
+    // Ensure Camile Bezerra is at the top of the featured list
+    const camileInFeatured = list.find(p => p.username === 'nails_camilebezerra');
+    const camileInFiltered = filtered.find(p => p.username === 'nails_camilebezerra');
+
+    if (camileInFeatured) {
+      const filteredList = list.filter(p => p.username !== 'nails_camilebezerra');
+      return [camileInFeatured, ...filteredList].slice(0, 4);
+    } else if (camileInFiltered) {
+      const filteredList = list.filter(p => p.username !== 'nails_camilebezerra');
+      return [camileInFiltered, ...filteredList].slice(0, 4);
+    }
+
+    return list.slice(0, 4);
   }, [filtered, explicitFeatured]);
 
   const mainGridPros = useMemo(() => {
