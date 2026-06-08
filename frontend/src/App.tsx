@@ -8,6 +8,7 @@ import PublicProfile from './components/PublicProfile';
 const ServicesDiscovery = React.lazy(() => import('./components/ServicesDiscovery'));
 const ProfessionalProfilePage = React.lazy(() => import('./components/ProfessionalProfilePage'));
 const ProSalesPage = React.lazy(() => import('./components/ProSalesPage'));
+const SeoLandingPage = React.lazy(() => import('./components/SeoLandingPage'));
 import { Link2, Sparkles, LogIn, Lock, CheckCircle, RefreshCw, BarChart4, Palette, Heart, AlertTriangle, ExternalLink, Ban, FileText, X, Briefcase, Users, ShieldCheck, TrendingUp, Smartphone, Store } from 'lucide-react';
 
 export default function App() {
@@ -96,8 +97,10 @@ export default function App() {
   const [publicLoading, setPublicLoading] = useState(false);
   const [publicError, setPublicError] = useState<string | null>(null);
 
-  // Dynamic SEO meta tags for public profiles
+  // Dynamic SEO meta tags for public profiles and SEO pages
   useEffect(() => {
+    const seoPaths = ['linktree-gratis', 'alternativa-linktree', 'como-colocar-link-na-bio'];
+
     if (publicProfile) {
       const desc = publicProfile.bio || `Confira os links e serviços de ${publicProfile.displayName} no LinkFlowAI`;
       const pageTitle = `${publicProfile.displayName} (@${publicProfile.username}) | LinkFlowAI`;
@@ -158,6 +161,56 @@ export default function App() {
         if (!twitterImage) { twitterImage = document.createElement('meta'); twitterImage.setAttribute('name', 'twitter:image'); document.head.appendChild(twitterImage); }
         twitterImage.setAttribute('content', publicProfile.profilePicUrl);
       }
+    } else if (publicView && seoPaths.includes(publicView)) {
+      let pageTitle = '';
+      let desc = '';
+      
+      if (publicView === 'linktree-gratis') {
+        pageTitle = 'Linktree Grátis: Agrupador de Links na Bio 100% Gratuito | LinkFlowAI';
+        desc = 'Crie seu biolink personalizado sem mensalidades. Tenha todos os recursos que as outras plataformas cobram por um preço de R$ 0,00.';
+      } else if (publicView === 'alternativa-linktree') {
+        pageTitle = 'A Melhor Alternativa ao Linktree em Português | LinkFlowAI';
+        desc = 'Descubra por que milhares de criadores de conteúdo, profissionais liberais e marcas estão migrando do Linktree para o LinkFlowAI.';
+      } else {
+        pageTitle = 'Como Colocar Link na Bio do Instagram e TikTok (Guia) | LinkFlowAI';
+        desc = 'O guia definitivo para criar sua página de links no LinkFlowAI e inseri-la de forma profissional no topo de suas redes sociais.';
+      }
+
+      document.title = pageTitle;
+
+      // Meta Description
+      let metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) {
+        metaDesc.setAttribute('content', desc);
+      }
+
+      // Open Graph Title
+      let ogTitle = document.querySelector('meta[property="og:title"]');
+      if (ogTitle) { ogTitle.setAttribute('content', pageTitle); }
+
+      // Open Graph Description
+      let ogDesc = document.querySelector('meta[property="og:description"]');
+      if (ogDesc) { ogDesc.setAttribute('content', desc); }
+
+      // Canonical URL
+      const pageUrl = `https://linkflowai.com.br/${publicView}`;
+      let canonical = document.querySelector('link[rel="canonical"]');
+      if (canonical) {
+        canonical.setAttribute('href', pageUrl);
+      }
+
+      // Open Graph URL
+      let ogUrl = document.querySelector('meta[property="og:url"]');
+      if (ogUrl) {
+        ogUrl.setAttribute('content', pageUrl);
+      }
+
+      // Twitter Cards
+      let twitterTitle = document.querySelector('meta[name="twitter:title"]');
+      if (twitterTitle) { twitterTitle.setAttribute('content', pageTitle); }
+
+      let twitterDesc = document.querySelector('meta[name="twitter:description"]');
+      if (twitterDesc) { twitterDesc.setAttribute('content', desc); }
     } else if (!publicSlug) {
       document.title = 'LinkFlowAI | Sua Página de Links + Rede Social';
       
@@ -178,7 +231,7 @@ export default function App() {
         document.title = 'LinkFlowAI | Sua Página de Links + Rede Social';
       }
     };
-  }, [publicProfile, publicSlug]);
+  }, [publicProfile, publicSlug, publicView]);
 
   // Parse URL parameter "?u=username" or pathname
   useEffect(() => {
@@ -189,30 +242,87 @@ export default function App() {
 
     const path = window.location.pathname;
     const cleanPath = path.replace(/^\/+|\/+$/g, '');
-    const reservedPaths = ['servicos', 'profissional', 'index.html', 'privacy', 'terms', 'admin'];
+    const seoPaths = ['linktree-gratis', 'alternativa-linktree', 'como-colocar-link-na-bio'];
+    const reservedPaths = ['servicos', 'profissional', 'index.html', 'privacy', 'terms', 'admin', ...seoPaths];
 
-    if (!u && cleanPath && !reservedPaths.includes(cleanPath)) {
-      u = cleanPath;
-    }
+    // Check custom domain
+    const hostname = window.location.hostname.toLowerCase();
+    const platformDomains = [
+      'localhost',
+      '127.0.0.1',
+      'linkflowai.com.br',
+      'www.linkflowai.com.br',
+      'linkflow-bf1bb.web.app',
+      'linkflow-bf1bb.firebaseapp.com',
+      'linkflow.vercel.app'
+    ];
+    
+    const isCustomDomain = !platformDomains.includes(hostname) && 
+                           !hostname.endsWith('.gitpod.io') && 
+                           !hostname.endsWith('.github.dev') && 
+                           !hostname.endsWith('.ngrok-free.app');
 
-    if (u) {
-      const slug = u.trim().toLowerCase();
-      setPublicSlug(slug);
-      
-      // Clean up search param from URL if it was '?u=' to keep the URL clean and short
-      if (params.has('u')) {
-        params.delete('u');
-        const search = params.toString();
-        const nextQuery = search ? `?${search}` : '';
-        const newUrl = `${window.location.origin}/${slug}${nextQuery}`;
-        window.history.replaceState({}, '', newUrl);
+    const fetchCustomDomainProfile = async () => {
+      setPublicLoading(true);
+      try {
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('customDomain', '==', hostname), limit(1));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          const profileData = snap.docs[0].data() as UserProfile;
+          if (profileData.verifiedProfessional && profileData.serviceEnabled) {
+            setPublicProfile(profileData);
+            setPublicSlug(profileData.username);
+            
+            // Fetch links for the custom domain profile
+            const linksRef = collection(db, 'users', profileData.uid, 'links');
+            const linksQuery = query(linksRef, where('active', '==', true));
+            const linksSnap = await getDocs(linksQuery);
+            const items: LinkItem[] = [];
+            linksSnap.forEach((l) => items.push(l.data() as LinkItem));
+            items.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+            setPublicLinks(items);
+          } else {
+            setPublicError('Este domínio personalizado exige um plano profissional verificado ativo.');
+          }
+        } else {
+          setPublicError('Este domínio personalizado não está configurado em nenhuma conta do LinkFlowAI.');
+        }
+      } catch (err) {
+        console.error('Erro ao buscar perfil por domínio personalizado:', err);
+        setPublicError('Não foi possível carregar as informações do domínio.');
+      } finally {
+        setPublicLoading(false);
+      }
+    };
+
+    if (isCustomDomain) {
+      fetchCustomDomainProfile();
+    } else {
+      if (!u && cleanPath && !reservedPaths.includes(cleanPath)) {
+        u = cleanPath;
+      }
+
+      if (u) {
+        const slug = u.trim().toLowerCase();
+        setPublicSlug(slug);
+        
+        // Clean up search param from URL if it was '?u=' to keep the URL clean and short
+        if (params.has('u')) {
+          params.delete('u');
+          const search = params.toString();
+          const nextQuery = search ? `?${search}` : '';
+          const newUrl = `${window.location.origin}/${slug}${nextQuery}`;
+          window.history.replaceState({}, '', newUrl);
+        }
+      }
+      if (view) {
+        setPublicView(view.trim().toLowerCase());
+      } else if (cleanPath === 'servicos' || cleanPath === 'profissional' || seoPaths.includes(cleanPath)) {
+        setPublicView(cleanPath);
       }
     }
-    if (view) {
-      setPublicView(view.trim().toLowerCase());
-    } else if (cleanPath === 'servicos' || cleanPath === 'profissional') {
-      setPublicView(cleanPath);
-    }
+
     if (pro) {
       setPublicProProfile(pro.trim().toLowerCase());
     }
@@ -1039,8 +1149,27 @@ export default function App() {
     );
   }
 
+  const seoPaths = ['linktree-gratis', 'alternativa-linktree', 'como-colocar-link-na-bio'];
+  if (publicView && seoPaths.includes(publicView)) {
+    return (
+      <React.Suspense fallback={
+        <div className="min-h-screen bg-[#050b18] flex items-center justify-center text-slate-400">
+          <RefreshCw className="w-8 h-8 text-[#a78bfa] animate-spin" />
+        </div>
+      }>
+        <SeoLandingPage 
+          slug={publicView} 
+          onBack={() => {
+            window.history.pushState({}, '', '/');
+            setPublicView(null);
+          }} 
+        />
+      </React.Suspense>
+    );
+  }
+
   // ----- RENDER BRIGHT PUBLIC PAGE ROUTE -----
-  if (publicSlug) {
+  if (publicSlug || publicError) {
     if (publicLoading) {
       return (
         <div className="min-h-screen bg-[#050b18] flex flex-col items-center justify-center text-slate-400 gap-3">
@@ -1078,18 +1207,20 @@ export default function App() {
             <div className="w-12 h-12 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center mx-auto mb-2">
               <AlertTriangle className="w-6 h-6" aria-hidden="true" />
             </div>
-            <h1 className="text-lg font-bold font-sans text-slate-200">Página Não Encontrada</h1>
-            <p className="text-xs text-slate-500">
-              O link <span className="font-mono text-slate-400">@{publicSlug}</span> não está associado a nenhuma conta registrada ou foi desativado.
+            <h1 className="text-lg font-bold font-sans text-slate-200">
+              {publicError ? 'Erro no Domínio' : 'Página Não Encontrada'}
+            </h1>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              {publicError ? publicError : `O link @${publicSlug} não está associado a nenhuma conta registrada ou foi desativado.`}
             </p>
-            <p className="text-[10px] text-slate-600">Código: 404</p>
+            <p className="text-[10px] text-slate-600">Código: {publicError ? '400' : '404'}</p>
             <div className="pt-2">
               <a
-                href="/"
+                href="https://linkflowai.com.br"
                 className="inline-flex py-3 px-6 rounded-xl bg-[#a78bfa] hover:bg-[#c4b5fd] text-white text-xs font-bold font-sans tracking-wide transition-all shadow-lg shadow-[#a78bfa]/20"
-                aria-label="Criar minha página no LinkFlowAI"
+                aria-label="Ir para o LinkFlowAI"
               >
-                Criar Meu LinkFlowAI
+                Ir para o LinkFlowAI
               </a>
             </div>
           </div>

@@ -44,6 +44,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
   const [portfolio, setPortfolio] = useState('');
   const [skills, setSkills] = useState<string[]>([]);
   const [skillInput, setSkillInput] = useState('');
+  const [customDomain, setCustomDomain] = useState(userProfile.customDomain || '');
 
   const isApproved = userProfile.verifiedProfessional && userProfile.serviceEnabled;
   const isPending = proProfile?.pendingApproval && !proProfile?.verified;
@@ -67,9 +68,11 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
           setSkills(data.skills || []);
           setDisplayName(data.displayName || userProfile.displayName || '');
           setProfilePicUrl(data.profilePicUrl || userProfile.profilePicUrl || '');
+          setCustomDomain(data.customDomain || userProfile.customDomain || '');
         } else {
           setDisplayName(userProfile.displayName || '');
           setProfilePicUrl(userProfile.profilePicUrl || '');
+          setCustomDomain(userProfile.customDomain || '');
         }
       } catch (err) {
         console.error('Erro ao carregar perfil profissional:', err);
@@ -78,7 +81,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
       }
     };
     fetchPro();
-  }, [userProfile.uid, userProfile.displayName, userProfile.profilePicUrl]);
+  }, [userProfile.uid, userProfile.displayName, userProfile.profilePicUrl, userProfile.customDomain]);
 
   const handleAddSkill = () => {
     const s = skillInput.trim();
@@ -104,6 +107,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
     setIsSaving(true);
     try {
       const ref = doc(db, 'professional_profiles', userProfile.uid);
+      const finalDomain = isApproved ? customDomain.trim().toLowerCase() : '';
       const data: Partial<ProfessionalProfile> = {
         uid: userProfile.uid,
         username: userProfile.username,
@@ -119,6 +123,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
         skills,
         verified: isApproved || false,
         pendingApproval: !isApproved,
+        customDomain: finalDomain,
         updatedAt: serverTimestamp(),
       };
 
@@ -136,6 +141,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
       await updateDoc(userRef, {
         displayName: displayName.trim(),
         profilePicUrl: profilePicUrl.trim(),
+        customDomain: finalDomain,
         updatedAt: serverTimestamp()
       });
 
@@ -144,6 +150,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
           ...userProfile,
           displayName: displayName.trim(),
           profilePicUrl: profilePicUrl.trim(),
+          customDomain: finalDomain,
           updatedAt: new Date()
         });
       }
@@ -529,6 +536,28 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
             />
           </div>
         </div>
+
+        {/* Domínio Personalizado */}
+        {isApproved && (
+          <div className="relative z-10 space-y-2">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+              <span className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5 text-[#a78bfa]" /> Domínio Personalizado</span>
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={customDomain}
+                onChange={e => setCustomDomain(e.target.value.replace(/\s+/g, ''))}
+                placeholder="links.seudominio.com.br"
+                maxLength={100}
+                className="flex-1 bg-black/20 border border-white/10 rounded-xl py-3.5 px-4 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-[#a78bfa]/60 focus:bg-black/40 focus:ring-4 focus:ring-[#a78bfa]/10 transition-all hover:border-white/20 font-mono"
+              />
+            </div>
+            <p className="text-[10px] text-slate-500 leading-relaxed">
+              Aponte o CNAME do seu domínio ou subdomínio para <strong className="text-slate-300 font-mono">linkflowai.com.br</strong> no seu provedor de DNS para ativar a conexão.
+            </p>
+          </div>
+        )}
 
         {/* Error */}
         {saveError && (

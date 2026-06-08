@@ -1,0 +1,30 @@
+{
+  "name": "LinkFlowAI - Seu Link na Bio Gratuito",
+  "short_name": "LinkFlowAI",
+  "description": "Crie seu link na bio gratuito, agende serviços e publique no feed com a melhor alternativa ao Linktree.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050b18",
+  "theme_color": "#050b18",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ]
+}

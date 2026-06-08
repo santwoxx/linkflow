@@ -118,6 +118,7 @@ export interface UserProfile {
   // LinkFlowAI Profissional
   verifiedProfessional?: boolean;
   serviceEnabled?: boolean;
+  customDomain?: string;
   createdAt: any;
   updatedAt: any;
 }
@@ -160,6 +161,7 @@ export interface ProfessionalProfile {
   approvedBy?: string;
   rating?: number;
   ratingCount?: number;
+  customDomain?: string;
   createdAt: any;
   updatedAt: any;
 }

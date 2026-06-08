@@ -32,6 +32,16 @@
   <link rel="canonical" href="https://linkflowai.com.br/" />
   <link rel="icon" type="image/svg+xml"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>🔗</text></svg>" />
+  <link rel="manifest" href="/manifest.json" />
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(reg => console.log('Service Worker registrado!', reg))
+          .catch(err => console.log('Erro ao registrar Service Worker:', err));
+      });
+    }
+  </script>
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
