@@ -37,7 +37,7 @@ app.use((_req, res) => {
   res.status(404).json({
     error: 'Rota não encontrada',
     message: 'LinkFlow API - Use /api/health ou /api/gemini/generate',
-    docs: 'https://linkflow-neon.vercel.app/',
+    docs: 'https://linkflowai.com.br/',
   });
 });
 

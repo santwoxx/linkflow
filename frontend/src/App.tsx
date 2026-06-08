@@ -654,7 +654,7 @@ export default function App() {
       setCurrentUser({
         uid: 'demo-user-123',
         displayName: parsed.displayName,
-        email: 'demo@linkflow.com',
+        email: 'demo@linkflowai.com.br',
         photoURL: parsed.profilePicUrl,
         emailVerified: true,
       } as any);
@@ -865,7 +865,7 @@ export default function App() {
       displayName: 'Administrador Demo',
       bio: 'Sou um perfil de testes do LinkFlow! Teste todos os recursos livremente.',
       profilePicUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-      email: 'demo@linkflow.com',
+      email: 'demo@linkflowai.com.br',
       role: 'user',
       theme: {
         themeId: 'sophisticated-dark',
@@ -883,7 +883,7 @@ export default function App() {
     setCurrentUser({
       uid: 'demo-user-123',
       displayName: defaultDemoProfile.displayName,
-      email: 'demo@linkflow.com',
+      email: 'demo@linkflowai.com.br',
       photoURL: defaultDemoProfile.profilePicUrl,
     } as any);
     setUserProfile(defaultDemoProfile);
@@ -1063,7 +1063,7 @@ export default function App() {
             <div>
               <label className="block text-xs text-slate-400 font-semibold mb-1.5">Nome de Usuário (Slug URL)</label>
               <div className="relative flex items-center">
-                <span className="absolute left-3.5 text-xs text-slate-500 font-mono select-none">linkflow.com/?u=</span>
+                <span className="absolute left-3.5 text-xs text-slate-500 font-mono select-none">linkflowai.com.br/?u=</span>
                 <input
                   id="chosen-username-input"
                   type="text"
@@ -1106,7 +1106,7 @@ export default function App() {
               <div className="text-[11px] text-emerald-400 bg-emerald-950/10 border border-emerald-900/20 rounded-lg p-2.5 flex items-start gap-2 animate-fade-in">
                 <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-semibold">Parabéns!</span> O slug <strong className="font-mono">linkflow.com/?u={chosenUsername.trim().toLowerCase()}</strong> está 100% disponível para reserva.
+                  <span className="font-semibold">Parabéns!</span> O slug <strong className="font-mono">linkflowai.com.br/?u={chosenUsername.trim().toLowerCase()}</strong> está 100% disponível para reserva.
                 </div>
               </div>
             )}
@@ -1462,7 +1462,7 @@ export default function App() {
               - Solicitar a portabilidade dos seus dados<br/>
               - Revogar o consentimento a qualquer momento<br/>
               - Ser informado sobre compartilhamento de dados<br/>
-              Para exercer esses direitos, entre em contato pelo e-mail: contato@linkflow.com</p>
+              Para exercer esses direitos, entre em contato pelo e-mail: contato@linkflowai.com.br</p>
 
               <h3 className="text-sm font-bold text-white">5. Retenção de Dados</h3>
               <p>Mantemos seus dados enquanto sua conta estiver ativa. Ao excluir sua conta, seus dados serão removidos em até 30 dias, exceto quando necessário para cumprimento de obrigações legais.</p>
@@ -1475,7 +1475,7 @@ export default function App() {
 
               <h3 className="text-sm font-bold text-white">8. Contato</h3>
               <p>Para questões sobre privacidade e proteção de dados, entre em contato:<br/>
-              E-mail: contato@linkflow.com</p>
+              E-mail: contato@linkflowai.com.br</p>
 
               <p className="text-slate-500 pt-2">Última atualização: Junho de 2026</p>
             </div>
