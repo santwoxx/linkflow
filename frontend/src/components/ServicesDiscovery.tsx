@@ -228,6 +228,27 @@ export default function ServicesDiscovery({ onViewProfile }: ServicesDiscoveryPr
   const filtered = useMemo(() => {
     let result = [...professionals];
 
+    // Inject Natan Marinho if he's not in the database response
+    if (!result.some((p) => p.username === 'natanmarinho-dev')) {
+      result.unshift({
+        uid: 'natan-marinho-ceo-123',
+        username: 'natanmarinho-dev',
+        displayName: 'Natan Marinho',
+        profilePicUrl: 'https://i.ibb.co/YFV7fWfd/IMG-0259.jpg',
+        profession: 'CEO & Founder do LinkFlow',
+        category: 'Programação',
+        bio: 'CEO & Founder do LinkFlow 🚀 Desenvolvedor Fullstack | Especialista em criar ecossistemas digitais de alta performance e conexões sem fricção.',
+        whatsapp: '5581999999999',
+        city: 'Recife PE',
+        skills: ['React', 'Node.js', 'Firebase', 'TypeScript', 'SaaS', 'UI/UX'],
+        verified: true,
+        rating: 5.0,
+        ratingCount: 48,
+        createdAt: { seconds: Date.now() / 1000 },
+        updatedAt: { seconds: Date.now() / 1000 }
+      });
+    }
+
     // Inject Camile Bezerra if she's not in the database response
     if (!result.some((p) => p.username === 'nails_camilebezerra')) {
       result.unshift({
@@ -313,19 +334,17 @@ export default function ServicesDiscovery({ onViewProfile }: ServicesDiscoveryPr
       list = filtered.filter(p => p.profilePicUrl && p.skills?.length >= 3);
     }
 
-    // Ensure Camile Bezerra is at the top of the featured list
-    const camileInFeatured = list.find(p => p.username === 'nails_camilebezerra');
-    const camileInFiltered = filtered.find(p => p.username === 'nails_camilebezerra');
+    // Ensure Natan Marinho is first, and Camile Bezerra is second in Highlights
+    const natan = filtered.find(p => p.username === 'natanmarinho-dev');
+    const camile = filtered.find(p => p.username === 'nails_camilebezerra');
 
-    if (camileInFeatured) {
-      const filteredList = list.filter(p => p.username !== 'nails_camilebezerra');
-      return [camileInFeatured, ...filteredList].slice(0, 4);
-    } else if (camileInFiltered) {
-      const filteredList = list.filter(p => p.username !== 'nails_camilebezerra');
-      return [camileInFiltered, ...filteredList].slice(0, 4);
-    }
+    const rest = list.filter(p => p.username !== 'natanmarinho-dev' && p.username !== 'nails_camilebezerra');
 
-    return list.slice(0, 4);
+    const resultList: ProfessionalProfile[] = [];
+    if (natan) resultList.push(natan);
+    if (camile) resultList.push(camile);
+
+    return [...resultList, ...rest].slice(0, 4);
   }, [filtered, explicitFeatured]);
 
   const mainGridPros = useMemo(() => {
@@ -684,7 +703,14 @@ function ProCard({ pro, onViewProfile, isFeatured }: { pro: ProfessionalProfile,
           </div>
         </div>
 
-        <h3 className="text-xl font-extrabold text-white mb-1.5 truncate group-hover:text-[#a78bfa] transition-colors">{pro.displayName}</h3>
+        <h3 className="text-xl font-extrabold text-white mb-1.5 truncate group-hover:text-[#a78bfa] transition-colors flex items-center gap-2">
+          {pro.displayName}
+          {pro.username === 'natanmarinho-dev' && (
+            <span className="inline-flex items-center gap-0.5 text-[9px] font-black bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse shadow-md shadow-amber-500/20">
+              CEO / Dono
+            </span>
+          )}
+        </h3>
         <p className="text-sm text-[#a78bfa] font-bold mb-5 truncate">{pro.profession}</p>
 
         <div className="flex items-center gap-4 text-[13px] text-slate-400 font-medium mb-6">

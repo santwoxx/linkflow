@@ -100,6 +100,20 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
               createdAt: new Date(),
               updatedAt: new Date(),
             });
+          } else if (profile.username === 'natanmarinho-dev' || profile.email === ADMIN_EMAIL) {
+            setProData({
+              uid: profile.uid,
+              username: 'natanmarinho-dev',
+              displayName: 'Natan Marinho',
+              profession: 'CEO & Founder do LinkFlow',
+              category: 'Programação',
+              bio: 'CEO & Founder do LinkFlow 🚀 Desenvolvedor Fullstack | Especialista em criar ecossistemas digitais de alta performance e conexões sem fricção.',
+              whatsapp: '5581999999999',
+              skills: ['React', 'Node.js', 'Firebase', 'TypeScript', 'SaaS', 'UI/UX'],
+              verified: true,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            });
           }
         })
         .catch(err => {
@@ -113,6 +127,20 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
               bio: 'Especialista em Alongamentos de Unha, Blindagem e Nail Art Delicadas ✨🌸',
               whatsapp: '73981177122',
               skills: ['Gel', 'Nail Art', 'Manicure', 'Blindagem', 'Cutilagem'],
+              verified: true,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            });
+          } else if (profile.username === 'natanmarinho-dev' || profile.email === ADMIN_EMAIL) {
+            setProData({
+              uid: profile.uid,
+              username: 'natanmarinho-dev',
+              displayName: 'Natan Marinho',
+              profession: 'CEO & Founder do LinkFlow',
+              category: 'Programação',
+              bio: 'CEO & Founder do LinkFlow 🚀 Desenvolvedor Fullstack | Especialista em criar ecossistemas digitais de alta performance e conexões sem fricção.',
+              whatsapp: '5581999999999',
+              skills: ['React', 'Node.js', 'Firebase', 'TypeScript', 'SaaS', 'UI/UX'],
               verified: true,
               createdAt: new Date(),
               updatedAt: new Date(),

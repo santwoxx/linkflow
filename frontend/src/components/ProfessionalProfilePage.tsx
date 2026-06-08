@@ -55,6 +55,23 @@ export default function ProfessionalProfilePage({ username, onBack }: Profession
               createdAt: new Date(),
               updatedAt: new Date()
             });
+          } else if (username === 'natanmarinho-dev') {
+            setPro({
+              uid: 'natan-marinho-ceo-123',
+              username: 'natanmarinho-dev',
+              displayName: 'Natan Marinho',
+              profilePicUrl: 'https://i.ibb.co/YFV7fWfd/IMG-0259.jpg',
+              profession: 'CEO & Founder do LinkFlow',
+              category: 'Programação',
+              bio: 'CEO & Founder do LinkFlow 🚀 Desenvolvedor Fullstack | Especialista em criar ecossistemas digitais de alta performance e conexões sem fricção.',
+              whatsapp: '5581999999999',
+              instagram: 'natanmarinho.dev',
+              city: 'Recife PE',
+              skills: ['React', 'Node.js', 'Firebase', 'TypeScript', 'SaaS', 'UI/UX'],
+              verified: true,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            });
           } else {
             setNotFound(true);
           }

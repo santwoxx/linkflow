@@ -223,7 +223,101 @@ export default function App() {
       }
     };
 
+    const applyNatanMock = () => {
+      const defaultProfile: UserProfile = {
+        uid: 'natan-marinho-ceo-123',
+        username: 'natanmarinho-dev',
+        displayName: 'Natan Marinho',
+        bio: 'CEO & Founder do LinkFlow 🚀 | Desenvolvedor Fullstack | Especialista em criar ecossistemas digitais de alta performance e conexões sem fricção.',
+        profilePicUrl: 'https://i.ibb.co/YFV7fWfd/IMG-0259.jpg',
+        email: 'brisasofc@gmail.com',
+        role: 'admin',
+        verifiedProfessional: true,
+        serviceEnabled: true,
+        theme: {
+          themeId: 'sophisticated-dark',
+          cardStyle: 'rounded',
+          fontFamily: 'sans',
+          buttonColor: '#111a36',
+          buttonTextColor: '#ffffff',
+          backgroundColor: 'bg-[#0a1128] text-slate-100',
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const defaultLinks: LinkItem[] = [
+        {
+          id: 'natan-booking',
+          userId: 'natan-marinho-ceo-123',
+          title: 'Agendamento de Consultorias',
+          url: '5581999999999',
+          active: true,
+          order: 1,
+          type: 'scheduling',
+          animation: 'glow',
+          content: [
+            {
+              id: 'svc-n1',
+              name: 'Mentoria & Consultoria Técnica',
+              description: 'Sessão individual para arquitetura de software, SaaS e escalabilidade.',
+              price: 'R$ 300,00',
+              duration: '1h 00m'
+            },
+            {
+              id: 'svc-n2',
+              name: 'Desenvolvimento de Landing Page Premium',
+              description: 'Página ultra rápida com design moderno, SEO otimizado e conversão focada.',
+              price: 'Sob Orçamento',
+              duration: '5 dias'
+            },
+            {
+              id: 'svc-n3',
+              name: 'Integração de Métodos de Pagamento',
+              description: 'Configuração completa de checkout transparente (Mercado Pago, Stripe, etc.).',
+              price: 'R$ 800,00',
+              duration: '2 dias'
+            }
+          ],
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          id: 'natan-instagram',
+          userId: 'natan-marinho-ceo-123',
+          title: 'Siga no Instagram @natanmarinho.dev',
+          url: 'https://instagram.com/natanmarinho.dev',
+          active: true,
+          order: 2,
+          type: 'link',
+          iconEmoji: '📸',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          id: 'natan-github',
+          userId: 'natan-marinho-ceo-123',
+          title: 'GitHub Professional',
+          url: 'https://github.com',
+          active: true,
+          order: 3,
+          type: 'link',
+          iconEmoji: '💻',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      ];
+
+      setPublicProfile(defaultProfile);
+      setPublicLinks(defaultLinks);
+      finishInitialLoad();
+    };
+
     const applyCamileMock = () => {
+      if (publicSlug === 'natanmarinho-dev') {
+        applyNatanMock();
+        return;
+      }
       const defaultProfile: UserProfile = {
         uid: 'camile-bezerra-123',
         username: 'nails_camilebezerra',
@@ -423,7 +517,7 @@ export default function App() {
         if (cancelled) return;
 
         if (querySnapshot.empty) {
-          if (publicSlug === 'nails_camilebezerra') {
+          if (publicSlug === 'nails_camilebezerra' || publicSlug === 'natanmarinho-dev') {
             applyCamileMock();
             return;
           }
@@ -491,7 +585,7 @@ export default function App() {
           return;
         }
         if (querySnapshot.empty) {
-          if (publicSlug === 'nails_camilebezerra') {
+          if (publicSlug === 'nails_camilebezerra' || publicSlug === 'natanmarinho-dev') {
             applyCamileMock();
             return;
           }
@@ -587,10 +681,14 @@ export default function App() {
             data.email = data.email || firebaseUser.email || '';
             if (data.email === ADMIN_EMAIL) {
               data.role = 'admin';
+              data.verifiedProfessional = true;
+              data.serviceEnabled = true;
               const ceoPic = 'https://i.ibb.co/YFV7fWfd/IMG-0259.jpg';
               if (data.profilePicUrl !== ceoPic) {
                 data.profilePicUrl = ceoPic;
-                updateDoc(userDocRef, { profilePicUrl: ceoPic }).catch(() => {});
+                updateDoc(userDocRef, { profilePicUrl: ceoPic, verifiedProfessional: true, serviceEnabled: true }).catch(() => {});
+              } else {
+                updateDoc(userDocRef, { verifiedProfessional: true, serviceEnabled: true }).catch(() => {});
               }
             }
             if (data.email === 'camilebezerra92@gmail.com') {
@@ -716,6 +814,11 @@ export default function App() {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
+
+      if (currentUser.email === ADMIN_EMAIL) {
+        newUserProfile.verifiedProfessional = true;
+        newUserProfile.serviceEnabled = true;
+      }
 
       if (currentUser.email === 'camilebezerra92@gmail.com') {
         newUserProfile.verifiedProfessional = true;
