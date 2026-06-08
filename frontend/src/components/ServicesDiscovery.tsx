@@ -8,7 +8,7 @@ import {
   limit,
   onSnapshot
 } from 'firebase/firestore';
-import { ProfessionalProfile, PRO_CATEGORIES, ProCategory } from '../types';
+import { ProfessionalProfile, PRO_CATEGORIES, ProCategory, UserProfile } from '../types';
 import {
   Search, MapPin, Star, ChevronLeft,
   Loader2, SlidersHorizontal, X, Users, AlertTriangle, WifiOff, RefreshCw, MessageCircle, ArrowRight, ShieldCheck, Zap
@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from 'motion/react';
 
 interface ServicesDiscoveryProps {
   onViewProfile: (username: string) => void;
+  currentUserProfile?: UserProfile | null;
 }
 
 const PAGE_SIZE = 20;
@@ -110,7 +111,7 @@ const ConversionBanner = () => (
 
 // ---- Main Component ----
 
-export default function ServicesDiscovery({ onViewProfile }: ServicesDiscoveryProps) {
+export default function ServicesDiscovery({ onViewProfile, currentUserProfile }: ServicesDiscoveryProps) {
   const [professionals, setProfessionals] = useState<ProfessionalProfile[]>([]);
   const [explicitFeatured, setExplicitFeatured] = useState<ProfessionalProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -305,8 +306,22 @@ export default function ServicesDiscovery({ onViewProfile }: ServicesDiscoveryPr
       return 0;
     });
 
+    if (currentUserProfile) {
+      result = result.map(p => {
+        if (p.username === currentUserProfile.username) {
+          return {
+            ...p,
+            displayName: currentUserProfile.displayName || p.displayName,
+            profilePicUrl: currentUserProfile.profilePicUrl || p.profilePicUrl,
+            bio: currentUserProfile.bio || p.bio,
+          };
+        }
+        return p;
+      });
+    }
+
     return result;
-  }, [professionals, searchQuery, selectedCategory, selectedCity, sort]);
+  }, [professionals, searchQuery, selectedCategory, selectedCity, sort, currentUserProfile]);
 
   const clearFilters = () => {
     setSearchInput('');

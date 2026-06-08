@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { UserProfile, LinkItem, ClickLog } from '../types';
 import { db, OperationType, handleFirestoreError, logoutUser } from '../firebase';
-import { collection, doc, setDoc, updateDoc, deleteDoc, addDoc, onSnapshot, query, orderBy, getDocs, where, limit } from 'firebase/firestore';
+import { collection, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, onSnapshot, query, orderBy, getDocs, where, limit } from 'firebase/firestore';
 import LinkEditor from './LinkEditor';
 import ThemeSelector from './ThemeSelector';
 import StatsView from './StatsView';
@@ -580,6 +580,23 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
         updatedAt: updatedProfile.updatedAt,
       });
 
+      // Sync to professional_profiles if the professional profile exists in Firestore
+      try {
+        const proRef = doc(db, 'professional_profiles', userProfile.uid);
+        const proSnap = await getDoc(proRef);
+        if (proSnap.exists()) {
+          await updateDoc(proRef, {
+            displayName: updatedProfile.displayName,
+            bio: updatedProfile.bio,
+            profilePicUrl: updatedProfile.profilePicUrl,
+            username: updatedProfile.username,
+            updatedAt: new Date()
+          });
+        }
+      } catch (proErr) {
+        console.warn("Erro ao sincronizar perfil profissional na aparência:", proErr);
+      }
+
       onProfileUpdate(updatedProfile);
 
       // Cross-tab + same-tab sync: force the public page to re-fetch.
@@ -902,7 +919,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                   <RefreshCw className="w-6 h-6 text-[#a78bfa] animate-spin" aria-hidden="true" />
                 </div>
               }>
-                <ProfessionalDashboard userProfile={userProfile} />
+                <ProfessionalDashboard userProfile={userProfile} onProfileUpdate={onProfileUpdate} />
               </React.Suspense>
             </div>
           )}

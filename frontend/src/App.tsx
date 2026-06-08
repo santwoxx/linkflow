@@ -926,6 +926,7 @@ export default function App() {
         }>
           <ProfessionalProfilePage 
             username={publicProProfile} 
+            currentUserProfile={userProfile}
             onBack={() => {
               const newUrl = new URL(window.location.href);
               newUrl.searchParams.delete('pro');
@@ -943,6 +944,7 @@ export default function App() {
         </div>
       }>
         <ServicesDiscovery 
+          currentUserProfile={userProfile}
           onViewProfile={(username) => {
             const newUrl = new URL(window.location.href);
             newUrl.searchParams.set('pro', username);

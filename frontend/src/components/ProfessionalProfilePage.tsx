@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
-import { ProfessionalProfile } from '../types';
+import { ProfessionalProfile, UserProfile } from '../types';
 import {
   ArrowLeft, Star, MapPin, MessageCircle, Instagram, Globe,
   Briefcase, Loader2, ShieldCheck, ExternalLink, ChevronRight
@@ -18,9 +18,10 @@ const CAT_ICONS: Record<string, string> = {
 interface ProfessionalProfilePageProps {
   username: string;
   onBack: () => void;
+  currentUserProfile?: UserProfile | null;
 }
 
-export default function ProfessionalProfilePage({ username, onBack }: ProfessionalProfilePageProps) {
+export default function ProfessionalProfilePage({ username, onBack, currentUserProfile }: ProfessionalProfilePageProps) {
   const [pro, setPro] = useState<ProfessionalProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -37,9 +38,10 @@ export default function ProfessionalProfilePage({ username, onBack }: Profession
           limit(1)
         );
         const snap = await getDocs(q);
+        let loadedPro: ProfessionalProfile | null = null;
         if (snap.empty) {
           if (username === 'nails_camilebezerra') {
-            setPro({
+            loadedPro = {
               uid: 'camile-bezerra-123',
               username: 'nails_camilebezerra',
               displayName: 'Camile Bezerra',
@@ -54,9 +56,9 @@ export default function ProfessionalProfilePage({ username, onBack }: Profession
               verified: true,
               createdAt: new Date(),
               updatedAt: new Date()
-            });
+            };
           } else if (username === 'natanmarinho-dev') {
-            setPro({
+            loadedPro = {
               uid: 'natan-marinho-ceo-123',
               username: 'natanmarinho-dev',
               displayName: 'Natan Marinho',
@@ -71,12 +73,24 @@ export default function ProfessionalProfilePage({ username, onBack }: Profession
               verified: true,
               createdAt: new Date(),
               updatedAt: new Date()
-            });
+            };
           } else {
             setNotFound(true);
           }
         } else {
-          setPro(snap.docs[0].data() as ProfessionalProfile);
+          loadedPro = snap.docs[0].data() as ProfessionalProfile;
+        }
+
+        if (loadedPro) {
+          if (currentUserProfile && currentUserProfile.username === loadedPro.username) {
+            loadedPro = {
+              ...loadedPro,
+              displayName: currentUserProfile.displayName || loadedPro.displayName,
+              profilePicUrl: currentUserProfile.profilePicUrl || loadedPro.profilePicUrl,
+              bio: currentUserProfile.bio || loadedPro.bio,
+            };
+          }
+          setPro(loadedPro);
         }
       } catch (err) {
         console.error('Erro ao buscar perfil profissional:', err);
@@ -86,7 +100,7 @@ export default function ProfessionalProfilePage({ username, onBack }: Profession
       }
     };
     fetch();
-  }, [username]);
+  }, [username, currentUserProfile]);
 
   if (isLoading) {
     return (

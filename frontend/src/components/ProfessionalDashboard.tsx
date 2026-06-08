@@ -5,14 +5,27 @@ import { UserProfile, ProfessionalProfile, PRO_CATEGORIES, MP_CHECKOUT_URL } fro
 import {
   Briefcase, Save, Loader2, CheckCircle, Clock, Star, MapPin,
   MessageCircle, Instagram, Globe, X, Plus, AlertCircle, ArrowRight,
-  Shield, Zap
+  Shield, Zap, Upload, RefreshCw
 } from 'lucide-react';
+import { compressImage } from '../utils/image';
+
+const AVATAR_TEMPLATES = [
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80'
+];
 
 interface ProfessionalDashboardProps {
   userProfile: UserProfile;
+  onProfileUpdate?: (updated: UserProfile) => void;
 }
 
-export default function ProfessionalDashboard({ userProfile }: ProfessionalDashboardProps) {
+export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: ProfessionalDashboardProps) {
   const [proProfile, setProProfile] = useState<ProfessionalProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -20,6 +33,8 @@ export default function ProfessionalDashboard({ userProfile }: ProfessionalDashb
   const [saveError, setSaveError] = useState('');
 
   // Form fields
+  const [displayName, setDisplayName] = useState(userProfile.displayName || '');
+  const [profilePicUrl, setProfilePicUrl] = useState(userProfile.profilePicUrl || '');
   const [profession, setProfession] = useState('');
   const [category, setCategory] = useState('');
   const [bio, setBio] = useState('');
@@ -50,6 +65,11 @@ export default function ProfessionalDashboard({ userProfile }: ProfessionalDashb
           setInstagram(data.instagram || '');
           setPortfolio(data.portfolio || '');
           setSkills(data.skills || []);
+          setDisplayName(data.displayName || userProfile.displayName || '');
+          setProfilePicUrl(data.profilePicUrl || userProfile.profilePicUrl || '');
+        } else {
+          setDisplayName(userProfile.displayName || '');
+          setProfilePicUrl(userProfile.profilePicUrl || '');
         }
       } catch (err) {
         console.error('Erro ao carregar perfil profissional:', err);
@@ -58,7 +78,7 @@ export default function ProfessionalDashboard({ userProfile }: ProfessionalDashb
       }
     };
     fetchPro();
-  }, [userProfile.uid]);
+  }, [userProfile.uid, userProfile.displayName, userProfile.profilePicUrl]);
 
   const handleAddSkill = () => {
     const s = skillInput.trim();
@@ -72,6 +92,10 @@ export default function ProfessionalDashboard({ userProfile }: ProfessionalDashb
   };
 
   const handleSave = async () => {
+    if (!displayName.trim()) {
+      setSaveError('Nome de Exibição é obrigatório.');
+      return;
+    }
     if (!profession.trim() || !category || !whatsapp.trim() || !city.trim()) {
       setSaveError('Preencha pelo menos: Profissão, Categoria, Cidade e WhatsApp.');
       return;
@@ -83,8 +107,8 @@ export default function ProfessionalDashboard({ userProfile }: ProfessionalDashb
       const data: Partial<ProfessionalProfile> = {
         uid: userProfile.uid,
         username: userProfile.username,
-        displayName: userProfile.displayName,
-        profilePicUrl: userProfile.profilePicUrl || '',
+        displayName: displayName.trim(),
+        profilePicUrl: profilePicUrl.trim(),
         profession: profession.trim(),
         category,
         bio: bio.trim(),
@@ -105,6 +129,23 @@ export default function ProfessionalDashboard({ userProfile }: ProfessionalDashb
       } else {
         await updateDoc(ref, data);
         setProProfile(prev => prev ? { ...prev, ...data } : null);
+      }
+
+      // Sync user profile updates to 'users' collection too
+      const userRef = doc(db, 'users', userProfile.uid);
+      await updateDoc(userRef, {
+        displayName: displayName.trim(),
+        profilePicUrl: profilePicUrl.trim(),
+        updatedAt: serverTimestamp()
+      });
+
+      if (onProfileUpdate) {
+        onProfileUpdate({
+          ...userProfile,
+          displayName: displayName.trim(),
+          profilePicUrl: profilePicUrl.trim(),
+          updatedAt: new Date()
+        });
       }
 
       setSaveSuccess(true);
@@ -250,6 +291,97 @@ export default function ProfessionalDashboard({ userProfile }: ProfessionalDashb
           <Briefcase className="w-5 h-5 text-[#a78bfa]" />
           Seu Perfil Profissional
         </h2>
+
+        {/* Nome de Exibição */}
+        <div className="relative z-10">
+          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+            Nome de Exibição <span className="text-rose-400">*</span>
+          </label>
+          <input
+            type="text"
+            value={displayName}
+            onChange={e => setDisplayName(e.target.value)}
+            placeholder="Seu nome completo ou nome de marca..."
+            maxLength={60}
+            className="w-full bg-black/20 border border-white/10 rounded-xl py-3.5 px-4 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-[#a78bfa]/60 focus:bg-black/40 focus:ring-4 focus:ring-[#a78bfa]/10 transition-all hover:border-white/20"
+            required
+          />
+        </div>
+
+        {/* Foto de Perfil */}
+        <div className="relative z-10 space-y-3">
+          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+            Foto de Perfil <span className="text-rose-400">*</span>
+          </label>
+          <div className="bg-black/20 border border-white/10 rounded-xl p-4 space-y-4">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input 
+                type="text" 
+                placeholder="URL da foto" 
+                value={profilePicUrl} 
+                onChange={(e) => setProfilePicUrl(e.target.value)}
+                className="flex-1 bg-black/20 text-xs text-zinc-300 py-3.5 px-4 rounded-xl border border-white/10 hover:border-white/20 focus:border-[#a78bfa]/60 focus:bg-black/40 focus:ring-4 focus:ring-[#a78bfa]/10 transition-all placeholder-slate-500 font-mono outline-none" 
+              />
+              <div className="flex gap-2">
+                <input 
+                  id="file-upload-pro-avatar" 
+                  type="file" 
+                  accept="image/*" 
+                  className="hidden"
+                  onChange={async (e) => { 
+                    const file = e.target.files?.[0]; 
+                    if (file) { 
+                      try { 
+                        setProfilePicUrl(await compressImage(file, 150, 150, 0.6)); 
+                      } catch (err) {
+                        console.error("Erro ao comprimir imagem:", err);
+                      } 
+                    } 
+                    e.target.value = ''; 
+                  }} 
+                />
+                <label 
+                  htmlFor="file-upload-pro-avatar" 
+                  className="bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold px-5 py-3.5 rounded-xl border border-white/5 hover:border-white/10 transition-all cursor-pointer flex-1 sm:flex-none flex items-center justify-center gap-2 shadow-sm uppercase tracking-wider"
+                >
+                  <Upload className="w-3.5 h-3.5 text-emerald-400" /> Subir
+                </label>
+                {profilePicUrl && (
+                  <button 
+                    type="button" 
+                    onClick={() => setProfilePicUrl('')} 
+                    className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold px-4 py-3.5 rounded-xl border border-rose-500/20 transition-all cursor-pointer flex-1 sm:flex-none uppercase tracking-wider"
+                  >
+                    Limpar
+                  </button>
+                )}
+              </div>
+            </div>
+            
+            {/* Visual preview of current select avatar */}
+            <div className="flex items-center gap-3">
+              {profilePicUrl ? (
+                <img src={profilePicUrl} alt="Preview do avatar" className="w-12 h-12 rounded-xl object-cover border border-white/10" />
+              ) : (
+                <div className="w-12 h-12 rounded-xl bg-slate-800 border border-white/5 flex items-center justify-center text-xs text-slate-500">Vazio</div>
+              )}
+              <div className="flex flex-wrap gap-2">
+                {AVATAR_TEMPLATES.map((url, idx) => (
+                  <button 
+                    key={idx} 
+                    type="button" 
+                    onClick={() => setProfilePicUrl(url)}
+                    className={`w-9 h-9 rounded-full overflow-hidden border-2 transition-all cursor-pointer hover:scale-105 shrink-0 ${
+                      profilePicUrl === url ? 'border-[#a78bfa] scale-110 shadow-[0_0_10px_rgba(167,139,250,0.3)]' : 'border-white/5 hover:border-white/20'
+                    }`}
+                  >
+                    <img src={url} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Profissão */}
         <div className="relative z-10">
