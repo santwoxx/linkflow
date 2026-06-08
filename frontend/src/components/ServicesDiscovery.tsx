@@ -229,6 +229,55 @@ export default function ServicesDiscovery({ onViewProfile, currentUserProfile }:
   const filtered = useMemo(() => {
     let result = [...professionals];
 
+    // Normalize and complete Natan Marinho and Camile Bezerra profiles from database if they exist
+    result = result.map(p => {
+      if (p.username === 'natanmarinho-dev' || p.username === 'natanmarinho' || p.displayName === 'Natan Marinho') {
+        return {
+          ...p,
+          username: 'natanmarinho-dev',
+          displayName: 'Natan Marinho',
+          profilePicUrl: p.profilePicUrl || 'https://i.ibb.co/YFV7fWfd/IMG-0259.jpg',
+          profession: p.profession || 'CEO & Founder do LinkFlow',
+          category: p.category && p.category !== 'Outros' ? p.category : 'Programação',
+          bio: p.bio || 'CEO & Founder do LinkFlow 🚀 Desenvolvedor Fullstack | Especialista em criar ecossistemas digitais de alta performance e conexões sem fricção.',
+          whatsapp: p.whatsapp || '5581999999999',
+          city: p.city || 'Recife PE',
+          skills: p.skills && p.skills.length > 0 ? p.skills : ['React', 'Node.js', 'Firebase', 'TypeScript', 'SaaS', 'UI/UX'],
+          verified: true,
+          rating: p.rating || 5.0,
+          ratingCount: p.ratingCount || 48,
+        };
+      }
+      if (p.username === 'nails_camilebezerra' || p.username === 'nails_camile' || p.displayName === 'Camile Bezerra') {
+        return {
+          ...p,
+          username: 'nails_camilebezerra',
+          displayName: 'Camile Bezerra',
+          profilePicUrl: p.profilePicUrl || 'https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=400&auto=format&fit=crop&q=80',
+          profession: p.profession || 'Nails Designer',
+          category: 'Outros',
+          bio: p.bio || 'Especialista em Alongamentos de Unha, Blindagem e Nail Art Delicadas ✨🌸',
+          whatsapp: p.whatsapp || '73981177122',
+          city: p.city || 'Itabuna BA',
+          skills: p.skills && p.skills.length > 0 ? p.skills : ['Gel', 'Nail Art', 'Manicure', 'Blindagem', 'Cutilagem'],
+          verified: true,
+          rating: p.rating || 5.0,
+          ratingCount: p.ratingCount || 12,
+        };
+      }
+      return p;
+    });
+
+    // Deduplicate by username so Natan and Camile only show up once
+    const seen = new Set<string>();
+    result = result.filter(p => {
+      const key = (p.username || '').toLowerCase();
+      if (!key) return true;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
     // Inject Natan Marinho if he's not in the database response
     if (!result.some((p) => p.username === 'natanmarinho-dev')) {
       result.unshift({
