@@ -182,7 +182,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
                 <Star className="w-6 h-6 text-[#a78bfa]" />
               </div>
               <div>
-                <h2 className="font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 text-base">LinkFlow Profissional</h2>
+                <h2 className="font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 text-base">LinkFlowAI Profissional</h2>
                 <p className="text-[11px] text-slate-400 font-medium">Divulgue seus serviços na plataforma</p>
               </div>
             </div>
@@ -234,7 +234,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
           </h4>
           <ol className="space-y-3">
             {[
-              'Assine o plano LinkFlow Profissional pelo link acima.',
+              'Assine o plano LinkFlowAI Profissional pelo link acima.',
               'Após o pagamento, entre em contato com o administrador informando seu usuário @' + userProfile.username + '.',
               'O administrador analisa e aprova seu acesso.',
               'Volte aqui e preencha seu perfil profissional!',
@@ -248,7 +248,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
         </div>
 
         <p className="text-[10px] text-slate-600 text-center leading-relaxed">
-          O LinkFlow atua exclusivamente como plataforma de divulgação. Toda negociação e contratação acontece diretamente entre você e o cliente.
+          O LinkFlowAI atua exclusivamente como plataforma de divulgação. Toda negociação e contratação acontece diretamente entre você e o cliente.
         </p>
       </div>
     );
@@ -278,7 +278,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
           <Star className="w-5 h-5 text-amber-400 fill-amber-400 shrink-0" />
           <div>
             <p className="text-sm font-bold text-emerald-300">Perfil Verificado ativo!</p>
-            <p className="text-xs text-emerald-400/80 mt-0.5">Você é um Profissional Verificado LinkFlow. Seu perfil está visível na busca.</p>
+            <p className="text-xs text-emerald-400/80 mt-0.5">Você é um Profissional Verificado LinkFlowAI. Seu perfil está visível na busca.</p>
           </div>
         </div>
       )}
@@ -564,7 +564,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
 
       {/* Legal disclaimer */}
       <p className="text-[10px] text-slate-600 text-center leading-relaxed">
-        O LinkFlow atua exclusivamente como plataforma de divulgação. Toda negociação, contratação, pagamento e execução dos serviços são realizados diretamente entre contratante e contratado.
+        O LinkFlowAI atua exclusivamente como plataforma de divulgação. Toda negociação, contratação, pagamento e execução dos serviços são realizados diretamente entre contratante e contratado.
       </p>
     </div>
   );

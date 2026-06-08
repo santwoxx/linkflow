@@ -82,6 +82,20 @@ export interface UserTheme {
   // Footer
   footerText?: string;
   showBranding?: boolean;
+
+  // Premium v3
+  buttonHoverEffect?: 'scale' | 'glow' | 'lift' | 'outline-grow' | 'none';
+  headerSocials?: {
+    instagram?: string;
+    youtube?: string;
+    tiktok?: string;
+    linkedin?: string;
+    twitter?: string;
+    whatsapp?: string;
+    github?: string;
+  };
+  gradientStartColor?: string;
+  gradientEndColor?: string;
 }
 
 export interface UserProfile {
@@ -101,7 +115,7 @@ export interface UserProfile {
   banned?: boolean;
   followersCount?: number;
   followingCount?: number;
-  // LinkFlow Profissional
+  // LinkFlowAI Profissional
   verifiedProfessional?: boolean;
   serviceEnabled?: boolean;
   createdAt: any;
@@ -224,6 +238,10 @@ export interface LinkItem {
   // Specific fields for specialized blocks
   content?: any;           // Generic array for items (products, testimonials, services, gallery image urls)
   imageUrl?: string;       // For Promo Banner
+
+  scheduleEnabled?: boolean;
+  scheduleStartDate?: string;
+  scheduleEndDate?: string;
 
   createdAt: any;
   updatedAt: any;
@@ -432,6 +450,28 @@ export const AVAILABLE_THEMES: ThemeConfig[] = [
     buttonColor: '#1c1c24',
     buttonTextColor: '#a78bfa',
     fontClass: 'font-sans',
+    cardStyle: 'shadow'
+  },
+  {
+    id: 'matcha-latte',
+    name: 'Matcha Latte 🍵',
+    backgroundClass: 'bg-gradient-to-b from-[#f0f4f1] via-[#e2ebe4] to-[#f0f4f1] text-[#2c4c38]',
+    buttonClass: 'bg-[#ffffff]/90 border border-[#b2cbb9] text-[#2c4c38] hover:bg-[#f0f4f1] transition-all shadow-sm',
+    textColorClass: 'text-[#2c4c38]',
+    buttonColor: '#ffffff',
+    buttonTextColor: '#2c4c38',
+    fontClass: 'font-sans',
+    cardStyle: 'rounded'
+  },
+  {
+    id: 'sunset-glow-premium',
+    name: 'Brilho do Sol 🌅',
+    backgroundClass: 'bg-gradient-to-br from-[#fdba74] via-[#f43f5e] to-[#8b5cf6] text-white',
+    buttonClass: 'bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 shadow-lg',
+    textColorClass: 'text-white',
+    buttonColor: 'rgba(255,255,255,0.15)',
+    buttonTextColor: '#ffffff',
+    fontClass: 'font-outfit',
     cardStyle: 'shadow'
   }
 ];

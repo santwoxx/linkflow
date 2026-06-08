@@ -57,15 +57,15 @@ export default function ProfessionalProfilePage({ username, onBack, currentUserP
               createdAt: new Date(),
               updatedAt: new Date()
             };
-          } else if (username === 'natanmarinho-dev') {
+          } else if (username === 'natanmarinho.dev') {
             loadedPro = {
               uid: 'natan-marinho-ceo-123',
-              username: 'natanmarinho-dev',
+              username: 'natanmarinho.dev',
               displayName: 'Natan Marinho',
               profilePicUrl: 'https://i.ibb.co/YFV7fWfd/IMG-0259.jpg',
-              profession: 'CEO & Founder do LinkFlow',
+              profession: 'CEO & Founder do LinkFlowAI',
               category: 'Programação',
-              bio: 'CEO & Founder do LinkFlow 🚀 Desenvolvedor Fullstack | Especialista em criar ecossistemas digitais de alta performance e conexões sem fricção.',
+              bio: 'CEO & Founder do LinkFlowAI 🚀 Desenvolvedor Fullstack | Especialista em criar ecossistemas digitais de alta performance e conexões sem fricção.',
               whatsapp: '5581999999999',
               instagram: 'natanmarinho.dev',
               city: 'Recife PE',
@@ -126,7 +126,7 @@ export default function ProfessionalProfilePage({ username, onBack, currentUserP
     );
   }
 
-  const waLink = `https://wa.me/${pro.whatsapp.replace(/\D/g, '')}?text=Olá! Vi seu perfil no LinkFlow e gostaria de saber mais sobre seus serviços.`;
+  const waLink = `https://wa.me/${pro.whatsapp.replace(/\D/g, '')}?text=Olá! Vi seu perfil no LinkFlowAI e gostaria de saber mais sobre seus serviços.`;
 
   return (
     <div className="min-h-screen bg-[#020617] text-slate-100 pb-24 font-sans selection:bg-[#a78bfa]/30 selection:text-white">
@@ -308,7 +308,7 @@ export default function ProfessionalProfilePage({ username, onBack, currentUserP
         {/* Legal Footer */}
         <div className="mt-8 flex items-center justify-center gap-2 text-xs font-medium text-slate-500 bg-black/20 p-4 rounded-2xl border border-white/5">
           <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-          <span className="text-center">O LinkFlow funciona como vitrine. A negociação e contratação são de inteira responsabilidade das partes.</span>
+          <span className="text-center">O LinkFlowAI funciona como vitrine. A negociação e contratação são de inteira responsabilidade das partes.</span>
         </div>
 
       </div>

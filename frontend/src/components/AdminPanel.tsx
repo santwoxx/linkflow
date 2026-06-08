@@ -251,7 +251,7 @@ export default function AdminPanel() {
       alert('O nome de usuário deve ter pelo menos 3 caracteres.');
       return;
     }
-    if (!/^[a-z0-9_-]+$/.test(newUsername)) {
+    if (!/^[a-z0-9_\.-]+$/.test(newUsername)) {
       alert('Use apenas letras minúsculas, números, hífen e underscore.');
       return;
     }
@@ -304,7 +304,7 @@ export default function AdminPanel() {
           </div>
           <div>
             <h3 className="text-sm font-bold text-amber-400">Painel Administrativo</h3>
-            <p className="text-[10px] text-zinc-500">Gerencie sua plataforma LinkFlow</p>
+            <p className="text-[10px] text-zinc-500">Gerencie sua plataforma LinkFlowAI</p>
           </div>
         </div>
         <p className="text-xs text-zinc-400 leading-relaxed">
@@ -411,7 +411,7 @@ export default function AdminPanel() {
                         <input
                           type="text"
                           value={editingUsernameValue}
-                          onChange={(e) => setEditingUsernameValue(e.target.value.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase())}
+                          onChange={(e) => setEditingUsernameValue(e.target.value.replace(/[^a-zA-Z0-9_\.-]/g, '').toLowerCase())}
                           className="bg-black text-[10px] text-zinc-200 px-1.5 py-0.5 rounded border border-[#a78bfa]/40 focus:outline-none w-28 font-mono"
                           autoFocus
                           onKeyDown={(e) => { if (e.key === 'Enter') handleSaveUsername(p.uid); if (e.key === 'Escape') handleCancelEditUsername(); }}
@@ -503,7 +503,7 @@ export default function AdminPanel() {
                       {p.banned ? 'Desbanir' : 'Banir'}
                     </button>
                     <a
-                      href={`/?u=${p.username}`}
+                      href={`/${p.username}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
@@ -582,11 +582,11 @@ export default function AdminPanel() {
 
       <p className="text-[10px] text-zinc-600 text-center">
         <Sparkles className="w-3 h-3 inline-block mr-1 text-amber-400" />
-        LinkFlow Platform — {new Date().getFullYear()}
+        LinkFlowAI Platform — {new Date().getFullYear()}
       </p>
 
       {/* ============================================================ */}
-      {/* PROFESSIONAL APPROVALS (LinkFlow Profissional)               */}
+      {/* PROFESSIONAL APPROVALS (LinkFlowAI Profissional)               */}
       {/* ============================================================ */}
       <div className="bg-black/40 border border-white/5 rounded-xl overflow-hidden">
         <div className="flex items-center justify-between p-4 border-b border-white/5 flex-wrap gap-2">

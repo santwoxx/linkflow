@@ -452,7 +452,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
 
   // Copy shared post link
   const handleSharePost = (post: SocialPost) => {
-    const postUrl = `${window.location.origin}${window.location.pathname}?u=${post.username}&p=${post.id}`;
+    const postUrl = `${window.location.origin}/${post.username}?p=${post.id}`;
     navigator.clipboard.writeText(postUrl).then(() => {
       setCopiedPostId(post.id);
       setTimeout(() => setCopiedPostId(null), 2500);
@@ -853,7 +853,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                 {/* 5A. Post Header (LinkedIn Style) */}
                 <div className="px-4 py-3 flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <a href={`/?u=${post.username}`} className="shrink-0">
+                    <a href={`/${post.username}`} className="shrink-0">
                       {post.profilePicUrl ? (
                         <img 
                           src={post.profilePicUrl} 
@@ -868,7 +868,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                     </a>
                     
                     <div className="flex flex-col justify-center">
-                      <a href={`/?u=${post.username}`} className="text-[15px] font-bold text-white hover:text-[#a78bfa] hover:underline leading-tight transition-colors">
+                      <a href={`/${post.username}`} className="text-[15px] font-bold text-white hover:text-[#a78bfa] hover:underline leading-tight transition-colors">
                         {post.displayName}
                       </a>
                       <span className="text-[12px] text-zinc-400 leading-tight mt-0.5">

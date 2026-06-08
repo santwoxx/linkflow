@@ -18,7 +18,7 @@ const BENEFITS = [
 ] as const;
 
 export default function ProPromoBanner({
-  eyebrow = 'LinkFlow Profissional',
+  eyebrow = 'LinkFlowAI Profissional',
   heading = 'Divulgue seus serviços aqui',
   subhead = 'Assine o plano e apareça para milhares de visitantes. Contato direto via WhatsApp.',
   source = 'pro_promo_banner',
@@ -28,7 +28,7 @@ export default function ProPromoBanner({
 
   return (
     <section
-      aria-label="Assinar LinkFlow Profissional"
+      aria-label="Assinar LinkFlowAI Profissional"
       className={`relative overflow-hidden bg-gradient-to-br from-[#a78bfa]/15 via-indigo-950/30 to-[#050b18] border border-[#a78bfa]/25 rounded-2xl p-5 sm:p-7 ${className}`}
     >
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(167,139,250,0.1)_0%,transparent_60%)] pointer-events-none" />
@@ -71,7 +71,7 @@ export default function ProPromoBanner({
             target="_blank"
             rel="noopener noreferrer"
             className="shrink-0 inline-flex items-center gap-1.5 px-4 sm:px-5 py-2.5 bg-[#a78bfa] hover:bg-[#c4b5fd] text-white font-bold text-xs sm:text-sm rounded-xl transition-all shadow-lg shadow-[#a78bfa]/25 cursor-pointer"
-            aria-label="Assinar LinkFlow Profissional a partir de R$ 19,90 por mês"
+            aria-label="Assinar LinkFlowAI Profissional a partir de R$ 19,90 por mês"
           >
             <Briefcase className="w-3.5 h-3.5 sm:w-4 sm:h-4" aria-hidden="true" /> Assinar
           </a>

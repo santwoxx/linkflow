@@ -106,7 +106,7 @@ export default function DiscoverProfiles() {
             </h2>
             <p className="text-xs text-slate-400">
               Explore nossa comunidade de criadores de conteúdo, afiliados e influenciadores. 
-              Inspire-se e conecte-se com as mentes criativas do LinkFlow.
+              Inspire-se e conecte-se com as mentes criativas do LinkFlowAI.
             </p>
           </div>
           

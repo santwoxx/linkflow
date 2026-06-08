@@ -290,6 +290,42 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
                 <input type="url" value={currentTheme.titleLogoUrl || ''} onChange={(e) => updateField('titleLogoUrl', e.target.value)} className="w-full bg-[#111] text-xs font-mono border border-white/10 rounded-lg py-2 px-3 text-zinc-300" placeholder="https://..." />
               </div>
             )}
+
+            <div className="p-4 bg-black/50 border border-white/5 rounded-2xl space-y-4 mt-2">
+              <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Palette className="w-3.5 h-3.5 text-[#a78bfa]" /> Ícones de Redes Sociais no Topo
+              </h4>
+              <p className="text-[9px] text-zinc-500">Insira suas URLs e elas aparecerão como ícones elegantes logo no início do perfil.</p>
+              
+              <div className="space-y-3">
+                {[
+                  { key: 'instagram', label: 'Instagram', placeholder: 'https://instagram.com/seu_usuario' },
+                  { key: 'youtube', label: 'YouTube', placeholder: 'https://youtube.com/@seu_canal' },
+                  { key: 'tiktok', label: 'TikTok', placeholder: 'https://tiktok.com/@seu_usuario' },
+                  { key: 'linkedin', label: 'LinkedIn', placeholder: 'https://linkedin.com/in/seu_nome' },
+                  { key: 'twitter', label: 'Twitter / X', placeholder: 'https://x.com/seu_usuario' },
+                  { key: 'github', label: 'GitHub', placeholder: 'https://github.com/seu_usuario' },
+                  { key: 'whatsapp', label: 'WhatsApp', placeholder: 'Ex: 5511999999999 (somente números)' },
+                ].map((social) => (
+                  <div key={social.key} className="flex flex-col gap-1">
+                    <label className="text-[9px] text-zinc-500 font-mono uppercase">{social.label}</label>
+                    <input
+                      type="text"
+                      value={(currentTheme.headerSocials as any)?.[social.key] || ''}
+                      onChange={(e) => {
+                        const socials = currentTheme.headerSocials || {};
+                        updateField('headerSocials', {
+                          ...socials,
+                          [social.key]: e.target.value,
+                        });
+                      }}
+                      placeholder={social.placeholder}
+                      className="w-full bg-[#111] text-xs font-mono border border-white/10 rounded-lg py-2 px-3 text-zinc-300 outline-none focus:border-[#a78bfa]/50 focus:ring-1 focus:ring-[#a78bfa]/20 transition-all"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
@@ -329,36 +365,185 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
 
             {currentTheme.wallpaperStyle === 'gradient' && (
               <div className="space-y-3">
-                <div className="p-3 bg-black/50 border border-white/5 rounded-xl">
-                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">Gradient</label>
-                  <div className="flex gap-2 mb-2">
-                    <input type="color" value={currentTheme.backgroundColor.startsWith('#') ? currentTheme.backgroundColor : '#667eea'} onChange={(e) => updateField('backgroundColor', e.target.value)} className="w-8 h-8 rounded border border-white/10 bg-transparent cursor-pointer shrink-0" />
-                    <input type="text" value={currentTheme.backgroundGradient || ''} onChange={(e) => { updateField('backgroundGradient', e.target.value); updateField('backgroundType', 'gradient'); }} className="flex-1 bg-[#111] text-xs font-mono border border-white/10 rounded-lg py-2 px-3 text-zinc-300" placeholder="linear-gradient(...)" />
+                <div className="p-3 bg-black/50 border border-white/5 rounded-xl space-y-3">
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Criador de Gradiente Visual</label>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <span className="text-[9px] text-zinc-500 uppercase font-bold">Cor Inicial</span>
+                      <div className="flex gap-2">
+                        <input
+                          type="color"
+                          value={currentTheme.gradientStartColor || '#667eea'}
+                          onChange={(e) => {
+                            const start = e.target.value;
+                            const end = currentTheme.gradientEndColor || '#764ba2';
+                            const dir = currentTheme.gradientDirection || 'linear-down';
+                            let gradVal = `linear-gradient(180deg, ${start} 0%, ${end} 100%)`;
+                            if (dir === 'linear-up') gradVal = `linear-gradient(0deg, ${start} 0%, ${end} 100%)`;
+                            else if (dir === 'linear-right') gradVal = `linear-gradient(90deg, ${start} 0%, ${end} 100%)`;
+                            else if (dir === 'linear-left') gradVal = `linear-gradient(270deg, ${start} 0%, ${end} 100%)`;
+                            else if (dir === 'radial') gradVal = `radial-gradient(circle, ${start} 0%, ${end} 100%)`;
+                            
+                            onChange({
+                              ...currentTheme,
+                              themeId: 'custom',
+                              gradientStartColor: start,
+                              backgroundGradient: gradVal,
+                              backgroundType: 'gradient',
+                            });
+                          }}
+                          className="w-8 h-8 rounded border border-white/10 bg-transparent cursor-pointer shrink-0"
+                        />
+                        <input
+                          type="text"
+                          value={currentTheme.gradientStartColor || '#667eea'}
+                          onChange={(e) => {
+                            const start = e.target.value;
+                            const end = currentTheme.gradientEndColor || '#764ba2';
+                            const dir = currentTheme.gradientDirection || 'linear-down';
+                            let gradVal = `linear-gradient(180deg, ${start} 0%, ${end} 100%)`;
+                            if (dir === 'linear-up') gradVal = `linear-gradient(0deg, ${start} 0%, ${end} 100%)`;
+                            else if (dir === 'linear-right') gradVal = `linear-gradient(90deg, ${start} 0%, ${end} 100%)`;
+                            else if (dir === 'linear-left') gradVal = `linear-gradient(270deg, ${start} 0%, ${end} 100%)`;
+                            else if (dir === 'radial') gradVal = `radial-gradient(circle, ${start} 0%, ${end} 100%)`;
+                            
+                            onChange({
+                              ...currentTheme,
+                              themeId: 'custom',
+                              gradientStartColor: start,
+                              backgroundGradient: gradVal,
+                              backgroundType: 'gradient',
+                            });
+                          }}
+                          className="w-full bg-[#111] text-xs font-mono border border-white/10 rounded-lg px-2 text-zinc-300"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <span className="text-[9px] text-zinc-500 uppercase font-bold">Cor Final</span>
+                      <div className="flex gap-2">
+                        <input
+                          type="color"
+                          value={currentTheme.gradientEndColor || '#764ba2'}
+                          onChange={(e) => {
+                            const start = currentTheme.gradientStartColor || '#667eea';
+                            const end = e.target.value;
+                            const dir = currentTheme.gradientDirection || 'linear-down';
+                            let gradVal = `linear-gradient(180deg, ${start} 0%, ${end} 100%)`;
+                            if (dir === 'linear-up') gradVal = `linear-gradient(0deg, ${start} 0%, ${end} 100%)`;
+                            else if (dir === 'linear-right') gradVal = `linear-gradient(90deg, ${start} 0%, ${end} 100%)`;
+                            else if (dir === 'linear-left') gradVal = `linear-gradient(270deg, ${start} 0%, ${end} 100%)`;
+                            else if (dir === 'radial') gradVal = `radial-gradient(circle, ${start} 0%, ${end} 100%)`;
+                            
+                            onChange({
+                              ...currentTheme,
+                              themeId: 'custom',
+                              gradientEndColor: end,
+                              backgroundGradient: gradVal,
+                              backgroundType: 'gradient',
+                            });
+                          }}
+                          className="w-8 h-8 rounded border border-white/10 bg-transparent cursor-pointer shrink-0"
+                        />
+                        <input
+                          type="text"
+                          value={currentTheme.gradientEndColor || '#764ba2'}
+                          onChange={(e) => {
+                            const start = currentTheme.gradientStartColor || '#667eea';
+                            const end = e.target.value;
+                            const dir = currentTheme.gradientDirection || 'linear-down';
+                            let gradVal = `linear-gradient(180deg, ${start} 0%, ${end} 100%)`;
+                            if (dir === 'linear-up') gradVal = `linear-gradient(0deg, ${start} 0%, ${end} 100%)`;
+                            else if (dir === 'linear-right') gradVal = `linear-gradient(90deg, ${start} 0%, ${end} 100%)`;
+                            else if (dir === 'linear-left') gradVal = `linear-gradient(270deg, ${start} 0%, ${end} 100%)`;
+                            else if (dir === 'radial') gradVal = `radial-gradient(circle, ${start} 0%, ${end} 100%)`;
+                            
+                            onChange({
+                              ...currentTheme,
+                              themeId: 'custom',
+                              gradientEndColor: end,
+                              backgroundGradient: gradVal,
+                              backgroundType: 'gradient',
+                            });
+                          }}
+                          className="w-full bg-[#111] text-xs font-mono border border-white/10 rounded-lg px-2 text-zinc-300"
+                        />
+                      </div>
+                    </div>
                   </div>
+
                   <div className="h-14 w-full rounded-lg border border-white/10 transition-all" style={{ background: currentTheme.backgroundGradient || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}></div>
                 </div>
 
                 <div>
                   <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">Direction</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {(['linear-up', 'linear-down', 'radial'] as const).map((dir) => (
-                      <button key={dir} onClick={() => updateField('gradientDirection', dir)} className={`py-2 text-[10px] font-bold rounded-lg border transition-all ${(currentTheme.gradientDirection || 'linear-down') === dir ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]' : 'border-white/10 bg-black text-zinc-500 hover:bg-white/5'}`}>
-                        {dir === 'linear-up' ? 'Up' : dir === 'linear-down' ? 'Down' : 'Radial'}
+                  <div className="grid grid-cols-5 gap-1">
+                    {([
+                      { id: 'linear-down', label: 'Baixo' },
+                      { id: 'linear-up', label: 'Cima' },
+                      { id: 'linear-right', label: 'Dir.' },
+                      { id: 'linear-left', label: 'Esq.' },
+                      { id: 'radial', label: 'Radial' },
+                    ] as const).map((dir) => (
+                      <button
+                        key={dir.id}
+                        type="button"
+                        onClick={() => {
+                          const start = currentTheme.gradientStartColor || '#667eea';
+                          const end = currentTheme.gradientEndColor || '#764ba2';
+                          let gradVal = `linear-gradient(180deg, ${start} 0%, ${end} 100%)`;
+                          if (dir.id === 'linear-up') gradVal = `linear-gradient(0deg, ${start} 0%, ${end} 100%)`;
+                          else if (dir.id === 'linear-right') gradVal = `linear-gradient(90deg, ${start} 0%, ${end} 100%)`;
+                          else if (dir.id === 'linear-left') gradVal = `linear-gradient(270deg, ${start} 0%, ${end} 100%)`;
+                          else if (dir.id === 'radial') gradVal = `radial-gradient(circle, ${start} 0%, ${end} 100%)`;
+
+                          onChange({
+                            ...currentTheme,
+                            themeId: 'custom',
+                            gradientDirection: dir.id,
+                            backgroundGradient: gradVal,
+                            backgroundType: 'gradient',
+                          });
+                        }}
+                        className={`py-2 text-[9px] font-bold rounded-lg border transition-all ${
+                          (currentTheme.gradientDirection || 'linear-down') === dir.id
+                            ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]'
+                            : 'border-white/10 bg-black text-zinc-500 hover:bg-white/5'
+                        }`}
+                      >
+                        {dir.label}
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <button onClick={() => setExpandedGradients(!expandedGradients)} className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-wider flex items-center gap-1 hover:underline">
-                    <Palette className="w-3 h-3" /> {expandedGradients ? 'Hide' : 'Show'} Presets
+                  <button type="button" onClick={() => setExpandedGradients(!expandedGradients)} className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-wider flex items-center gap-1 hover:underline">
+                    <Palette className="w-3 h-3" /> {expandedGradients ? 'Ocultar' : 'Mostrar'} Presets
                   </button>
                   {expandedGradients && (
                     <div className="grid grid-cols-5 gap-2 mt-2">
                       {GRADIENT_PRESETS.map((g) => (
                         <button
                           key={g.value}
-                          onClick={() => { updateField('backgroundGradient', g.value); updateField('backgroundType', 'gradient'); setExpandedGradients(false); }}
+                          type="button"
+                          onClick={() => {
+                            const hexes = g.value.match(/#[0-9a-fA-F]{6}/g) || [];
+                            const start = hexes[0] || '#667eea';
+                            const end = hexes[1] || '#764ba2';
+
+                            onChange({
+                              ...currentTheme,
+                              themeId: 'custom',
+                              gradientStartColor: start,
+                              gradientEndColor: end,
+                              backgroundGradient: g.value,
+                              backgroundType: 'gradient',
+                            });
+                            setExpandedGradients(false);
+                          }}
                           className={`h-10 rounded-lg border transition-all hover:scale-105 ${currentTheme.backgroundGradient === g.value ? 'border-[#a78bfa] ring-1 ring-[#a78bfa]/30' : 'border-white/10'}`}
                           style={{ background: g.value }}
                           title={g.name}
@@ -559,6 +744,32 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
                 </div>
               </div>
             </div>
+
+            <div className="p-3 bg-black/50 border border-white/5 rounded-xl space-y-2 mt-2">
+              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Efeito de Hover nos Botões</label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                {([
+                  { id: 'none', label: 'Nenhum' },
+                  { id: 'scale', label: 'Zoom' },
+                  { id: 'glow', label: 'Brilho' },
+                  { id: 'lift', label: 'Flutuar' },
+                  { id: 'outline-grow', label: 'Borda Pulsante' },
+                ] as const).map((effect) => (
+                  <button
+                    key={effect.id}
+                    type="button"
+                    onClick={() => updateField('buttonHoverEffect', effect.id)}
+                    className={`py-2 px-1 text-[10px] font-bold rounded-lg border transition-all cursor-pointer ${
+                      (currentTheme.buttonHoverEffect || 'none') === effect.id
+                        ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa] ring-1 ring-[#a78bfa]/20'
+                        : 'border-white/5 bg-black text-zinc-400 hover:bg-[#1a1a1a]'
+                    }`}
+                  >
+                    {effect.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
@@ -687,8 +898,8 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
 
             <div className="flex items-center justify-between p-3 bg-black/50 border border-white/5 rounded-xl">
               <div>
-                <h4 className="text-xs font-semibold text-zinc-300 flex items-center gap-1"><Sparkles className="w-3 h-3 text-emerald-400" /> Show LinkFlow Branding</h4>
-                <p className="text-[9px] text-zinc-500">Display "Powered by LinkFlow" badge</p>
+                <h4 className="text-xs font-semibold text-zinc-300 flex items-center gap-1"><Sparkles className="w-3 h-3 text-emerald-400" /> Show LinkFlowAI Branding</h4>
+                <p className="text-[9px] text-zinc-500">Display "Powered by LinkFlowAI" badge</p>
               </div>
               <button onClick={() => updateField('showBranding', currentTheme.showBranding !== false ? false : true)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${currentTheme.showBranding !== false ? 'bg-emerald-500' : 'bg-zinc-700'}`}>
                 <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${currentTheme.showBranding !== false ? 'translate-x-6' : 'translate-x-1'}`} />

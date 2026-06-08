@@ -39,7 +39,7 @@ service cloud.firestore {
       return !(s is string) || s is string && s.size() <= maxLen;
     }
     function isValidUsername(u) {
-      return u is string && u.size() >= 3 && u.size() <= 30 && u.matches('^[a-zA-Z0-9_\\-]+$');
+      return u is string && u.size() >= 3 && u.size() <= 30 && u.matches('^[a-zA-Z0-9_\\-\\.]+$');
     }
     function isValidColor(c) {
       // aceita hex (#fff, #ffffff, #ffffffff), color functions (rgb, hsl, lab,

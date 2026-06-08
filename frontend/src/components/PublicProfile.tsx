@@ -3,10 +3,25 @@ import { UserProfile, LinkItem, ADMIN_EMAIL, DEFAULT_LAYOUT } from '../types';
 import { db, auth } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { ExternalLink, Copy, Check, Sparkles, MessageSquare, Link as LinkIcon, LogIn, Star, Crown, UserPlus, UserCheck, Briefcase, ShoppingBag, Clock, ShieldCheck, Music, Calendar, X } from 'lucide-react';
+import { ExternalLink, Copy, Check, Sparkles, MessageSquare, Link as LinkIcon, LogIn, Star, Crown, UserPlus, UserCheck, Briefcase, ShoppingBag, Clock, ShieldCheck, Music, Calendar, X, Instagram, Youtube, Linkedin, Github, Twitter } from 'lucide-react';
 import CommunityFeed from './CommunityFeed';
 import { isFollowing, followUser, unfollowUser } from '../utils/follow';
 import GoToNatanDevButton from './GoToNatanDevButton';
+
+const TiktokIcon = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+  </svg>
+);
 
 interface PublicProfileProps {
   profile: UserProfile;
@@ -100,14 +115,14 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
               createdAt: new Date(),
               updatedAt: new Date(),
             });
-          } else if (profile.username === 'natanmarinho-dev' || profile.email === ADMIN_EMAIL) {
+          } else if (profile.username === 'natanmarinho.dev' || profile.email === ADMIN_EMAIL) {
             setProData({
               uid: profile.uid,
-              username: 'natanmarinho-dev',
+              username: 'natanmarinho.dev',
               displayName: 'Natan Marinho',
-              profession: 'CEO & Founder do LinkFlow',
+              profession: 'CEO & Founder do LinkFlowAI',
               category: 'Programação',
-              bio: 'CEO & Founder do LinkFlow 🚀 Desenvolvedor Fullstack | Especialista em criar ecossistemas digitais de alta performance e conexões sem fricção.',
+              bio: 'CEO & Founder do LinkFlowAI 🚀 Desenvolvedor Fullstack | Especialista em criar ecossistemas digitais de alta performance e conexões sem fricção.',
               whatsapp: '5581999999999',
               skills: ['React', 'Node.js', 'Firebase', 'TypeScript', 'SaaS', 'UI/UX'],
               verified: true,
@@ -131,14 +146,14 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
               createdAt: new Date(),
               updatedAt: new Date(),
             });
-          } else if (profile.username === 'natanmarinho-dev' || profile.email === ADMIN_EMAIL) {
+          } else if (profile.username === 'natanmarinho.dev' || profile.email === ADMIN_EMAIL) {
             setProData({
               uid: profile.uid,
-              username: 'natanmarinho-dev',
+              username: 'natanmarinho.dev',
               displayName: 'Natan Marinho',
-              profession: 'CEO & Founder do LinkFlow',
+              profession: 'CEO & Founder do LinkFlowAI',
               category: 'Programação',
-              bio: 'CEO & Founder do LinkFlow 🚀 Desenvolvedor Fullstack | Especialista em criar ecossistemas digitais de alta performance e conexões sem fricção.',
+              bio: 'CEO & Founder do LinkFlowAI 🚀 Desenvolvedor Fullstack | Especialista em criar ecossistemas digitais de alta performance e conexões sem fricção.',
               whatsapp: '5581999999999',
               skills: ['React', 'Node.js', 'Firebase', 'TypeScript', 'SaaS', 'UI/UX'],
               verified: true,
@@ -266,9 +281,23 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
   const layoutMt = layout.elementSpacing === 'compact' ? 'mt-2' :
     layout.elementSpacing === 'spacious' ? 'mt-5' : 'mt-3';
 
-  // Active links sorted by order
+  // Active links sorted by order and filtered by scheduling
   const activeLinks = links
-    .filter((l) => l.active)
+    .filter((l) => {
+      if (!l.active) return false;
+      if (l.scheduleEnabled) {
+        const now = new Date();
+        if (l.scheduleStartDate) {
+          const start = new Date(l.scheduleStartDate);
+          if (now < start) return false;
+        }
+        if (l.scheduleEndDate) {
+          const end = new Date(l.scheduleEndDate);
+          if (now > end) return false;
+        }
+      }
+      return true;
+    })
     .sort((a, b) => a.order - b.order);
 
   // Function to register outbound metric clicks
@@ -311,7 +340,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
 
   // Copy profile link
   const handleCopyLink = () => {
-    const currentUrl = `${window.location.origin}${window.location.pathname}?u=${profile.username}`;
+    const currentUrl = `${window.location.origin}/${profile.username}`;
     navigator.clipboard.writeText(currentUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -355,6 +384,31 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
       default:
         variantClasses += "hover:scale-[1.02] active:scale-[0.98] shadow-sm";
         break;
+    }
+
+    // Custom button hover effects
+    const hoverEffect = theme.buttonHoverEffect || 'none';
+    if (theme.cardStyle !== 'brutalist') {
+      if (hoverEffect !== 'none') {
+        variantClasses = variantClasses.replace('hover:scale-[1.02]', '');
+      }
+      
+      switch (hoverEffect) {
+        case 'scale':
+          variantClasses += " hover:scale-105 hover:rotate-[0.5deg]";
+          break;
+        case 'glow':
+          variantClasses += " hover:shadow-[0_0_20px_rgba(255,255,255,0.45)] hover:scale-[1.02]";
+          break;
+        case 'lift':
+          variantClasses += " hover:-translate-y-1.5 hover:shadow-2xl hover:scale-[1.02]";
+          break;
+        case 'outline-grow':
+          variantClasses += " hover:ring-[5px] hover:ring-white/15 hover:scale-[1.02]";
+          break;
+        default:
+          break;
+      }
     }
 
     // PREMIUM: Glassmorphism Effect Override
@@ -423,6 +477,48 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
   const RenderBio = ({ profile: p }: { profile: UserProfile }) => (
     p.bio ? <p id="profile-bio" className="text-sm opacity-85 max-w-sm mt-3 whitespace-pre-line leading-relaxed text-slate-100 break-words">{p.bio}</p> : null
   );
+
+  const RenderHeaderSocials = ({ theme: t }: { theme: any }) => {
+    if (!t.headerSocials) return null;
+    const socials = t.headerSocials;
+    const items = [
+      { key: 'instagram', icon: <Instagram className="w-4 h-4" />, color: 'hover:text-pink-500 hover:bg-pink-500/10' },
+      { key: 'youtube', icon: <Youtube className="w-4 h-4" />, color: 'hover:text-red-500 hover:bg-red-500/10' },
+      { key: 'tiktok', icon: <TiktokIcon className="w-4 h-4" />, color: 'hover:text-cyan-400 hover:bg-cyan-400/10' },
+      { key: 'linkedin', icon: <Linkedin className="w-4 h-4" />, color: 'hover:text-blue-500 hover:bg-blue-500/10' },
+      { key: 'twitter', icon: <Twitter className="w-4 h-4" />, color: 'hover:text-sky-400 hover:bg-sky-400/10' },
+      { key: 'github', icon: <Github className="w-4 h-4" />, color: 'hover:text-white hover:bg-white/10' },
+      { key: 'whatsapp', icon: <MessageSquare className="w-4 h-4" />, color: 'hover:text-emerald-500 hover:bg-emerald-500/10' },
+    ];
+
+    const activeSocials = items.filter(item => socials[item.key]);
+    if (activeSocials.length === 0) return null;
+
+    return (
+      <div className="flex flex-wrap gap-2.5 mt-4 justify-center z-10 relative">
+        {activeSocials.map(item => {
+          let url = socials[item.key];
+          if (item.key === 'whatsapp') {
+            const num = url.replace(/\D/g, '');
+            url = `https://wa.me/${num}`;
+          } else if (url && !/^https?:\/\//i.test(url)) {
+            url = 'https://' + url;
+          }
+          return (
+            <a
+              key={item.key}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`w-9 h-9 rounded-full bg-white/5 border border-white/15 flex items-center justify-center text-zinc-300 transition-all duration-300 shadow-sm cursor-pointer ${item.color}`}
+            >
+              {item.icon}
+            </a>
+          );
+        })}
+      </div>
+    );
+  };
 
   // --- MEDIA BACKGROUND HANDLERS ---
   const bgType = theme.backgroundType || 'color';
@@ -510,6 +606,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                 <RenderName profile={profile} isOwner={isOwner} layoutMt="mt-3" />
                 <RenderUsername profile={profile} />
                 <RenderBio profile={profile} />
+                <RenderHeaderSocials theme={theme} />
               </div>
             </div>
           </div>
@@ -531,6 +628,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
               <RenderName profile={profile} isOwner={isOwner} layoutMt={layoutMt} />
               <RenderUsername profile={profile} />
               <RenderBio profile={profile} />
+              <RenderHeaderSocials theme={theme} />
             </div>
           </div>
         )}
@@ -554,6 +652,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                 <RenderName profile={profile} isOwner={isOwner} layoutMt={layoutMt} />
                 <RenderUsername profile={profile} />
                 <RenderBio profile={profile} />
+                <RenderHeaderSocials theme={theme} />
               </div>
             </div>
           </>
@@ -566,6 +665,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
               <RenderName profile={profile} isOwner={isOwner} layoutMt={layoutMt} />
               <RenderUsername profile={profile} />
               <RenderBio profile={profile} />
+              <RenderHeaderSocials theme={theme} />
             </div>
           </div>
         )}
@@ -588,6 +688,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
               <RenderName profile={profile} isOwner={isOwner} layoutMt={layoutMt} />
               <RenderUsername profile={profile} />
               <RenderBio profile={profile} />
+              <RenderHeaderSocials theme={theme} />
             </div>
           </div>
         )}
@@ -671,7 +772,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                   <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 shadow-xl">
                     <div className="flex items-center gap-2 mb-2">
                       <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                      <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">Profissional Verificado LinkFlow</span>
+                      <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">Profissional Verificado LinkFlowAI</span>
                     </div>
                     <h4 className="text-lg font-black text-white mb-1 font-sans">{proData.profession}</h4>
                     {proData.skills && proData.skills.length > 0 && (
@@ -688,7 +789,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                     )}
                     {proData.whatsapp && (
                       <a
-                        href={`https://wa.me/${proData.whatsapp.replace(/\D/g, '')}?text=Olá! Encontrei seu perfil no LinkFlow e gostaria de solicitar um orçamento.`}
+                        href={`https://wa.me/${proData.whatsapp.replace(/\D/g, '')}?text=Olá! Encontrei seu perfil no LinkFlowAI e gostaria de solicitar um orçamento.`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="mt-5 w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-emerald-600/30"
@@ -744,7 +845,12 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                             <img src={prod.imageUrl} alt={prod.name} className="w-full aspect-square rounded-xl object-cover" />
                             <div className="px-1 pb-1">
                               <h4 className="text-[11px] font-semibold truncate text-white">{prod.name}</h4>
-                              <p className="text-xs font-black text-emerald-400 mt-1">{prod.price}</p>
+                              <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                                <span className="text-xs font-black text-emerald-400">{prod.price}</span>
+                                {prod.oldPrice && (
+                                  <span className="text-[9px] line-through text-white/40">{prod.oldPrice}</span>
+                                )}
+                              </div>
                             </div>
                           </a>
                         ))}
@@ -780,7 +886,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                       <h3 className="text-sm font-bold text-center uppercase tracking-widest flex items-center justify-center gap-1.5">
                         <Briefcase className="w-4 h-4 text-emerald-400" /> {link.title}
                       </h3>
-                      <p className="text-[10px] text-white/50 text-center -mt-1">Cada profissional é responsável pelo seu serviço. O LinkFlow não é intermediador.</p>
+                      <p className="text-[10px] text-white/50 text-center -mt-1">Cada profissional é responsável pelo seu serviço. O LinkFlowAI não é intermediador.</p>
                       <div className="space-y-3">
                         {services.map((svc: any, idx: number) => (
                           <div key={idx} className="bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-2xl hover:bg-white/10 transition-all shadow-lg">
@@ -852,7 +958,14 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                         {tests.map((t: any, idx: number) => (
                           <div key={idx} className="min-w-[260px] w-[260px] shrink-0 snap-center bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-2xl flex flex-col items-center text-center gap-3">
                             <div className="flex gap-1">
-                              {[...Array(t.rating || 5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />)}
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                  key={star}
+                                  className={`w-3.5 h-3.5 ${
+                                    star <= (t.rating || 5) ? 'text-amber-400 fill-amber-400' : 'text-white/20'
+                                  }`}
+                                />
+                              ))}
                             </div>
                             <p className="text-xs italic text-white/80 leading-relaxed">"{t.text}"</p>
                             <h4 className="text-[10px] font-bold text-white/50 uppercase tracking-widest">{t.name}</h4>
@@ -1042,14 +1155,14 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
             {!sessionUser && !previewMode && (
               <div className="bg-white/5 border border-white/10 p-4 sm:p-5 rounded-2xl backdrop-blur-md text-center space-y-3 shadow-lg">
                 <p className="text-[11px] text-white/70 leading-relaxed font-sans">
-                  Você está visualizando a rede social de <span className="font-bold text-white">@{profile.username}</span> como visitante. Faça login para curtir, comentar e criar o seu próprio <span className="font-bold">LinkFlow</span>!
+                  Você está visualizando a rede social de <span className="font-bold text-white">@{profile.username}</span> como visitante. Faça login para curtir, comentar e criar o seu próprio <span className="font-bold">LinkFlowAI</span>!
                 </p>
                 <a
                   href="/"
                   className="inline-flex py-2 px-4 bg-[#a78bfa] hover:bg-[#c4b5fd] rounded-xl text-[10px] font-bold text-white uppercase tracking-wider items-center gap-1.5 transition-all hover:scale-105 cursor-pointer shadow-md shadow-[#a78bfa]/10"
                 >
                   <LogIn className="w-3.5 h-3.5" />
-                  Entrar no LinkFlow
+                  Entrar no LinkFlowAI
                 </a>
               </div>
             )}
@@ -1106,7 +1219,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-900/60 backdrop-blur-md border border-zinc-800 text-xs text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-all font-sans font-medium"
           >
             <Sparkles className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-            Desenvolvido com LinkFlow
+            Desenvolvido com LinkFlowAI
           </a>
         )}
       </div>

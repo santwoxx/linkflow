@@ -231,15 +231,15 @@ export default function ServicesDiscovery({ onViewProfile, currentUserProfile }:
 
     // Normalize and complete Natan Marinho and Camile Bezerra profiles from database if they exist
     result = result.map(p => {
-      if (p.username === 'natanmarinho-dev' || p.username === 'natanmarinho' || p.displayName === 'Natan Marinho') {
+      if (p.username === 'natanmarinho.dev' || p.username === 'natanmarinho' || p.displayName === 'Natan Marinho') {
         return {
           ...p,
-          username: 'natanmarinho-dev',
+          username: 'natanmarinho.dev',
           displayName: 'Natan Marinho',
           profilePicUrl: p.profilePicUrl || 'https://i.ibb.co/YFV7fWfd/IMG-0259.jpg',
-          profession: p.profession || 'CEO & Founder do LinkFlow',
+          profession: p.profession || 'CEO & Founder do LinkFlowAI',
           category: p.category && p.category !== 'Outros' ? p.category : 'Programação',
-          bio: p.bio || 'CEO & Founder do LinkFlow 🚀 Desenvolvedor Fullstack | Especialista em criar ecossistemas digitais de alta performance e conexões sem fricção.',
+          bio: p.bio || 'CEO & Founder do LinkFlowAI 🚀 Desenvolvedor Fullstack | Especialista em criar ecossistemas digitais de alta performance e conexões sem fricção.',
           whatsapp: p.whatsapp || '5581999999999',
           city: p.city || 'Recife PE',
           skills: p.skills && p.skills.length > 0 ? p.skills : ['React', 'Node.js', 'Firebase', 'TypeScript', 'SaaS', 'UI/UX'],
@@ -279,15 +279,15 @@ export default function ServicesDiscovery({ onViewProfile, currentUserProfile }:
     });
 
     // Inject Natan Marinho if he's not in the database response
-    if (!result.some((p) => p.username === 'natanmarinho-dev')) {
+    if (!result.some((p) => p.username === 'natanmarinho.dev')) {
       result.unshift({
         uid: 'natan-marinho-ceo-123',
-        username: 'natanmarinho-dev',
+        username: 'natanmarinho.dev',
         displayName: 'Natan Marinho',
         profilePicUrl: 'https://i.ibb.co/YFV7fWfd/IMG-0259.jpg',
-        profession: 'CEO & Founder do LinkFlow',
+        profession: 'CEO & Founder do LinkFlowAI',
         category: 'Programação',
-        bio: 'CEO & Founder do LinkFlow 🚀 Desenvolvedor Fullstack | Especialista em criar ecossistemas digitais de alta performance e conexões sem fricção.',
+        bio: 'CEO & Founder do LinkFlowAI 🚀 Desenvolvedor Fullstack | Especialista em criar ecossistemas digitais de alta performance e conexões sem fricção.',
         whatsapp: '5581999999999',
         city: 'Recife PE',
         skills: ['React', 'Node.js', 'Firebase', 'TypeScript', 'SaaS', 'UI/UX'],
@@ -399,10 +399,10 @@ export default function ServicesDiscovery({ onViewProfile, currentUserProfile }:
     }
 
     // Ensure Natan Marinho is first, and Camile Bezerra is second in Highlights
-    const natan = filtered.find(p => p.username === 'natanmarinho-dev');
+    const natan = filtered.find(p => p.username === 'natanmarinho.dev');
     const camile = filtered.find(p => p.username === 'nails_camilebezerra');
 
-    const rest = list.filter(p => p.username !== 'natanmarinho-dev' && p.username !== 'nails_camilebezerra');
+    const rest = list.filter(p => p.username !== 'natanmarinho.dev' && p.username !== 'nails_camilebezerra');
 
     const resultList: ProfessionalProfile[] = [];
     if (natan) resultList.push(natan);
@@ -725,7 +725,7 @@ function ProCard({ pro, onViewProfile, isFeatured }: { pro: ProfessionalProfile,
   // Check if phone or whatsapp exists
   const rawNumber = pro.whatsapp || '';
   const waNumber = rawNumber.replace(/\D/g, '');
-  const waLink = waNumber ? `https://wa.me/55${waNumber}?text=Olá! Encontrei seu perfil no LinkFlow e gostaria de saber mais sobre seus serviços.` : null;
+  const waLink = waNumber ? `https://wa.me/55${waNumber}?text=Olá! Encontrei seu perfil no LinkFlowAI e gostaria de saber mais sobre seus serviços.` : null;
 
   return (
     <article 
@@ -769,7 +769,7 @@ function ProCard({ pro, onViewProfile, isFeatured }: { pro: ProfessionalProfile,
 
         <h3 className="text-xl font-extrabold text-white mb-1.5 truncate group-hover:text-[#a78bfa] transition-colors flex items-center gap-2">
           {pro.displayName}
-          {pro.username === 'natanmarinho-dev' && (
+          {pro.username === 'natanmarinho.dev' && (
             <span className="inline-flex items-center gap-0.5 text-[9px] font-black bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse shadow-md shadow-amber-500/20">
               CEO / Dono
             </span>

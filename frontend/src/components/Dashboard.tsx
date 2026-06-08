@@ -680,13 +680,13 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
 
   // Copy shareable profile link
   const handleCopyLink = () => {
-    const currentUrl = `${window.location.origin}${window.location.pathname}?u=${userProfile.username}`;
+    const currentUrl = `${window.location.origin}/${userProfile.username}`;
     navigator.clipboard.writeText(currentUrl);
     setCopiedNotification(true);
     setTimeout(() => setCopiedNotification(false), 2000);
   };
 
-  const publicProfileUrl = `${window.location.origin}${window.location.pathname}?u=${userProfile.username}`;
+  const publicProfileUrl = `${window.location.origin}/${userProfile.username}`;
 
   const navItems = [
     { id: 'feed', label: 'Feed', icon: <MessageSquare className="w-5 h-5" /> } as const,
@@ -709,7 +709,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#a78bfa] to-indigo-600 flex items-center justify-center text-white shadow-[0_0_20px_rgba(167,139,250,0.4)] shrink-0">
             <Link2 className="w-5 h-5 rotate-45 stroke-[2.5]" />
           </div>
-          <span className="hidden xl:block text-lg font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">LinkFlow</span>
+          <span className="hidden xl:block text-lg font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">LinkFlowAI</span>
         </div>
 
         {/* Nav Items */}
@@ -768,7 +768,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
           
           <div className="hidden xl:flex items-center gap-1.5 pt-1">
             <a
-              href={`?u=${userProfile.username}`}
+              href={`/${userProfile.username}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[#a78bfa]/10 hover:bg-[#a78bfa]/20 text-[#a78bfa] border border-[#a78bfa]/20 transition-all group"
@@ -823,7 +823,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#a78bfa] to-indigo-600 flex items-center justify-center text-white shadow-sm">
             <Link2 className="w-4 h-4 rotate-45 stroke-[2.5]" />
           </div>
-          <span className="text-base font-black text-white tracking-tight">LinkFlow</span>
+          <span className="text-base font-black text-white tracking-tight">LinkFlowAI</span>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={handleCopyLink} className="text-[11px] font-bold text-slate-300 hover:text-white px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/50 hover:bg-slate-700 transition-all cursor-pointer flex items-center gap-1.5">
@@ -867,7 +867,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                       </button>
                       <a
                         id="visit-public-profile-from-builder"
-                        href={`?u=${userProfile.username}`}
+                        href={`/${userProfile.username}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1.5 text-[10px] font-bold px-3 py-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 transition-all cursor-pointer"
@@ -904,7 +904,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
               <div className="flex items-center justify-between bg-[#0a1128] border border-slate-800/60 rounded-2xl p-4">
                 <div>
                   <p className="text-sm font-bold text-white">Vitrine pública de profissionais</p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Veja como os clientes encontram prestadores no LinkFlow.</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Veja como os clientes encontram prestadores no LinkFlowAI.</p>
                 </div>
                 <a
                   href="?view=servicos"
@@ -1095,8 +1095,8 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                         <div className="space-y-2">
                           <label className="text-[10px] text-zinc-500 font-mono tracking-wide uppercase">Link Personalizado</label>
                           <div className="flex items-center gap-2 bg-[#0a0a0a] border border-white/5 hover:border-white/10 rounded-xl px-4 focus-within:border-[#a78bfa]/50 focus-within:ring-2 focus-within:ring-[#a78bfa]/20 transition-all">
-                            <span className="text-xs text-zinc-600 font-mono shrink-0">/?u=</span>
-                            <input type="text" placeholder="seu-nome" value={username} onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_-]/g, ''))}
+                            <span className="text-xs text-zinc-600 font-mono shrink-0">/</span>
+                            <input type="text" placeholder="seu-nome" value={username} onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_\.-]/g, ''))}
                               className="w-full bg-transparent text-xs text-white py-3.5 focus:outline-none transition-all placeholder-zinc-600 font-mono" required />
                           </div>
                         </div>

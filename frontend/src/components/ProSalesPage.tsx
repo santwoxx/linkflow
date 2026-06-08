@@ -9,7 +9,7 @@ import { getProCheckoutUrl } from '../utils/proCheckout';
 const CHECKOUT_URL = getProCheckoutUrl('pro_sales');
 
 const BENEFITS = [
-  { icon: <Shield className="w-5 h-5" />, title: 'Perfil Verificado', desc: 'Selo oficial de profissional verificado pelo LinkFlow.', color: 'text-amber-400', bg: 'bg-amber-400/10 border-amber-400/20' },
+  { icon: <Shield className="w-5 h-5" />, title: 'Perfil Verificado', desc: 'Selo oficial de profissional verificado pelo LinkFlowAI.', color: 'text-amber-400', bg: 'bg-amber-400/10 border-amber-400/20' },
   { icon: <Globe className="w-5 h-5" />, title: 'Página Profissional', desc: 'Sua própria página de divulgação com bio, skills e portfólio.', color: 'text-[#a78bfa]', bg: 'bg-[#a78bfa]/10 border-[#a78bfa]/20' },
   { icon: <Search className="w-5 h-5" />, title: 'Busca de Profissionais', desc: 'Apareça na vitrine pública de profissionais verificados.', color: 'text-blue-400', bg: 'bg-blue-400/10 border-blue-400/20' },
   { icon: <Briefcase className="w-5 h-5" />, title: 'Portfólio', desc: 'Adicione link para seu portfólio, site ou trabalhos anteriores.', color: 'text-emerald-400', bg: 'bg-emerald-400/10 border-emerald-400/20' },
@@ -24,10 +24,10 @@ const STEPS = [
 ];
 
 const FAQ = [
-  { q: 'Preciso ter uma conta no LinkFlow?', a: 'Sim! Você precisa ter uma conta ativa no LinkFlow para assinar o plano profissional.' },
+  { q: 'Preciso ter uma conta no LinkFlowAI?', a: 'Sim! Você precisa ter uma conta ativa no LinkFlowAI para assinar o plano profissional.' },
   { q: 'Como funciona o pagamento?', a: 'O pagamento é feito diretamente no Mercado Pago, de forma segura. O plano é mensal e pode ser cancelado a qualquer momento.' },
   { q: 'Em quanto tempo meu perfil é aprovado?', a: 'Após o pagamento e contato com o administrador, a aprovação acontece em até 48 horas úteis.' },
-  { q: 'O LinkFlow intermedia as negociações?', a: 'Não. O LinkFlow é apenas uma plataforma de divulgação. Toda a negociação e contratação acontece diretamente entre você e o cliente via WhatsApp.' },
+  { q: 'O LinkFlowAI intermedia as negociações?', a: 'Não. O LinkFlowAI é apenas uma plataforma de divulgação. Toda a negociação e contratação acontece diretamente entre você e o cliente via WhatsApp.' },
   { q: 'Posso cancelar quando quiser?', a: 'Sim. Você pode cancelar a assinatura a qualquer momento pelo Mercado Pago. Ao cancelar, seu perfil é desativado ao fim do período pago.' },
 ];
 
@@ -42,11 +42,11 @@ export default function ProSalesPage() {
 
         <div className="relative max-w-3xl mx-auto px-4 py-12 sm:py-16 md:py-20 text-center">
           <div className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#a78bfa] bg-[#a78bfa]/10 border border-[#a78bfa]/25 px-4 py-2 rounded-full mb-6">
-            <Star className="w-3 h-3 fill-[#a78bfa]" /> LinkFlow Profissional
+            <Star className="w-3 h-3 fill-[#a78bfa]" /> LinkFlowAI Profissional
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight mb-4">
-            Transforme seu LinkFlow em uma{' '}
+            Transforme seu LinkFlowAI em uma{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#a78bfa] to-indigo-400">
               máquina de gerar clientes
             </span>
@@ -108,7 +108,7 @@ export default function ProSalesPage() {
         <div className="relative overflow-hidden bg-gradient-to-br from-[#a78bfa]/15 via-[#0a1128] to-indigo-950/30 border border-[#a78bfa]/30 rounded-2xl p-8 text-center shadow-2xl shadow-[#a78bfa]/10">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(167,139,250,0.1)_0%,transparent_70%)] pointer-events-none" />
           <div className="relative">
-            <p className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-widest mb-3">LinkFlow Profissional</p>
+            <p className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-widest mb-3">LinkFlowAI Profissional</p>
             <div className="flex items-start justify-center gap-1 mb-1">
               <span className="text-xl font-bold text-slate-300 mt-2">R$</span>
               <span className="text-6xl font-black text-white">19</span>
@@ -190,7 +190,7 @@ export default function ProSalesPage() {
           source="pro_sales"
         />
         <p className="text-[10px] text-slate-600 mt-4 leading-relaxed max-w-sm mx-auto text-center">
-          O LinkFlow atua exclusivamente como plataforma de divulgação. Toda negociação, contratação e pagamento é realizada diretamente entre as partes — o LinkFlow não intermedia transações.
+          O LinkFlowAI atua exclusivamente como plataforma de divulgação. Toda negociação, contratação e pagamento é realizada diretamente entre as partes — o LinkFlowAI não intermedia transações.
         </p>
       </section>
     </div>

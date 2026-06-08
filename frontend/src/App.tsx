@@ -38,7 +38,7 @@ export default function App() {
       return;
     }
 
-    if (!/^[a-zA-Z0-9_\-]+$/.test(cleaned)) {
+    if (!/^[a-zA-Z0-9_\-\.]+$/.test(cleaned)) {
       setUsernameAvailable(false);
       setUsernameError('Use apenas letras, números, hífens (-) ou sublinhados (_).');
       setUsernameCheckLoading(false);
@@ -99,8 +99,11 @@ export default function App() {
   // Dynamic SEO meta tags for public profiles
   useEffect(() => {
     if (publicProfile) {
-      const desc = publicProfile.bio || `Confira os links e serviços de ${publicProfile.displayName} no LinkFlow`;
-      document.title = `${publicProfile.displayName} (@${publicProfile.username}) | LinkFlow`;
+      const desc = publicProfile.bio || `Confira os links e serviços de ${publicProfile.displayName} no LinkFlowAI`;
+      const pageTitle = `${publicProfile.displayName} (@${publicProfile.username}) | LinkFlowAI`;
+      document.title = pageTitle;
+      
+      // Meta Description
       let metaDesc = document.querySelector('meta[name="description"]');
       if (!metaDesc) {
         metaDesc = document.createElement('meta');
@@ -108,39 +111,107 @@ export default function App() {
         document.head.appendChild(metaDesc);
       }
       metaDesc.setAttribute('content', desc);
-      // Open Graph
+      
+      // Open Graph Title
       let ogTitle = document.querySelector('meta[property="og:title"]');
       if (!ogTitle) { ogTitle = document.createElement('meta'); ogTitle.setAttribute('property', 'og:title'); document.head.appendChild(ogTitle); }
-      ogTitle.setAttribute('content', `${publicProfile.displayName} | LinkFlow`);
+      ogTitle.setAttribute('content', `${publicProfile.displayName} | LinkFlowAI`);
+      
+      // Open Graph Description
       let ogDesc = document.querySelector('meta[property="og:description"]');
       if (!ogDesc) { ogDesc = document.createElement('meta'); ogDesc.setAttribute('property', 'og:description'); document.head.appendChild(ogDesc); }
       ogDesc.setAttribute('content', desc);
+      
+      // Open Graph Image
       if (publicProfile.profilePicUrl) {
         let ogImage = document.querySelector('meta[property="og:image"]');
         if (!ogImage) { ogImage = document.createElement('meta'); ogImage.setAttribute('property', 'og:image'); document.head.appendChild(ogImage); }
         ogImage.setAttribute('content', publicProfile.profilePicUrl);
       }
+
+      // Open Graph URL
+      const profileUrl = `https://linkflowai.com.br/${publicProfile.username}`;
+      let ogUrl = document.querySelector('meta[property="og:url"]');
+      if (!ogUrl) { ogUrl = document.createElement('meta'); ogUrl.setAttribute('property', 'og:url'); document.head.appendChild(ogUrl); }
+      ogUrl.setAttribute('content', profileUrl);
+
+      // Canonical URL
+      let canonical = document.querySelector('link[rel="canonical"]');
+      if (!canonical) {
+        canonical = document.createElement('link');
+        canonical.setAttribute('rel', 'canonical');
+        document.head.appendChild(canonical);
+      }
+      canonical.setAttribute('href', profileUrl);
+
+      // Twitter Cards
+      let twitterTitle = document.querySelector('meta[name="twitter:title"]');
+      if (!twitterTitle) { twitterTitle = document.createElement('meta'); twitterTitle.setAttribute('name', 'twitter:title'); document.head.appendChild(twitterTitle); }
+      twitterTitle.setAttribute('content', pageTitle);
+
+      let twitterDesc = document.querySelector('meta[name="twitter:description"]');
+      if (!twitterDesc) { twitterDesc = document.createElement('meta'); twitterDesc.setAttribute('name', 'twitter:description'); document.head.appendChild(twitterDesc); }
+      twitterDesc.setAttribute('content', desc);
+
+      if (publicProfile.profilePicUrl) {
+        let twitterImage = document.querySelector('meta[name="twitter:image"]');
+        if (!twitterImage) { twitterImage = document.createElement('meta'); twitterImage.setAttribute('name', 'twitter:image'); document.head.appendChild(twitterImage); }
+        twitterImage.setAttribute('content', publicProfile.profilePicUrl);
+      }
     } else if (!publicSlug) {
-      document.title = 'LinkFlow | Sua Página de Links + Rede Social';
+      document.title = 'LinkFlowAI | Sua Página de Links + Rede Social';
+      
+      // Restore default canonical URL
+      let canonical = document.querySelector('link[rel="canonical"]');
+      if (canonical) {
+        canonical.setAttribute('href', 'https://linkflowai.com.br/');
+      }
+      
+      // Restore default OG URL
+      let ogUrl = document.querySelector('meta[property="og:url"]');
+      if (ogUrl) {
+        ogUrl.setAttribute('content', 'https://linkflowai.com.br/');
+      }
     }
     return () => {
       if (publicSlug && !publicProfile) {
-        document.title = 'LinkFlow | Sua Página de Links + Rede Social';
+        document.title = 'LinkFlowAI | Sua Página de Links + Rede Social';
       }
     };
   }, [publicProfile, publicSlug]);
 
-  // Parse URL parameter "?u=username"
+  // Parse URL parameter "?u=username" or pathname
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const u = params.get('u');
+    let u = params.get('u');
     const view = params.get('view');
     const pro = params.get('pro');
+
+    const path = window.location.pathname;
+    const cleanPath = path.replace(/^\/+|\/+$/g, '');
+    const reservedPaths = ['servicos', 'profissional', 'index.html', 'privacy', 'terms', 'admin'];
+
+    if (!u && cleanPath && !reservedPaths.includes(cleanPath)) {
+      u = cleanPath;
+    }
+
     if (u) {
-      setPublicSlug(u.trim().toLowerCase());
+      const slug = u.trim().toLowerCase();
+      setPublicSlug(slug);
+      
+      // Clean up search param from URL if it was '?u=' to keep the URL clean and short
+      if (params.has('u')) {
+        params.delete('u');
+        const search = params.toString();
+        const nextQuery = search ? `?${search}` : '';
+        const newUrl = `${window.location.origin}/${slug}${nextQuery}`;
+        window.history.replaceState({}, '', newUrl);
+      }
     }
     if (view) {
       setPublicView(view.trim().toLowerCase());
+    } else if (cleanPath === 'servicos' || cleanPath === 'profissional') {
+      setPublicView(cleanPath);
     }
     if (pro) {
       setPublicProProfile(pro.trim().toLowerCase());
@@ -226,9 +297,9 @@ export default function App() {
     const applyNatanMock = () => {
       const defaultProfile: UserProfile = {
         uid: 'natan-marinho-ceo-123',
-        username: 'natanmarinho-dev',
+        username: 'natanmarinho.dev',
         displayName: 'Natan Marinho',
-        bio: 'CEO & Founder do LinkFlow 🚀 | Desenvolvedor Fullstack | Especialista em criar ecossistemas digitais de alta performance e conexões sem fricção.',
+        bio: 'CEO & Founder do LinkFlowAI 🚀 | Desenvolvedor Fullstack | Especialista em criar ecossistemas digitais de alta performance e conexões sem fricção.',
         profilePicUrl: 'https://i.ibb.co/YFV7fWfd/IMG-0259.jpg',
         email: 'brisasofc@gmail.com',
         role: 'admin',
@@ -314,7 +385,7 @@ export default function App() {
     };
 
     const applyCamileMock = () => {
-      if (publicSlug === 'natanmarinho-dev') {
+      if (publicSlug === 'natanmarinho.dev') {
         applyNatanMock();
         return;
       }
@@ -423,7 +494,7 @@ export default function App() {
           uid: 'demo-user-123',
           username: 'usuario_demo',
           displayName: 'Administrador Demo',
-          bio: 'Sou um perfil de testes do LinkFlow! Teste todos os recursos livremente.',
+          bio: 'Sou um perfil de testes do LinkFlowAI! Teste todos os recursos livremente.',
           profilePicUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
           theme: {
             themeId: 'sophisticated-dark',
@@ -756,7 +827,7 @@ export default function App() {
     if (!currentUser) return;
 
     const cleanedUsername = chosenUsername.trim().toLowerCase();
-    if (!/^[a-zA-Z0-9_\-]+$/.test(cleanedUsername)) {
+    if (!/^[a-zA-Z0-9_\-\.]+$/.test(cleanedUsername)) {
       setUsernameError('Use apenas letras, números, hífens (-) ou sublinhados (_).');
       return;
     }
@@ -863,7 +934,7 @@ export default function App() {
       uid: 'demo-user-123',
       username: 'usuario_demo',
       displayName: 'Administrador Demo',
-      bio: 'Sou um perfil de testes do LinkFlow! Teste todos os recursos livremente.',
+      bio: 'Sou um perfil de testes do LinkFlowAI! Teste todos os recursos livremente.',
       profilePicUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
       email: 'demo@linkflowai.com.br',
       role: 'user',
@@ -992,7 +1063,7 @@ export default function App() {
             </p>
             <div className="pt-2">
               <a href="/" className="inline-flex py-3 px-6 rounded-xl bg-[#a78bfa] hover:bg-[#c4b5fd] text-white text-xs font-bold transition-all">
-                Criar Meu LinkFlow
+                Criar Meu LinkFlowAI
               </a>
             </div>
           </div>
@@ -1016,9 +1087,9 @@ export default function App() {
               <a
                 href="/"
                 className="inline-flex py-3 px-6 rounded-xl bg-[#a78bfa] hover:bg-[#c4b5fd] text-white text-xs font-bold font-sans tracking-wide transition-all shadow-lg shadow-[#a78bfa]/20"
-                aria-label="Criar minha página no LinkFlow"
+                aria-label="Criar minha página no LinkFlowAI"
               >
-                Criar Meu LinkFlow
+                Criar Meu LinkFlowAI
               </a>
             </div>
           </div>
@@ -1063,7 +1134,7 @@ export default function App() {
             <div>
               <label className="block text-xs text-slate-400 font-semibold mb-1.5">Nome de Usuário (Slug URL)</label>
               <div className="relative flex items-center">
-                <span className="absolute left-3.5 text-xs text-slate-500 font-mono select-none">linkflowai.com.br/?u=</span>
+                <span className="absolute left-3.5 text-xs text-slate-500 font-mono select-none">linkflowai.com.br/</span>
                 <input
                   id="chosen-username-input"
                   type="text"
@@ -1074,7 +1145,7 @@ export default function App() {
                     const inputVal = e.target.value.toLowerCase().replace(/\s+/g, '-');
                     setChosenUsername(inputVal);
                   }}
-                  className={`w-full bg-black text-xs font-mono py-3.5 pl-[145px] pr-10 rounded-xl border focus:outline-none transition-all placeholder-slate-800 ${
+                  className={`w-full bg-black text-xs font-mono py-3.5 pl-[130px] pr-10 rounded-xl border focus:outline-none transition-all placeholder-slate-800 ${
                     usernameCheckLoading ? 'border-[#a78bfa]/50 text-[#a78bfa]' :
                     usernameAvailable === true ? 'border-emerald-500/80 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.15)]' :
                     usernameAvailable === false ? 'border-rose-500/80 text-rose-400 bg-rose-950/5' :
@@ -1106,7 +1177,7 @@ export default function App() {
               <div className="text-[11px] text-emerald-400 bg-emerald-950/10 border border-emerald-900/20 rounded-lg p-2.5 flex items-start gap-2 animate-fade-in">
                 <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-semibold">Parabéns!</span> O slug <strong className="font-mono">linkflowai.com.br/?u={chosenUsername.trim().toLowerCase()}</strong> está 100% disponível para reserva.
+                  <span className="font-semibold">Parabéns!</span> O slug <strong className="font-mono">linkflowai.com.br/{chosenUsername.trim().toLowerCase()}</strong> está 100% disponível para reserva.
                 </div>
               </div>
             )}
@@ -1193,7 +1264,7 @@ export default function App() {
           <div className="w-8 h-8 rounded-lg bg-[#a78bfa] flex items-center justify-center text-white font-bold shadow-[0_0_15px_rgba(167,139,250,0.3)]" aria-hidden="true">
             <Link2 className="w-4 h-4 rotate-45 text-white" />
           </div>
-          <span className="font-sans font-extrabold text-sm tracking-wide text-white select-none">LinkFlow</span>
+          <span className="font-sans font-extrabold text-sm tracking-wide text-white select-none">LinkFlowAI</span>
         </div>
         <nav aria-label="Navegação principal" className="flex items-center gap-2">
           <a
@@ -1206,7 +1277,7 @@ export default function App() {
           <button
             onClick={handleLogin}
             className="py-1.5 px-3.5 border border-slate-800 hover:border-[#a78bfa]/40 hover:bg-[#a78bfa]/10 text-xs text-slate-300 hover:text-white font-semibold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer"
-            aria-label="Entrar no LinkFlow com Google"
+            aria-label="Entrar no LinkFlowAI com Google"
           >
             <LogIn className="w-3.5 h-3.5 text-[#a78bfa]" aria-hidden="true" /> Entrar
           </button>
@@ -1228,7 +1299,7 @@ export default function App() {
             Sua página de links (Link na Bio), seus serviços e <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#a78bfa] via-[#c4b5fd] to-white">sua rede social</span> em um só lugar
           </h1>
           <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto leading-relaxed font-light">
-            Crie sua página de links grátis no LinkFlow, a melhor <strong className="text-[#a78bfa]">alternativa ao Linktree</strong> para Instagram, TikTok e WhatsApp. Centralize seus contatos, <strong className="text-slate-300">divulgue portfólios</strong>, publique atualizações no feed e agende clientes — <strong className="text-slate-300">tudo sem mensalidades e 100% gratuito</strong>.
+            Crie sua página de links grátis no LinkFlowAI, a melhor <strong className="text-[#a78bfa]">alternativa ao Linktree</strong> para Instagram, TikTok e WhatsApp. Centralize seus contatos, <strong className="text-slate-300">divulgue portfólios</strong>, publique atualizações no feed e agende clientes — <strong className="text-slate-300">tudo sem mensalidades e 100% gratuito</strong>.
           </p>
         </div>
 
@@ -1262,7 +1333,7 @@ export default function App() {
               id="register-cta-btn"
               onClick={handleLogin}
               className="px-8 py-4 bg-gradient-to-r from-[#a78bfa] to-[#c4b5fd] hover:from-[#c4b5fd] hover:to-[#ddd6fe] hover:scale-[1.02] active:scale-[0.98] text-black font-extrabold text-xs rounded-xl tracking-wide font-sans shadow-[0_0_30px_rgba(167,139,250,0.35)] transition-all cursor-pointer flex items-center justify-center gap-2 uppercase shrink-0"
-              aria-label="Criar minha página no LinkFlow gratuitamente"
+              aria-label="Criar minha página no LinkFlowAI gratuitamente"
             >
               <LogIn className="w-4 h-4 text-white" aria-hidden="true" />
               Criar Minha Página Grátis
@@ -1310,7 +1381,7 @@ export default function App() {
                 <div className="w-8 h-8 rounded-full bg-purple-500/10 text-purple-400 flex items-center justify-center text-xs font-black shrink-0" aria-hidden="true">3</div>
                 <div>
                   <h3 className="text-xs font-bold text-slate-200">Negociação direta</h3>
-                  <p className="text-[10px] text-slate-500 mt-1">O comprador entra em contato pelo WhatsApp. O LinkFlow não é intermediador — a responsabilidade é toda sua.</p>
+                  <p className="text-[10px] text-slate-500 mt-1">O comprador entra em contato pelo WhatsApp. O LinkFlowAI não é intermediador — a responsabilidade é toda sua.</p>
                 </div>
               </div>
             </div>
@@ -1341,7 +1412,7 @@ export default function App() {
               <Users className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-bold text-slate-200 font-sans">Rede Social Integrada</h3>
-            <p className="text-xs text-slate-500 leading-relaxed font-light">Publique fotos, receba curtidas e comentários, siga perfis e construa sua comunidade dentro do LinkFlow.</p>
+            <p className="text-xs text-slate-500 leading-relaxed font-light">Publique fotos, receba curtidas e comentários, siga perfis e construa sua comunidade dentro do LinkFlowAI.</p>
           </article>
 
           <article className="bg-[#0f172a] p-5 rounded-2xl border border-slate-900/50 space-y-2 shadow-md hover:border-amber-500/20 hover:shadow-amber-500/5 transition-all">
@@ -1358,7 +1429,7 @@ export default function App() {
       {/* Footer copyright */}
       <footer className="px-6 py-6 border-t border-slate-900 text-center text-[10px] text-slate-600 font-medium z-10 flex flex-col sm:flex-row justify-between items-center max-w-4xl w-full mx-auto gap-3">
         <div className="flex items-center gap-4">
-          <span className="text-slate-500">© 2026 LinkFlow do Brasil</span>
+          <span className="text-slate-500">© 2026 LinkFlowAI do Brasil</span>
           <button onClick={() => setShowPolicy('terms')} className="text-slate-500 hover:text-slate-300 transition-colors cursor-pointer underline underline-offset-2">
             Termos de Uso
           </button>
@@ -1385,22 +1456,22 @@ export default function App() {
             </div>
             <div className="px-6 py-5 space-y-4 text-xs text-slate-300 leading-relaxed">
               <h3 className="text-sm font-bold text-white">1. Aceitação dos Termos</h3>
-              <p>Ao acessar e usar o LinkFlow, você declara que leu, entendeu e concorda com estes Termos de Uso. Se não concordar, não utilize a plataforma.</p>
+              <p>Ao acessar e usar o LinkFlowAI, você declara que leu, entendeu e concorda com estes Termos de Uso. Se não concordar, não utilize a plataforma.</p>
 
               <h3 className="text-sm font-bold text-white">2. Cadastro e Conta</h3>
               <p>2.1. Você é responsável por manter a confidencialidade dos seus dados de login.<br/>
               2.2. As informações fornecidas no cadastro devem ser verdadeiras e atualizadas.<br/>
-              2.3. O LinkFlow se reserva o direito de suspender ou encerrar contas que violem estes termos.</p>
+              2.3. O LinkFlowAI se reserva o direito de suspender ou encerrar contas que violem estes termos.</p>
 
               <h3 className="text-sm font-bold text-white">3. Responsabilidade sobre Serviços Anunciados</h3>
-              <p>3.1. O LinkFlow é uma plataforma de divulgação e não intermediador de vendas ou serviços.<br/>
+              <p>3.1. O LinkFlowAI é uma plataforma de divulgação e não intermediador de vendas ou serviços.<br/>
               3.2. Cada usuário é integralmente responsável pelos serviços, produtos e conteúdos que anuncia em sua página.<br/>
               3.3. Transações, acordos, entregas e pagamentos são de responsabilidade exclusiva das partes envolvidas.<br/>
-              3.4. O LinkFlow não se responsabiliza por quaisquer danos, prejuízos ou disputas decorrentes de negociações entre usuários.</p>
+              3.4. O LinkFlowAI não se responsabiliza por quaisquer danos, prejuízos ou disputas decorrentes de negociações entre usuários.</p>
 
               <h3 className="text-sm font-bold text-white">4. Conteúdo do Usuário</h3>
               <p>4.1. Você mantém todos os direitos sobre o conteúdo que publica.<br/>
-              4.2. Ao publicar, você concede ao LinkFlow uma licença para exibir seu conteúdo na plataforma.<br/>
+              4.2. Ao publicar, você concede ao LinkFlowAI uma licença para exibir seu conteúdo na plataforma.<br/>
               4.3. É proibido publicar conteúdo ilegal, ofensivo, difamatório, fraudulento ou que viole direitos de terceiros.</p>
 
               <h3 className="text-sm font-bold text-white">5. Conduta do Usuário</h3>
@@ -1410,10 +1481,10 @@ export default function App() {
               5.4. Não realizar engenharia reversa ou tentar explorar vulnerabilidades da plataforma.</p>
 
               <h3 className="text-sm font-bold text-white">6. Limitação de Responsabilidade</h3>
-              <p>O LinkFlow não será responsável por danos indiretos, incidentais ou consequenciais decorrentes do uso ou incapacidade de usar a plataforma, incluindo mas não se limitando a perda de dados, lucros cessantes ou interrupção de negócios.</p>
+              <p>O LinkFlowAI não será responsável por danos indiretos, incidentais ou consequenciais decorrentes do uso ou incapacidade de usar a plataforma, incluindo mas não se limitando a perda de dados, lucros cessantes ou interrupção de negócios.</p>
 
               <h3 className="text-sm font-bold text-white">7. Alterações nos Termos</h3>
-              <p>O LinkFlow pode modificar estes termos a qualquer momento. Alterações serão comunicadas na plataforma. O uso continuado após as alterações constitui aceitação dos novos termos.</p>
+              <p>O LinkFlowAI pode modificar estes termos a qualquer momento. Alterações serão comunicadas na plataforma. O uso continuado após as alterações constitui aceitação dos novos termos.</p>
 
               <h3 className="text-sm font-bold text-white">8. Lei Aplicável</h3>
               <p>Estes termos são regidos pelas leis da República Federativa do Brasil. Qualquer disputa será resolvida no foro da comarca de São Paulo - SP.</p>
@@ -1438,7 +1509,7 @@ export default function App() {
             </div>
             <div className="px-6 py-5 space-y-4 text-xs text-slate-300 leading-relaxed">
               <h3 className="text-sm font-bold text-white">1. Coleta de Informações</h3>
-              <p>Coletamos as seguintes informações quando você usa o LinkFlow:<br/>
+              <p>Coletamos as seguintes informações quando você usa o LinkFlowAI:<br/>
               - Informações de cadastro: nome, e-mail e foto do perfil (via Google)<br/>
               - Conteúdo publicado: links, posts, comentários e configurações de perfil<br/>
               - Dados de uso: cliques em links, visualizações de página e interações</p>

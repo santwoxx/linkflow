@@ -38,6 +38,21 @@ function parseSaveError(err: any): string {
   return trimmed || 'Erro desconhecido ao salvar.';
 }
 
+const getBlockLeftBorder = (type: BlockType) => {
+  switch (type) {
+    case 'whatsapp': return 'border-l-[4px] border-l-emerald-500 pl-4';
+    case 'telegram': return 'border-l-[4px] border-l-cyan-500 pl-4';
+    case 'buy_now': return 'border-l-[4px] border-l-amber-500 pl-4';
+    case 'promo_banner': return 'border-l-[4px] border-l-purple-500 pl-4';
+    case 'products': return 'border-l-[4px] border-l-blue-500 pl-4';
+    case 'gallery': return 'border-l-[4px] border-l-rose-500 pl-4';
+    case 'testimonials': return 'border-l-[4px] border-l-yellow-500 pl-4';
+    case 'services': return 'border-l-[4px] border-l-teal-500 pl-4';
+    case 'scheduling': return 'border-l-[4px] border-l-pink-500 pl-4';
+    default: return 'border-l-[4px] border-l-indigo-500 pl-4';
+  }
+};
+
 export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreviewChange }: LinkEditorProps) {
   const [isAdding, setIsAdding] = useState(false);
 
@@ -70,6 +85,11 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
   const [editCustomIconPosition, setEditCustomIconPosition] = useState<'' | 'left' | 'right' | 'top' | 'none'>('');
   const [showAdvancedStyle, setShowAdvancedStyle] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
+
+  const [editScheduleEnabled, setEditScheduleEnabled] = useState(false);
+  const [editScheduleStartDate, setEditScheduleStartDate] = useState('');
+  const [editScheduleEndDate, setEditScheduleEndDate] = useState('');
+  const [editTab, setEditTab] = useState<'content' | 'style' | 'schedule'>('content');
 
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -139,6 +159,9 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
       customLetterSpacing: editCustomLetterSpacing as any,
       customUppercase: editCustomUppercase,
       customIconPosition: editCustomIconPosition as any,
+      scheduleEnabled: editScheduleEnabled,
+      scheduleStartDate: editScheduleStartDate,
+      scheduleEndDate: editScheduleEndDate,
     });
   }, [
     editingLinkId, onPreviewChange,
@@ -148,6 +171,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
     editCustomShadow, editCustomGlass, editCustomFont,
     editCustomBorderColor, editCustomBorderWidth,
     editCustomTextAlign, editCustomLetterSpacing, editCustomUppercase, editCustomIconPosition,
+    editScheduleEnabled, editScheduleStartDate, editScheduleEndDate,
   ]);
 
   const handleAddBlock = async (type: BlockType) => {
@@ -267,6 +291,10 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
     setEditContent(link.content || []);
     setEditingServiceId(null);
     setShowAdvancedStyle(false);
+    setEditScheduleEnabled(!!link.scheduleEnabled);
+    setEditScheduleStartDate(link.scheduleStartDate || '');
+    setEditScheduleEndDate(link.scheduleEndDate || '');
+    setEditTab('content');
   };
 
   const handleSaveEdit = async (linkId: string) => {
@@ -320,6 +348,9 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
         customUppercase: editCustomUppercase,
         customIconPosition: editCustomIconPosition as any,
         content: editContent,
+        scheduleEnabled: editScheduleEnabled,
+        scheduleStartDate: editScheduleStartDate,
+        scheduleEndDate: editScheduleEndDate,
       };
       // [diagnóstico] ajuda a confirmar no DevTools que TODOS os campos
       // customizados estão sendo enviados antes do onUpdate().
@@ -433,9 +464,13 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                   key={link.id}
                   id={`link-row-${link.id}`}
                   className={`relative p-5 rounded-3xl border transition-all shadow-xl overflow-hidden group/card ${
+                    isEditing
+                      ? 'border-[#a78bfa]/50 bg-[#0a0a0a] ring-1 ring-[#a78bfa]/20 pl-5'
+                      : getBlockLeftBorder(link.type)
+                  } ${
                     link.active
-                      ? isEditing 
-                        ? 'border-[#a78bfa]/50 bg-[#0a0a0a] ring-1 ring-[#a78bfa]/20'
+                      ? isEditing
+                        ? ''
                         : 'border-white/5 bg-[#0a0a0a] hover:border-white/10'
                       : 'border-white/5 bg-[#050505] opacity-60 hover:opacity-100'
                   }`}
@@ -452,10 +487,10 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                         <div className="flex gap-1">
                           <button
                             type="button"
-                          onClick={() => {
-                            if (onPreviewChange && editingLinkId) onPreviewChange(editingLinkId, null);
-                            setEditingLinkId(null);
-                          }}
+                            onClick={() => {
+                              if (onPreviewChange && editingLinkId) onPreviewChange(editingLinkId, null);
+                              setEditingLinkId(null);
+                            }}
                             className="p-1.5 rounded-lg border border-transparent hover:border-white/10 hover:bg-white/5 text-zinc-500 hover:text-white transition-all cursor-pointer"
                             title="Cancelar"
                           >
@@ -464,343 +499,596 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                         </div>
                       </div>
 
-                      {/* Common fields (Title/URL) */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">Título principal *</label>
-                          <input
-                            type="text"
-                            value={editTitle}
-                            onChange={(e) => setEditTitle(e.target.value)}
-                            className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-600 font-medium"
-                            required
-                          />
-                        </div>
-
-                        {(link.type === 'link' || link.type === 'whatsapp' || link.type === 'telegram' || link.type === 'buy_now' || link.type === 'promo_banner') && (
-                          <div>
-                            <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">Link de Destino / URL</label>
-                            <input
-                              type="text"
-                              value={editUrl}
-                              onChange={(e) => setEditUrl(e.target.value)}
-                              className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-600 font-mono"
-                            />
-                          </div>
-                        )}
-
-                        {link.type === 'scheduling' && (
-                          <div>
-                            <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">WhatsApp para Agendamentos (com DDD, apenas números)</label>
-                            <input
-                              type="text"
-                              value={editUrl}
-                              onChange={(e) => setEditUrl(e.target.value)}
-                              placeholder="Ex: 5511999999999"
-                              className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-650 font-mono"
-                            />
-                          </div>
-                        )}
+                      {/* TABS SELECTOR */}
+                      <div className="flex bg-black/30 border border-white/5 p-1 rounded-xl w-full gap-1">
+                        {[
+                          { id: 'content', label: '📝 Conteúdo' },
+                          { id: 'style', label: '🎨 Estilo & Badge' },
+                          { id: 'schedule', label: '⏰ Programação' }
+                        ].map((t) => (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => setEditTab(t.id as any)}
+                            className={`flex-1 py-2 text-[10px] sm:text-xs font-bold rounded-lg transition-all cursor-pointer uppercase tracking-wider ${
+                              editTab === t.id
+                                ? 'bg-white/10 text-white shadow'
+                                : 'text-zinc-500 hover:text-zinc-350 hover:bg-white/5'
+                            }`}
+                          >
+                            {t.label}
+                          </button>
+                        ))}
                       </div>
 
-                      {/* Promo Banner specific */}
-                      {link.type === 'promo_banner' && (
-                        <div>
-                          <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">URL da Imagem do Banner</label>
-                          <input
-                            type="text"
-                            value={editImageUrl}
-                            onChange={(e) => setEditImageUrl(e.target.value)}
-                            placeholder="https://..."
-                            className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-600 font-mono"
-                          />
+                      {/* TAB CONTENT: BASIC & ARRAY CONTENT */}
+                      {editTab === 'content' && (
+                        <div className="space-y-4 animate-in fade-in duration-200">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">Título principal *</label>
+                              <input
+                                type="text"
+                                value={editTitle}
+                                onChange={(e) => setEditTitle(e.target.value)}
+                                className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-600 font-medium"
+                                required
+                              />
+                            </div>
+
+                            {(link.type === 'link' || link.type === 'whatsapp' || link.type === 'telegram' || link.type === 'buy_now' || link.type === 'promo_banner') && (
+                              <div>
+                                <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">Link de Destino / URL</label>
+                                <input
+                                  type="text"
+                                  value={editUrl}
+                                  onChange={(e) => setEditUrl(e.target.value)}
+                                  className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-600 font-mono"
+                                />
+                              </div>
+                            )}
+
+                            {link.type === 'scheduling' && (
+                              <div>
+                                <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">WhatsApp para Agendamentos (com DDD, apenas números)</label>
+                                <input
+                                  type="text"
+                                  value={editUrl}
+                                  onChange={(e) => setEditUrl(e.target.value)}
+                                  placeholder="Ex: 5511999999999"
+                                  className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-650 font-mono"
+                                />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Promo Banner specific */}
+                          {link.type === 'promo_banner' && (
+                            <div>
+                              <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">URL da Imagem do Banner</label>
+                              <div className="flex gap-2">
+                                <input
+                                  type="text"
+                                  value={editImageUrl}
+                                  onChange={(e) => setEditImageUrl(e.target.value)}
+                                  placeholder="https://..."
+                                  className="flex-1 bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 transition-all outline-none font-mono"
+                                />
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  id="banner-image-upload"
+                                  className="hidden"
+                                  onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      try {
+                                        const base64 = await compressImage(file, 800, 320, 0.7);
+                                        setEditImageUrl(base64);
+                                      } catch {}
+                                    }
+                                    e.target.value = '';
+                                  }}
+                                />
+                                <label htmlFor="banner-image-upload" className="bg-[#151515] hover:bg-[#202020] text-white text-[11px] font-bold px-4 py-3.5 rounded-xl border border-white/5 hover:border-white/10 cursor-pointer flex items-center justify-center gap-1.5 shadow-sm">
+                                  <Upload className="w-3.5 h-3.5 text-emerald-400" /> Subir
+                                </label>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Scheduling Block Services Editor */}
+                          {link.type === 'scheduling' && (
+                            <div className="space-y-4 p-4 bg-[#111] border border-white/5 rounded-2xl">
+                              <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                                <span className="text-xs font-bold text-pink-400 uppercase tracking-widest flex items-center gap-1.5 font-sans">
+                                  <Calendar className="w-4 h-4" /> Serviços do Agendamento
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={addService}
+                                  className="flex items-center gap-1 px-3 py-1.5 bg-pink-600 hover:bg-pink-500 text-white text-[10px] font-bold rounded-lg transition-all cursor-pointer font-sans"
+                                >
+                                  <PlusCircle className="w-3.5 h-3.5" /> Adicionar Serviço
+                                </button>
+                              </div>
+
+                              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                                {editContent.map((svc) => {
+                                  const isEditingSvc = editingServiceId === svc.id;
+                                  return (
+                                    <div key={svc.id} className="p-3 bg-black/40 border border-white/5 rounded-xl space-y-2">
+                                      {isEditingSvc ? (
+                                        <div className="space-y-2 text-left">
+                                          <div className="grid grid-cols-2 gap-2">
+                                            <div>
+                                              <label className="block text-[8px] text-zinc-500 uppercase font-bold">Nome do Serviço</label>
+                                              <input type="text" value={svcName} onChange={(e) => setSvcName(e.target.value)} className="w-full bg-[#0a0a0a] text-xs text-white p-2 rounded-lg border border-white/5 outline-none font-sans" />
+                                            </div>
+                                            <div>
+                                              <label className="block text-[8px] text-zinc-500 uppercase font-bold">Preço</label>
+                                              <input type="text" value={svcPrice} onChange={(e) => setSvcPrice(e.target.value)} className="w-full bg-[#0a0a0a] text-xs text-white p-2 rounded-lg border border-white/5 outline-none font-sans" placeholder="R$ 100,00" />
+                                            </div>
+                                          </div>
+                                          <div className="grid grid-cols-2 gap-2">
+                                            <div>
+                                              <label className="block text-[8px] text-zinc-500 uppercase font-bold">Duração</label>
+                                              <input type="text" value={svcDuration} onChange={(e) => setSvcDuration(e.target.value)} className="w-full bg-[#0a0a0a] text-xs text-white p-2 rounded-lg border border-white/5 outline-none font-sans" placeholder="1h 30m" />
+                                            </div>
+                                            <div>
+                                              <label className="block text-[8px] text-zinc-500 uppercase font-bold">Descrição</label>
+                                              <input type="text" value={svcDescription} onChange={(e) => setSvcDescription(e.target.value)} className="w-full bg-[#0a0a0a] text-xs text-white p-2 rounded-lg border border-white/5 outline-none font-sans" />
+                                            </div>
+                                          </div>
+                                          <div className="flex gap-1.5 justify-end pt-1">
+                                            <button type="button" onClick={() => setEditingServiceId(null)} className="px-2 py-1 text-[10px] text-zinc-400 bg-zinc-900 rounded border border-white/5 cursor-pointer font-bold font-sans">Cancelar</button>
+                                            <button type="button" onClick={() => saveService(svc.id)} className="px-2.5 py-1 text-[10px] text-white bg-pink-600 hover:bg-pink-500 rounded font-bold cursor-pointer font-sans">Salvar</button>
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <div className="flex items-start justify-between gap-2 text-left">
+                                          <div className="min-w-0 flex-1">
+                                            <h5 className="text-xs font-bold text-white truncate font-sans">{svc.name}</h5>
+                                            <p className="text-[10px] text-zinc-400 truncate font-sans">{svc.description}</p>
+                                            <div className="flex gap-3 mt-1 text-[9px] font-semibold text-zinc-500">
+                                              <span className="text-pink-400">{svc.price}</span>
+                                              <span className="flex items-center gap-0.5"><Clock className="w-3 h-3" /> {svc.duration}</span>
+                                            </div>
+                                          </div>
+                                          <div className="flex gap-1 shrink-0">
+                                            <button type="button" onClick={() => startEditService(svc)} className="p-1.5 text-zinc-400 hover:text-white bg-zinc-900 rounded border border-white/5 cursor-pointer">
+                                              <Edit2 className="w-3.5 h-3.5" />
+                                            </button>
+                                            <button type="button" onClick={() => deleteService(svc.id)} className="p-1.5 text-zinc-400 hover:text-red-400 bg-zinc-900 rounded border border-white/5 cursor-pointer">
+                                              <Trash2 className="w-3.5 h-3.5" />
+                                            </button>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Image Gallery Editor */}
+                          {link.type === 'gallery' && (
+                            <div className="space-y-3 p-4 bg-[#111] border border-white/5 rounded-2xl">
+                              <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide">Imagens da Galeria</label>
+                              <div className="grid grid-cols-1 gap-2.5 max-h-[300px] overflow-y-auto pr-1">
+                                {editContent.map((imgUrl, idx) => (
+                                  <div key={idx} className="flex items-center gap-2 p-2 bg-black/40 border border-white/5 rounded-xl">
+                                    {imgUrl && <img src={imgUrl} className="w-10 h-10 rounded-lg object-cover" />}
+                                    <input
+                                      type="text"
+                                      value={imgUrl}
+                                      onChange={(e) => {
+                                        const newContent = [...editContent];
+                                        newContent[idx] = e.target.value;
+                                        setEditContent(newContent);
+                                      }}
+                                      className="flex-1 bg-transparent text-[10px] text-zinc-350 font-mono focus:outline-none placeholder-zinc-700"
+                                      placeholder="URL da imagem ou faça upload"
+                                    />
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      id={`gallery-upload-${idx}`}
+                                      className="hidden"
+                                      onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                          try {
+                                            const base64 = await compressImage(file, 600, 600, 0.7);
+                                            const newContent = [...editContent];
+                                            newContent[idx] = base64;
+                                            setEditContent(newContent);
+                                          } catch {}
+                                        }
+                                        e.target.value = '';
+                                      }}
+                                    />
+                                    <label htmlFor={`gallery-upload-${idx}`} className="p-1.5 bg-zinc-800 text-zinc-400 hover:text-white rounded-lg cursor-pointer flex items-center justify-center">
+                                      <Upload className="w-3.5 h-3.5" />
+                                    </label>
+                                    <button
+                                      type="button"
+                                      onClick={() => setEditContent(editContent.filter((_, i) => i !== idx))}
+                                      className="p-1.5 text-zinc-500 hover:text-red-400 rounded-lg cursor-pointer"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setEditContent([...editContent, ''])}
+                                className="w-full py-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white text-xs font-bold rounded-xl border border-white/5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                              >
+                                <PlusCircle className="w-4 h-4 text-[#a78bfa]" /> Adicionar Nova Imagem
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Products Carousel Editor */}
+                          {link.type === 'products' && (
+                            <div className="space-y-3 p-4 bg-[#111] border border-white/5 rounded-2xl">
+                              <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide">Itens do Carrossel de Produtos</label>
+                              <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+                                {editContent.map((prod, idx) => (
+                                  <div key={prod.id || idx} className="p-3 bg-black/40 border border-white/5 rounded-xl space-y-2">
+                                    <div className="flex items-start gap-3">
+                                      <label className="shrink-0 w-12 h-12 rounded-xl border border-dashed border-slate-700 hover:border-[#a78bfa] flex items-center justify-center cursor-pointer overflow-hidden bg-black relative">
+                                        {prod.imageUrl ? (
+                                          <img src={prod.imageUrl} className="w-full h-full object-cover" />
+                                        ) : (
+                                          <Upload className="w-4 h-4 text-zinc-500" />
+                                        )}
+                                        <input
+                                          type="file"
+                                          accept="image/*"
+                                          className="hidden"
+                                          onChange={async (e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                              try {
+                                                const base64 = await compressImage(file, 200, 200, 0.7);
+                                                const newContent = [...editContent];
+                                                newContent[idx] = { ...prod, imageUrl: base64 };
+                                                setEditContent(newContent);
+                                              } catch {}
+                                            }
+                                            e.target.value = '';
+                                          }}
+                                        />
+                                      </label>
+                                      <div className="flex-1 min-w-0 grid grid-cols-2 gap-2">
+                                        <div>
+                                          <label className="block text-[8px] text-zinc-500 uppercase font-bold">Nome</label>
+                                          <input
+                                            type="text"
+                                            value={prod.name || ''}
+                                            onChange={(e) => {
+                                              const newContent = [...editContent];
+                                              newContent[idx] = { ...prod, name: e.target.value };
+                                              setEditContent(newContent);
+                                            }}
+                                            className="w-full bg-[#0a0a0a] text-xs text-white p-1.5 rounded-lg border border-white/5 outline-none"
+                                          />
+                                        </div>
+                                        <div>
+                                          <label className="block text-[8px] text-zinc-500 uppercase font-bold">Link (Compra)</label>
+                                          <input
+                                            type="text"
+                                            value={prod.url || ''}
+                                            onChange={(e) => {
+                                              const newContent = [...editContent];
+                                              newContent[idx] = { ...prod, url: e.target.value };
+                                              setEditContent(newContent);
+                                            }}
+                                            placeholder="https://"
+                                            className="w-full bg-[#0a0a0a] text-[10px] text-zinc-300 p-1.5 rounded-lg border border-white/5 outline-none font-mono"
+                                          />
+                                        </div>
+                                        <div>
+                                          <label className="block text-[8px] text-zinc-500 uppercase font-bold">Preço</label>
+                                          <input
+                                            type="text"
+                                            value={prod.price || ''}
+                                            onChange={(e) => {
+                                              const newContent = [...editContent];
+                                              newContent[idx] = { ...prod, price: e.target.value };
+                                              setEditContent(newContent);
+                                            }}
+                                            placeholder="R$ 99,90"
+                                            className="w-full bg-[#0a0a0a] text-xs text-white p-1.5 rounded-lg border border-white/5 outline-none"
+                                          />
+                                        </div>
+                                        <div>
+                                          <label className="block text-[8px] text-zinc-500 uppercase font-bold">Preço Riscado (Promo)</label>
+                                          <input
+                                            type="text"
+                                            value={prod.oldPrice || ''}
+                                            onChange={(e) => {
+                                              const newContent = [...editContent];
+                                              newContent[idx] = { ...prod, oldPrice: e.target.value };
+                                              setEditContent(newContent);
+                                            }}
+                                            placeholder="R$ 149,90"
+                                            className="w-full bg-[#0a0a0a] text-xs text-white p-1.5 rounded-lg border border-white/5 outline-none"
+                                          />
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="flex justify-end pt-1 border-t border-white/5">
+                                      <button
+                                        type="button"
+                                        onClick={() => setEditContent(editContent.filter((_, i) => i !== idx))}
+                                        className="flex items-center gap-1 text-[9px] text-red-400 hover:text-red-350 font-bold cursor-pointer"
+                                      >
+                                        <Trash2 className="w-3 h-3" /> Remover Produto
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newId = `prod-${Date.now()}`;
+                                  setEditContent([...editContent, { id: newId, name: 'Novo Produto', price: 'R$ 99,90', imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=60', url: '' }]);
+                                }}
+                                className="w-full py-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white text-xs font-bold rounded-xl border border-white/5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                              >
+                                <PlusCircle className="w-4 h-4 text-blue-400" /> Adicionar Produto
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Testimonials Carousel Editor */}
+                          {link.type === 'testimonials' && (
+                            <div className="space-y-3 p-4 bg-[#111] border border-white/5 rounded-2xl">
+                              <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide">Depoimentos dos Clientes</label>
+                              <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+                                {editContent.map((t, idx) => (
+                                  <div key={t.id || idx} className="p-3 bg-black/40 border border-white/5 rounded-xl space-y-2">
+                                    <div className="space-y-2 text-left">
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                          <label className="block text-[8px] text-zinc-500 uppercase font-bold font-sans">Nome do Cliente</label>
+                                          <input
+                                            type="text"
+                                            value={t.name || ''}
+                                            onChange={(e) => {
+                                              const newContent = [...editContent];
+                                              newContent[idx] = { ...t, name: e.target.value };
+                                              setEditContent(newContent);
+                                            }}
+                                            className="w-full bg-[#0a0a0a] text-xs text-white p-1.5 rounded-lg border border-white/5 outline-none font-medium"
+                                          />
+                                        </div>
+                                        <div>
+                                          <label className="block text-[8px] text-zinc-500 uppercase font-bold">Avaliação</label>
+                                          <div className="flex gap-1 py-1">
+                                            {[1, 2, 3, 4, 5].map((stars) => (
+                                              <button
+                                                key={stars}
+                                                type="button"
+                                                onClick={() => {
+                                                  const newContent = [...editContent];
+                                                  newContent[idx] = { ...t, rating: stars };
+                                                  setEditContent(newContent);
+                                                }}
+                                                className="focus:outline-none cursor-pointer"
+                                              >
+                                                <Star
+                                                  className={`w-3.5 h-3.5 ${
+                                                    stars <= (t.rating || 5) ? 'text-yellow-450 fill-yellow-400' : 'text-zinc-600'
+                                                  }`}
+                                                />
+                                              </button>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <label className="block text-[8px] text-zinc-500 uppercase font-bold">Feedback</label>
+                                        <textarea
+                                          rows={2}
+                                          value={t.text || ''}
+                                          onChange={(e) => {
+                                            const newContent = [...editContent];
+                                            newContent[idx] = { ...t, text: e.target.value };
+                                            setEditContent(newContent);
+                                          }}
+                                          className="w-full bg-[#0a0a0a] text-xs text-white p-1.5 rounded-lg border border-white/5 outline-none resize-none leading-relaxed"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="flex justify-end pt-1 border-t border-white/5">
+                                      <button
+                                        type="button"
+                                        onClick={() => setEditContent(editContent.filter((_, i) => i !== idx))}
+                                        className="flex items-center gap-1 text-[9px] text-red-400 hover:text-red-350 font-bold cursor-pointer"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" /> Remover Depoimento
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newId = `test-${Date.now()}`;
+                                  setEditContent([...editContent, { id: newId, name: 'Nome do Cliente', text: 'Excelente atendimento, superou as expectativas!', rating: 5 }]);
+                                }}
+                                className="w-full py-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white text-xs font-bold rounded-xl border border-white/5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                              >
+                                <PlusCircle className="w-4 h-4 text-yellow-400" /> Adicionar Depoimento
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
 
-                      {/* Button properties fields */}
-                      {(link.type === 'link' || link.type === 'whatsapp' || link.type === 'buy_now' || link.type === 'telegram') && (
-                        <>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                            <div>
-                              <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
-                                <Tag className="w-3 h-3 text-zinc-500" />
-                                Subtítulo Auxiliar (Opcional)
-                              </label>
-                              <input
-                                type="text"
-                                placeholder="Ex: Receba em até 5 minutos"
-                                value={editSubtitle}
-                                onChange={(e) => setEditSubtitle(e.target.value)}
-                                className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-600 placeholder-slate-800"
-                              />
-                            </div>
+                      {/* TAB CONTENT: ADVANCED STYLE & BADGES */}
+                      {editTab === 'style' && (
+                        <div className="space-y-4 animate-in fade-in duration-200">
+                          {/* Common styling & attention geters */}
+                          {(link.type === 'link' || link.type === 'whatsapp' || link.type === 'buy_now' || link.type === 'telegram') && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
+                                  <Tag className="w-3 h-3 text-zinc-500" />
+                                  Subtítulo Auxiliar (Opcional)
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="Ex: Receba em até 5 minutos"
+                                  value={editSubtitle}
+                                  onChange={(e) => setEditSubtitle(e.target.value)}
+                                  className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-600"
+                                />
+                              </div>
 
-                            <div>
-                              <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
-                                <Sparkles className="w-3 h-3 text-emerald-400" />
-                                Texto do Badge (Tag)
-                              </label>
-                              <input
-                                type="text"
-                                placeholder="Ex: HOT, NOVO, 20% OFF"
-                                value={editBadgeText}
-                                onChange={(e) => setEditBadgeText(e.target.value)}
-                                className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-600 placeholder-slate-800 font-sans"
-                              />
-                            </div>
-                          </div>
+                              <div>
+                                <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
+                                  <Sparkles className="w-3 h-3 text-emerald-400" />
+                                  Texto do Badge (Tag)
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="Ex: HOT, NOVO, 20% OFF"
+                                  value={editBadgeText}
+                                  onChange={(e) => setEditBadgeText(e.target.value)}
+                                  className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-600"
+                                />
+                              </div>
 
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                            <div>
-                              <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
-                                <Smile className="w-3 h-3 text-amber-400" />
-                                Ícone do Link (Emoji)
-                              </label>
-                              <div className="relative">
+                              <div>
+                                <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
+                                  <Smile className="w-3 h-3 text-amber-400" />
+                                  Ícone do Link (Emoji)
+                                </label>
                                 <input
                                   type="text"
                                   maxLength={10}
                                   placeholder="Ex: 🚀, 💬"
                                   value={editIconEmoji}
                                   onChange={(e) => setEditIconEmoji(e.target.value)}
-                                  className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-600 placeholder-slate-800"
+                                  className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-600"
                                 />
                               </div>
-                            </div>
 
-                            <div>
-                              <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
-                                <Upload className="w-3 h-3 text-[#a78bfa]" />
-                                Logo / Imagem
-                              </label>
-                              <div className="flex items-center gap-2">
-                                <label className="shrink-0 w-10 h-10 rounded-xl border border-dashed border-slate-700 hover:border-[#a78bfa] flex items-center justify-center cursor-pointer overflow-hidden bg-black transition-all">
-                                  {editIconUrl ? (
-                                    <img src={editIconUrl} alt="logo" className="w-full h-full object-contain" />
-                                  ) : (
-                                    <Upload className="w-4 h-4 text-zinc-500" />
-                                  )}
-                                  <input
-                                    type="file"
-                                    accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif"
-                                    className="hidden"
-                                    onChange={async (e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file) {
-                                        try {
-                                          setEditIconUrl(await compressImage(file, 96, 96, 0.85));
-                                        } catch {}
-                                      }
-                                      e.target.value = '';
-                                    }}
-                                  />
-                                </label>
-                                <input
-                                  type="text"
-                                  placeholder="ou cole uma URL"
-                                  value={editIconUrl}
-                                  onChange={(e) => setEditIconUrl(e.target.value)}
-                                  className="flex-1 min-w-0 bg-[#0a0a0a] text-[10px] text-white py-3 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-slate-700 font-mono"
-                                />
-                                {editIconUrl && (
-                                  <button
-                                    type="button"
-                                    onClick={() => setEditIconUrl('')}
-                                    className="shrink-0 bg-rose-500/10 text-rose-400 text-[10px] font-bold px-2 py-1 rounded-lg border border-rose-500/20 cursor-pointer"
-                                  >
-                                    Limpar
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-
-                            <div>
-                              <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
-                                <Zap className="w-3 h-3 text-yellow-500" />
-                                Animação de Atenção
-                              </label>
-                              <select
-                                value={editAnimation}
-                                onChange={(e) => setEditAnimation(e.target.value)}
-                                className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none cursor-pointer font-sans"
-                              >
-                                <option value="none">Fixo</option>
-                                <option value="pulse">Pulse</option>
-                                <option value="wobble">Wobble</option>
-                                <option value="bounce">Bounce</option>
-                                <option value="glow">Glow Neon</option>
-                              </select>
-                            </div>
-                          </div>
-                        </>
-                      )}
-
-                      {/* Content Arrays Edit Notice */}
-                      {(link.type === 'products' || link.type === 'testimonials' || link.type === 'gallery') && (
-                        <div className="p-3 bg-blue-900/10 border border-blue-900/30 rounded-xl">
-                          <p className="text-[11px] text-blue-400">
-                            A edição avançada de itens internos (fotos da galeria, depoimentos individuais) será feita em uma janela modal nas próximas atualizações. O bloco base já está pronto para receber dados via código!
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Scheduling Block Services Editor */}
-                      {link.type === 'scheduling' && (
-                        <div className="space-y-4 p-4 bg-[#111] border border-white/5 rounded-2xl">
-                          <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                            <span className="text-xs font-bold text-pink-400 uppercase tracking-widest flex items-center gap-1.5 font-sans">
-                              <Calendar className="w-4 h-4" /> Serviços do Agendamento
-                            </span>
-                            <button
-                              type="button"
-                              onClick={addService}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-pink-600 hover:bg-pink-500 text-white text-[10px] font-bold rounded-lg transition-all cursor-pointer"
-                            >
-                              <PlusCircle className="w-3.5 h-3.5" /> Adicionar Serviço
-                            </button>
-                          </div>
-
-                          <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
-                            {editContent.map((svc) => {
-                              const isEditingSvc = editingServiceId === svc.id;
-                              return (
-                                <div key={svc.id} className="p-3 bg-black/40 border border-white/5 rounded-xl space-y-2">
-                                  {isEditingSvc ? (
-                                    <div className="space-y-2 text-left">
-                                      <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                          <label className="block text-[8px] text-zinc-500 uppercase">Nome do Serviço</label>
-                                          <input type="text" value={svcName} onChange={(e) => setSvcName(e.target.value)} className="w-full bg-[#0a0a0a] text-xs text-white p-2 rounded-lg border border-white/5" />
-                                        </div>
-                                        <div>
-                                          <label className="block text-[8px] text-zinc-500 uppercase">Preço</label>
-                                          <input type="text" value={svcPrice} onChange={(e) => setSvcPrice(e.target.value)} className="w-full bg-[#0a0a0a] text-xs text-white p-2 rounded-lg border border-white/5" placeholder="R$ 100,00" />
-                                        </div>
-                                      </div>
-                                      <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                          <label className="block text-[8px] text-zinc-500 uppercase">Duração</label>
-                                          <input type="text" value={svcDuration} onChange={(e) => setSvcDuration(e.target.value)} className="w-full bg-[#0a0a0a] text-xs text-white p-2 rounded-lg border border-white/5" placeholder="1h 30m" />
-                                        </div>
-                                        <div>
-                                          <label className="block text-[8px] text-zinc-500 uppercase">Descrição</label>
-                                          <input type="text" value={svcDescription} onChange={(e) => setSvcDescription(e.target.value)} className="w-full bg-[#0a0a0a] text-xs text-white p-2 rounded-lg border border-white/5" />
-                                        </div>
-                                      </div>
-                                      <div className="flex gap-1.5 justify-end pt-1">
-                                        <button type="button" onClick={() => setEditingServiceId(null)} className="px-2 py-1 text-[10px] text-zinc-400 bg-zinc-900 rounded border border-white/5 cursor-pointer">Cancelar</button>
-                                        <button type="button" onClick={() => saveService(svc.id)} className="px-2.5 py-1 text-[10px] text-white bg-pink-600 hover:bg-pink-500 rounded font-bold cursor-pointer">Salvar</button>
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <div className="flex items-start justify-between gap-2 text-left">
-                                      <div className="min-w-0 flex-1">
-                                        <h5 className="text-xs font-bold text-white truncate">{svc.name}</h5>
-                                        <p className="text-[10px] text-zinc-400 truncate">{svc.description}</p>
-                                        <div className="flex gap-3 mt-1 text-[9px] font-semibold text-zinc-500">
-                                          <span className="text-pink-400">{svc.price}</span>
-                                          <span className="flex items-center gap-0.5"><Clock className="w-3 h-3" /> {svc.duration}</span>
-                                        </div>
-                                      </div>
-                                      <div className="flex gap-1 shrink-0">
-                                        <button type="button" onClick={() => startEditService(svc)} className="p-1 text-zinc-400 hover:text-white bg-zinc-900 rounded border border-white/5 cursor-pointer">
-                                          <Edit2 className="w-3.5 h-3.5" />
-                                        </button>
-                                        <button type="button" onClick={() => deleteService(svc.id)} className="p-1 text-zinc-400 hover:text-red-400 bg-zinc-900 rounded border border-white/5 cursor-pointer">
-                                          <Trash2 className="w-3.5 h-3.5" />
-                                        </button>
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Advanced per-button customization */}
-                      {(link.type === 'link' || link.type === 'whatsapp' || link.type === 'buy_now' || link.type === 'telegram' || link.type === 'payment') && (
-                        <div className="bg-[#111111] border border-white/5 rounded-2xl overflow-hidden">
-                          <button
-                            type="button"
-                            onClick={() => setShowAdvancedStyle(v => !v)}
-                            className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-[#a78bfa]/5 transition-all cursor-pointer"
-                          >
-                            <span className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-wider flex items-center gap-1.5">
-                              <Palette className="w-3.5 h-3.5" /> Personalização Avançada do Botão
-                            </span>
-                            <span className="text-[9px] text-zinc-500 flex items-center gap-1">
-                              {showAdvancedStyle ? 'Ocultar' : 'Mostrar'}
-                              {showAdvancedStyle ? <Minimize className="w-3 h-3" /> : <Maximize className="w-3 h-3" />}
-                            </span>
-                          </button>
-
-                          {showAdvancedStyle && (
-                            <div className="px-4 pb-4 space-y-4 border-t border-white/5 pt-4">
-                              {/* Visual style preset */}
                               <div>
                                 <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
-                                  <Square className="w-3 h-3 text-[#a78bfa]" /> Estilo Visual
+                                  <Upload className="w-3 h-3 text-[#a78bfa]" />
+                                  Logo / Imagem
                                 </label>
-                                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1.5">
-                                  {([
-                                    { v: '', l: 'Padrão' },
-                                    { v: 'flat', l: 'Flat' },
-                                    { v: 'rounded', l: 'Round' },
-                                    { v: 'outline', l: 'Outline' },
-                                    { v: 'shadow', l: 'Shadow' },
-                                    { v: 'brutalist', l: 'Brutal' },
-                                    { v: 'glass', l: 'Glass' },
-                                    { v: 'gradient', l: 'Grad' },
-                                    { v: 'neon', l: 'Neon' },
-                                  ] as const).map(o => (
-                                    <button key={o.v || 'default'} type="button"
-                                      onClick={() => setEditCustomStyle(o.v as any)}
-                                      className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all cursor-pointer ${
-                                        editCustomStyle === o.v
-                                          ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
-                                          : 'bg-[#0a0a0a] border-white/5 text-zinc-500 hover:border-white/10 hover:text-zinc-300 hover:bg-white/5'
-                                      }`}>{o.l}</button>
-                                  ))}
+                                <div className="flex items-center gap-2">
+                                  <label className="shrink-0 w-10 h-10 rounded-xl border border-dashed border-slate-700 hover:border-[#a78bfa] flex items-center justify-center cursor-pointer overflow-hidden bg-black transition-all">
+                                    {editIconUrl ? (
+                                      <img src={editIconUrl} alt="logo" className="w-full h-full object-contain" />
+                                    ) : (
+                                      <Upload className="w-4 h-4 text-zinc-500" />
+                                    )}
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      className="hidden"
+                                      onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                          try {
+                                            setEditIconUrl(await compressImage(file, 96, 96, 0.85));
+                                          } catch {}
+                                        }
+                                        e.target.value = '';
+                                      }}
+                                    />
+                                  </label>
+                                  <input
+                                    type="text"
+                                    placeholder="URL da imagem"
+                                    value={editIconUrl}
+                                    onChange={(e) => setEditIconUrl(e.target.value)}
+                                    className="flex-1 min-w-0 bg-[#0a0a0a] text-[10px] text-white py-3 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none font-mono"
+                                  />
                                 </div>
                               </div>
 
-                              {/* Color customization */}
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <label className="text-[10px] text-zinc-400 font-semibold flex items-center gap-1">
-                                    <Droplet className="w-3 h-3 text-blue-400" /> Cor de Fundo
-                                  </label>
-                                  <label className="flex items-center gap-1.5 text-[9px] text-zinc-500 cursor-pointer">
-                                    <input type="checkbox" checked={editUseGradient} onChange={(e) => setEditUseGradient(e.target.checked)} className="accent-[#a78bfa] w-3 h-3" />
-                                    Usar gradiente
-                                  </label>
-                                </div>
-                                {!editUseGradient ? (
-                                  <div className="flex gap-2">
-                                    <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(editCustomColor) ? editCustomColor : '#111a36'} onChange={(e) => setEditCustomColor(e.target.value)} className="w-9 h-9 rounded border border-white/5 bg-transparent cursor-pointer shrink-0" title="Cor sólida" />
-                                    <input type="text" placeholder="#111a36 ou rgba(...)" value={editCustomColor} onChange={(e) => setEditCustomColor(e.target.value)} className="flex-1 bg-[#0a0a0a] text-[10px] text-white py-3 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none font-mono" />
-                                    {editCustomColor && <button type="button" onClick={() => setEditCustomColor('')} className="bg-rose-500/10 text-rose-400 text-[10px] font-bold px-2 rounded-lg border border-rose-500/20 cursor-pointer">Limpar</button>}
-                                  </div>
-                                ) : (
-                                  <div className="space-y-2">
-                                    <div className="flex gap-2">
-                                      <input type="text" placeholder="linear-gradient(135deg, #f00, #00f)" value={editCustomGradient} onChange={(e) => setEditCustomGradient(e.target.value)} className="flex-1 bg-[#0a0a0a] text-[10px] text-white py-3 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none font-mono" />
-                                      {editCustomGradient && <button type="button" onClick={() => setEditCustomGradient('')} className="bg-rose-500/10 text-rose-400 text-[10px] font-bold px-2 rounded-lg border border-rose-500/20 cursor-pointer">Limpar</button>}
-                                    </div>
-                                    <div className="h-7 w-full rounded-lg border border-slate-800 transition-all" style={{ background: editCustomGradient || 'linear-gradient(135deg, #1e3a8a, #7c3aed)' }} />
-                                  </div>
-                                )}
-                                <div className="flex flex-wrap gap-1">
-                                  {['#111a36','#1e40af','#7c3aed','#a78bfa','#db2777','#dc2626','#16a34a','#0d9488','#f59e0b','#f43f5e','#0ea5e9','#10b981','#1f2937','#000000','#ffffff','#6b7280'].map(c => (
-                                    <button key={c} type="button" onClick={() => { setEditCustomColor(c); if (editUseGradient) setEditUseGradient(false); }} className={`w-5 h-5 rounded-full border-2 transition-all cursor-pointer hover:scale-110 ${editCustomColor === c ? 'border-[#a78bfa] scale-110' : 'border-transparent hover:border-zinc-500'}`} style={{ backgroundColor: c }} title={c} />
-                                  ))}
-                                </div>
-                              </div>
-
-                              {/* Text color */}
                               <div>
+                                <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
+                                  <Zap className="w-3 h-3 text-yellow-500" />
+                                  Animação de Atenção
+                                </label>
+                                <select
+                                  value={editAnimation}
+                                  onChange={(e) => setEditAnimation(e.target.value)}
+                                  className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none cursor-pointer font-sans"
+                                >
+                                  <option value="none">Fixo</option>
+                                  <option value="pulse">Pulse</option>
+                                  <option value="wobble">Wobble</option>
+                                  <option value="bounce">Bounce</option>
+                                  <option value="glow">Glow Neon</option>
+                                </select>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Advanced properties accordion wrapper */}
+                          {(link.type === 'link' || link.type === 'whatsapp' || link.type === 'buy_now' || link.type === 'telegram' || link.type === 'payment') && (
+                            <div className="bg-[#111111] border border-white/5 rounded-2xl overflow-hidden">
+                              <button
+                                type="button"
+                                onClick={() => setShowAdvancedStyle(v => !v)}
+                                className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-[#a78bfa]/5 transition-all cursor-pointer"
+                              >
+                                <span className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-wider flex items-center gap-1.5">
+                                  <Palette className="w-3.5 h-3.5" /> Personalização Avançada do Botão
+                                </span>
+                                <span className="text-[9px] text-zinc-500 flex items-center gap-1">
+                                  {showAdvancedStyle ? 'Ocultar' : 'Mostrar'}
+                                  {showAdvancedStyle ? <Minimize className="w-3 h-3" /> : <Maximize className="w-3 h-3" />}
+                                </span>
+                              </button>
+
+                              {showAdvancedStyle && (
+                                <div className="px-4 pb-4 space-y-4 border-t border-white/5 pt-4">
+                                  {/* Visual style preset */}
+                                  <div>
+                                    <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
+                                      <Square className="w-3 h-3 text-[#a78bfa]" /> Estilo Visual
+                                    </label>
+                                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1.5">
+                                      {([
+                                        { v: '', l: 'Padrão' },
+                                        { v: 'flat', l: 'Flat' },
+                                        { v: 'rounded', l: 'Round' },
+                                        { v: 'outline', l: 'Outline' },
+                                        { v: 'shadow', l: 'Shadow' },
+                                        { v: 'brutalist', l: 'Brutal' },
+                                        { v: 'glass', l: 'Glass' },
+                                        { v: 'gradient', l: 'Grad' },
+                                        { v: 'neon', l: 'Neon' },
+                                      ] as const).map(o => (
+                                        <button key={o.v || 'default'} type="button"
+                                          onClick={() => setEditCustomStyle(o.v as any)}
+                                          className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all cursor-pointer ${
+                                            editCustomStyle === o.v
+                                              ? 'bg-[#a78bfa]/20 border-[#a78bfa]/40 text-[#a78bfa]'
+                                              : 'bg-[#0a0a0a] border-white/5 text-zinc-500 hover:border-white/10 hover:text-zinc-300 hover:bg-white/5'
+                                          }`}>{o.l}</button>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  {/* Color customization */}
+                                  <div className="space-y-2">
                                 <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
                                   <Type className="w-3 h-3 text-emerald-400" /> Cor do Texto
                                 </label>
@@ -1076,6 +1364,64 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                           )}
                         </div>
                       )}
+                    </div>
+                  )}
+                  
+
+                      {/* TAB CONTENT: SCHEDULING (TEMPORIZADOR) */}
+                      {editTab === 'schedule' && (
+                        <div className="space-y-4 animate-in fade-in duration-200">
+                          <div className="p-4 bg-[#111] border border-white/5 rounded-2xl space-y-4">
+                            <div className="flex items-center justify-between">
+                              <div className="space-y-1">
+                                <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5 font-sans">
+                                  <Clock className="w-4 h-4 text-pink-400" /> Agendar Exibição
+                                </h4>
+                                <p className="text-[10px] text-zinc-500">Defina um período para este bloco ficar visível no seu perfil.</p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setEditScheduleEnabled(!editScheduleEnabled)}
+                                className="focus:outline-none cursor-pointer"
+                              >
+                                {editScheduleEnabled ? (
+                                  <ToggleRight className="w-8 h-8 text-pink-500" />
+                                ) : (
+                                  <ToggleLeft className="w-8 h-8 text-zinc-600" />
+                                )}
+                              </button>
+                            </div>
+
+                            {editScheduleEnabled && (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-white/5">
+                                <div>
+                                  <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
+                                    <Calendar className="w-3.5 h-3.5 text-emerald-400" /> Data/Hora de Início
+                                  </label>
+                                  <input
+                                    type="datetime-local"
+                                    value={editScheduleStartDate}
+                                    onChange={(e) => setEditScheduleStartDate(e.target.value)}
+                                    className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none font-sans cursor-pointer"
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
+                                    <Calendar className="w-3.5 h-3.5 text-rose-400" /> Data/Hora de Fim
+                                  </label>
+                                  <input
+                                    type="datetime-local"
+                                    value={editScheduleEndDate}
+                                    onChange={(e) => setEditScheduleEndDate(e.target.value)}
+                                    className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none font-sans cursor-pointer"
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
 
                       {/* Save error banner */}
                       {saveError && (
@@ -1162,10 +1508,26 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                         </div>
 
                         <div className="min-w-0 space-y-1">
-                          <div className="flex items-center gap-1.5 mb-1">
+                          <div className="flex items-center gap-1.5 mb-1 flex-wrap">
                             <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-slate-800 text-zinc-300">
                               {blockName}
                             </span>
+                            {link.scheduleEnabled && (
+                              <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-pink-950/40 text-pink-400 border border-pink-900/30 flex items-center gap-0.5">
+                                <Clock className="w-2.5 h-2.5" /> Programado
+                              </span>
+                            )}
+                            {Array.isArray(link.content) && link.content.length > 0 && (
+                              <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-blue-950/40 text-blue-400 border border-blue-900/30">
+                                {link.content.length} {
+                                  link.type === 'products' ? (link.content.length === 1 ? 'produto' : 'produtos') :
+                                  link.type === 'gallery' ? (link.content.length === 1 ? 'imagem' : 'imagens') :
+                                  link.type === 'testimonials' ? (link.content.length === 1 ? 'depoimento' : 'depoimentos') :
+                                  link.type === 'services' ? (link.content.length === 1 ? 'serviço' : 'serviços') :
+                                  link.type === 'scheduling' ? (link.content.length === 1 ? 'serviço' : 'serviços') : 'itens'
+                                }
+                              </span>
+                            )}
                           </div>
                           <h4 className="text-sm font-semibold text-slate-200 truncate flex items-center gap-1.5">
                             {link.iconUrl ? (

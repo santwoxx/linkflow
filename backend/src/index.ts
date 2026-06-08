@@ -36,13 +36,13 @@ app.use('/api/gemini', geminiRouter);
 app.use((_req, res) => {
   res.status(404).json({
     error: 'Rota não encontrada',
-    message: 'LinkFlow API - Use /api/health ou /api/gemini/generate',
+    message: 'LinkFlowAI API - Use /api/health ou /api/gemini/generate',
     docs: 'https://linkflowai.com.br/',
   });
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`LinkFlow Backend rodando na porta ${PORT}`);
+  console.log(`LinkFlowAI Backend rodando na porta ${PORT}`);
 });
 
 export default app;
