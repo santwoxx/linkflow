@@ -366,6 +366,26 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
   const layout = theme.layout || DEFAULT_LAYOUT;
   const isCustomBg = theme.backgroundColor && (theme.backgroundColor.startsWith('#') || theme.backgroundColor.startsWith('rgb') || theme.backgroundColor.startsWith('hsl'));
   
+  const isLightColor = (color?: string) => {
+    if (!color || typeof color !== 'string') return false;
+    const hex = color.replace('#', '').trim();
+    if (hex.length === 3) {
+      const r = parseInt(hex[0] + hex[0], 16);
+      const g = parseInt(hex[1] + hex[1], 16);
+      const b = parseInt(hex[2] + hex[2], 16);
+      const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+      return yiq >= 128;
+    }
+    if (hex.length === 6) {
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+      return yiq >= 128;
+    }
+    return false;
+  };
+  
   // Decide font class
   let fontClass = 'font-sans';
   if (theme.fontFamily === 'space') fontClass = 'font-space';
@@ -592,7 +612,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
     );
   };
 
-  const titleColor = theme.titleColor || '#ffffff';
+  const titleColor = theme.titleColor || (isLightColor(theme.backgroundColor) ? '#0f172a' : '#ffffff');
   const titleStyle_ = theme.titleStyle || 'text';
 
   const RenderName = ({ profile: p, isOwner: owner, layoutMt: mt }: { profile: UserProfile; isOwner: boolean; layoutMt: string }) => (
@@ -611,11 +631,11 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
   );
 
   const RenderUsername = ({ profile: p }: { profile: UserProfile }) => (
-    <p id="profile-username" className="text-xs opacity-60 font-mono mt-1 text-slate-300">{p.username && `@${p.username}`}</p>
+    <p id="profile-username" className={`text-xs opacity-60 font-mono mt-1 ${isLightColor(theme.backgroundColor) ? 'text-zinc-700' : 'text-slate-300'}`}>{p.username && `@${p.username}`}</p>
   );
 
   const RenderBio = ({ profile: p }: { profile: UserProfile }) => (
-    p.bio ? <p id="profile-bio" className="text-sm opacity-85 max-w-sm mt-3 whitespace-pre-line leading-relaxed text-slate-100 break-words">{p.bio}</p> : null
+    p.bio ? <p id="profile-bio" className={`text-sm opacity-85 max-w-sm mt-3 whitespace-pre-line leading-relaxed break-words ${isLightColor(theme.backgroundColor) ? 'text-zinc-800' : 'text-slate-100'}`}>{p.bio}</p> : null
   );
 
   const RenderHeaderSocials = ({ theme: t }: { theme: any }) => {
@@ -650,7 +670,11 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className={`w-9 h-9 rounded-full bg-white/5 border border-white/15 flex items-center justify-center text-zinc-300 transition-all duration-300 shadow-sm cursor-pointer ${item.color}`}
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm cursor-pointer ${
+                isLightColor(theme.backgroundColor) 
+                  ? 'bg-black/5 border border-black/10 text-zinc-700' 
+                  : 'bg-white/5 border border-white/15 text-zinc-300'
+              } ${item.color}`}
             >
               {item.icon}
             </a>
@@ -682,7 +706,9 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
       id="public-profile-screen"
       style={getContainerStyle()}
       className={`${previewMode ? 'min-h-0' : 'min-h-[100dvh]'} w-full flex flex-col justify-between items-center py-8 px-4 sm:py-10 sm:px-5 md:py-12 md:px-6 relative transition-all duration-500 ${fontClass} ${letterSpacingClass} ${textAlignClass} ${
-        bgType === 'color' && !isCustomBg ? theme.backgroundColor || 'bg-zinc-950 text-zinc-100' : 'text-zinc-100'
+        bgType === 'color' && !isCustomBg 
+          ? theme.backgroundColor || 'bg-zinc-950 text-zinc-100' 
+          : isLightColor(theme.backgroundColor) ? 'text-zinc-900' : 'text-zinc-100'
       } ${theme.patternOverlay === 'dots' ? 'bg-[radial-gradient(circle,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[length:20px_20px]' : ''} ${theme.patternOverlay === 'grid' ? 'bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[length:40px_40px]' : ''} ${theme.patternOverlay === 'crosshatch' ? 'bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_2px,transparent_2px,transparent_6px),repeating-linear-gradient(-45deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_2px,transparent_2px,transparent_6px)]' : ''} ${theme.patternOverlay === 'waves' ? 'bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,255,255,0.04)_0%,transparent_50%),radial-gradient(ellipse_at_50%_100%,rgba(255,255,255,0.02)_0%,transparent_50%)]' : ''} ${theme.wallpaperNoise ? 'bg-noise' : ''}`}
     >
       {/* Video Background */}
@@ -1293,9 +1319,9 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
           <div className={`w-full ${contentMaxW} text-left space-y-4`}>
             {/* If visitor is a guest, prompt them to sign in or sign up */}
             {!sessionUser && !previewMode && (
-              <div className="bg-white/5 border border-white/10 p-4 sm:p-5 rounded-2xl backdrop-blur-md text-center space-y-3 shadow-lg">
-                <p className="text-[11px] text-white/70 leading-relaxed font-sans">
-                  Você está visualizando a rede social de <span className="font-bold text-white">@{profile.username}</span> como visitante. Faça login para curtir, comentar e criar o seu próprio <span className="font-bold">LinkFlowAI</span>!
+              <div className={`${isLightColor(theme.backgroundColor) ? 'bg-black/5 border border-black/10' : 'bg-white/5 border border-white/10'} p-4 sm:p-5 rounded-2xl backdrop-blur-md text-center space-y-3 shadow-lg`}>
+                <p className={`text-[11px] leading-relaxed font-sans ${isLightColor(theme.backgroundColor) ? 'text-zinc-800/80' : 'text-white/70'}`}>
+                  Você está visualizando a rede social de <span className={`font-bold ${isLightColor(theme.backgroundColor) ? 'text-zinc-900' : 'text-white'}`}>@{profile.username}</span> como visitante. Faça login para curtir, comentar e criar o seu próprio <span className={`font-bold ${isLightColor(theme.backgroundColor) ? 'text-zinc-900' : 'text-white'}`}>LinkFlowAI</span>!
                 </p>
                 <a
                   href="/"
@@ -1349,7 +1375,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
       {/* 3. Footer */}
       <div id="profile-badge-footer" className="mt-10 sm:mt-14 md:mt-16 text-center select-none flex flex-col items-center gap-2">
         {theme.footerText && (
-          <p className="text-[10px] text-white/40 max-w-xs leading-relaxed">{theme.footerText}</p>
+          <p className={`text-[10px] max-w-xs leading-relaxed ${isLightColor(theme.backgroundColor) ? 'text-zinc-500' : 'text-white/40'}`}>{theme.footerText}</p>
         )}
         {theme.showBranding !== false && (
           <a

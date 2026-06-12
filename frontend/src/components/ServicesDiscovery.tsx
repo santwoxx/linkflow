@@ -24,16 +24,213 @@ const PAGE_SIZE = 20;
 const SEARCH_DEBOUNCE_MS = 200;
 
 const CATEGORY_ICONS: Record<string, string> = {
-  'Programação': '💻',
-  'Design': '🎨',
-  'Marketing': '📈',
-  'Tráfego Pago': '🎯',
-  'Inteligência Artificial': '🤖',
-  'Consultoria': '💼',
-  'Vídeo e Edição': '🎬',
-  'Social Media': '📱',
-  'Copywriting': '✍️',
-  'Outros': '⚡',
+  'Segurança Eletrônica': '🛡️',
+  'Portaria Remota': '🚪',
+  'Monitoramento 24h': '📹',
+  'Controle de Acesso': '🔑',
+  'Infraestrutura de Redes': '🔌',
+  'Automação Residencial': '🏠',
+  'Automação Comercial': '🏢',
+  'Suporte Técnico': '🛠️',
+  'TI e Informática': '🖥️',
+  'Desenvolvimento Web': '💻',
+  'Aplicativos Mobile': '📱',
+  'Hospedagem e Servidores': '🗄️',
+  'SEO': '🔍',
+  'E-commerce': '🛒',
+  'Gestão de Tráfego': '📊',
+  'Produção Audiovisual': '🎬',
+  'Fotografia': '📷',
+  'Design Gráfico': '🎨',
+  'Branding': '🏷️',
+  'Consultoria Empresarial': '💼',
+  'Gestão de Projetos': '📋',
+  'Treinamentos': '🎓',
+  'Recursos Humanos': '👥',
+  'Jurídico': '⚖️',
+  'Contabilidade': '🧮',
+  'Engenharia': '🏗️',
+  'Arquitetura': '📐',
+  'Manutenção Predial': '🔧',
+  'Energia Solar': '☀️',
+  'Telecomunicações': '📡',
+  'Tradução': '🗣️',
+  'Eventos': '🎉',
+  'Outros': '✨',
+};
+
+interface SeoMetadata {
+  title: string;
+  description: string;
+  keywords: string;
+}
+
+const CATEGORY_SEO_METADATA: Record<string, SeoMetadata> = {
+  'Segurança Eletrônica': {
+    title: 'Contratar Segurança Eletrônica: Empresas e Técnicos | LinkFlowAI',
+    description: 'Encontre especialistas em Segurança Eletrônica no LinkFlowAI. Instalação de câmeras, alarmes, cerca elétrica e projetos de monitoramento completo.',
+    keywords: 'segurança eletrônica, instalação de câmeras, CFTV, cerca elétrica, alarmes residenciais'
+  },
+  'Portaria Remota': {
+    title: 'Portaria Remota e Virtual: Soluções de Segurança | LinkFlowAI',
+    description: 'Encontre as melhores empresas de Portaria Remota e portaria virtual no LinkFlowAI. Segurança condominial moderna e controle inteligente 24h.',
+    keywords: 'portaria remota, portaria virtual, segurança para condomínio, portaria inteligente'
+  },
+  'Monitoramento 24h': {
+    title: 'Monitoramento 24h: Monitoramento de Alarmes e Câmeras | LinkFlowAI',
+    description: 'Vigilância e proteção para sua casa ou negócio. Contrate monitoramento 24 horas e garanta resposta rápida contra invasões e sinistros.',
+    keywords: 'monitoramento 24h, central de monitoramento, vigilância residencial, alarmes monitorados'
+  },
+  'Controle de Acesso': {
+    title: 'Sistemas de Controle de Acesso Residencial e Comercial | LinkFlowAI',
+    description: 'Instalação e manutenção de Controle de Acesso. Biometria, fechaduras digitais, leitores de cartões e catracas para empresas e condomínios.',
+    keywords: 'controle de acesso, biometria, fechadura digital, leitor facial, cancela automática'
+  },
+  'Infraestrutura de Redes': {
+    title: 'Infraestrutura de Redes e Cabeamento Estruturado | LinkFlowAI',
+    description: 'Profissionais de TI especializados em Infraestrutura de Redes, cabeamento óptico, racks, configuração de switches, roteadores e Wi-Fi estável.',
+    keywords: 'infraestrutura de redes, cabeamento estruturado, rack ti, redes corporativas, roteador'
+  },
+  'Automação Residencial': {
+    title: 'Automação Residencial: Especialistas em Smart Home | LinkFlowAI',
+    description: 'Automatize sua casa. Contrate especialistas em Automação Residencial (sistemas Alexa, iluminação inteligente, áudio e vídeo integrado).',
+    keywords: 'automação residencial, casa inteligente, smart home, alexa, automação de iluminação'
+  },
+  'Automação Comercial': {
+    title: 'Automação Comercial: Soluções para Comércios e Lojas | LinkFlowAI',
+    description: 'Aumente a produtividade do seu comércio com sistemas integrados. Automação Comercial, PDV, impressoras térmicas e leitor de código de barras.',
+    keywords: 'automação comercial, sistema pdv, leitor de código de barras, frente de caixa'
+  },
+  'Suporte Técnico': {
+    title: 'Suporte Técnico de TI: Help Desk e Consertos | LinkFlowAI',
+    description: 'Precisa de suporte? Contrate profissionais em suporte técnico de informática, help desk, formatação de computadores e remoção de vírus.',
+    keywords: 'suporte técnico, help desk, conserto de notebook, formatação de pc'
+  },
+  'TI e Informática': {
+    title: 'Consultoria e Serviços de TI e Informática | LinkFlowAI',
+    description: 'Encontre profissionais de TI e Informática para suporte a servidores, redes corporativas, segurança de dados e manutenção avançada.',
+    keywords: 'ti e informática, infraestrutura ti, analista de sistemas, segurança da informação'
+  },
+  'Desenvolvimento Web': {
+    title: 'Desenvolvimento Web: Criação de Sites e Sistemas | LinkFlowAI',
+    description: 'Contrate desenvolvedores web de alto nível. Criação de sites institucionais, landing pages, blogs e sistemas web completos sob medida.',
+    keywords: 'desenvolvimento web, criar site, desenvolvedor frontend, desenvolvedor backend, programador react'
+  },
+  'Aplicativos Mobile': {
+    title: 'Desenvolvimento de Aplicativos Mobile Android e iOS | LinkFlowAI',
+    description: 'Crie o app ideal para seu negócio. Especialistas em desenvolvimento de aplicativos móveis utilizando Flutter, React Native, iOS e Android.',
+    keywords: 'aplicativos mobile, criar app, desenvolvedor flutter, programador mobile'
+  },
+  'Hospedagem e Servidores': {
+    title: 'Hospedagem e Servidores: Cloud, VPS e Migração | LinkFlowAI',
+    description: 'Configuração e gerenciamento de hospedagem de sites, servidores em nuvem (AWS, Azure, GCP), painel cPanel e servidores Linux.',
+    keywords: 'hospedagem e servidores, configurar vps, migração de site, nuvem, sysadmin'
+  },
+  'SEO': {
+    title: 'SEO: Consultoria de Otimização para Primeira Página | LinkFlowAI',
+    description: 'Otimização de sites para motores de busca. Contrate analistas de SEO focados em aumentar seu tráfego orgânico no Google de forma consistente.',
+    keywords: 'seo, otimização de sites, tráfego orgânico, posicionamento google, analista seo'
+  },
+  'E-commerce': {
+    title: 'Criação de Lojas Virtuais e Plataformas de E-commerce | LinkFlowAI',
+    description: 'Comece a vender online hoje. Criação de e-commerce na Shopify, Nuvemshop, WooCommerce e integração com meios de pagamento.',
+    keywords: 'e-commerce, criar loja virtual, shopify, nuvemshop, woocommerce'
+  },
+  'Gestão de Tráfego': {
+    title: 'Gestor de Tráfego Pago: Anúncios no Meta e Google | LinkFlowAI',
+    description: 'Especialistas em Gestão de Tráfego Pago. Crie campanhas de alta conversão no Facebook Ads, Instagram Ads, Google Ads e TikTok Ads.',
+    keywords: 'gestão de tráfego, tráfego pago, gestor de tráfego, facebook ads, google ads'
+  },
+  'Produção Audiovisual': {
+    title: 'Produção Audiovisual: Vídeos, Edição e Roteiro | LinkFlowAI',
+    description: 'Contrate videomakers e editores de vídeo profissionais para comerciais, canais de YouTube, reels para Instagram e cobertura audiovisual.',
+    keywords: 'produção audiovisual, editor de vídeo, videomaker, gravação de vídeo'
+  },
+  'Fotografia': {
+    title: 'Fotógrafos Profissionais: Ensaios e Cobertura | LinkFlowAI',
+    description: 'Encontre fotógrafos no LinkFlowAI. Cobertura fotográfica para casamentos, festas infantis, ensaios de moda e retratos corporativos.',
+    keywords: 'fotografia, fotógrafo, ensaio fotográfico, fotos de produtos, retrato corporativo'
+  },
+  'Design Gráfico': {
+    title: 'Design Gráfico: Criação de Logotipos e Peças | LinkFlowAI',
+    description: 'Designers gráficos criativos. Criação de logotipos, flyers, posts para redes sociais, cartões de visitas e identidade visual completa.',
+    keywords: 'design gráfico, designer gráfico, identidade visual, logotipo, artes digitais'
+  },
+  'Branding': {
+    title: 'Branding e Posicionamento de Marca Profissional | LinkFlowAI',
+    description: 'Construa marcas de sucesso. Projetos de Branding, manual de identidade de marca, tom de voz e estratégias de posicionamento de mercado.',
+    keywords: 'branding, gestão de marca, manual de identidade, posicionamento de mercado'
+  },
+  'Consultoria Empresarial': {
+    title: 'Consultoria Empresarial e Estratégia de Negócios | LinkFlowAI',
+    description: 'Alavanque sua empresa. Consultoria em vendas, finanças, gestão de equipes, planejamento estratégico e processos operacionais.',
+    keywords: 'consultoria empresarial, consultor de negócios, planejamento financeiro'
+  },
+  'Gestão de Projetos': {
+    title: 'Gestão de Projetos: Gerentes Ágeis e Kanban | LinkFlowAI',
+    description: 'Organize o fluxo de trabalho da sua equipe. Gerentes de projetos e Scrum Masters focados em produtividade, entregas rápidas e agilidade.',
+    keywords: 'gestão de projetos, gerente de projetos, scrum master, metodologias ágeis'
+  },
+  'Treinamentos': {
+    title: 'Treinamentos Corporativos e Palestras Profissionais | LinkFlowAI',
+    description: 'Capacite seus colaboradores. Treinamentos corporativos em liderança, atendimento ao cliente, oratória, vendas e novas tecnologias.',
+    keywords: 'treinamentos, palestra de vendas, workshop corporativo, capacitação'
+  },
+  'Recursos Humanos': {
+    title: 'Recursos Humanos: Recrutamento e Consultoria de RH | LinkFlowAI',
+    description: 'Contrate com precisão. Serviços de Recursos Humanos, hunting de talentos, processo seletivo, avaliação de desempenho e DP.',
+    keywords: 'recursos humanos, recrutamento e seleção, headhunter, departamento pessoal'
+  },
+  'Jurídico': {
+    title: 'Assessoria Jurídica e Advogados Especializados | LinkFlowAI',
+    description: 'Consulte advogados nas áreas civil, trabalhista, empresarial, tributária, societária e direito digital diretamente via WhatsApp.',
+    keywords: 'jurídico, advogado, assessoria jurídica, direito digital, contratos'
+  },
+  'Contabilidade': {
+    title: 'Contabilidade e Abertura de Empresas MEI/LTDA | LinkFlowAI',
+    description: 'Simplifique sua contabilidade. Serviços contábeis para empresas, declaração de imposto de renda, folha de pagamento e assessoria fiscal.',
+    keywords: 'contabilidade, contador, imposto de renda, abrir empresa, mei'
+  },
+  'Engenharia': {
+    title: 'Projetos de Engenharia, Laudos e Consultoria Técnica | LinkFlowAI',
+    description: 'Encontre engenheiros civis, elétricos e mecânicos. Elaboração de projetos estruturais, laudos técnicos, ART e reformas de imóveis.',
+    keywords: 'engenharia, engenheiro civil, laudo técnico, art, projeto estrutural'
+  },
+  'Arquitetura': {
+    title: 'Projetos Arquitetônicos e Design de Interiores | LinkFlowAI',
+    description: 'Dê vida às suas ideias com arquitetos qualificados. Projetos residenciais, comerciais, decoração de ambientes e paisagismo.',
+    keywords: 'arquitetura, arquiteto, design de interiores, projeto residencial'
+  },
+  'Manutenção Predial': {
+    title: 'Manutenção Predial: Hidráulica, Elétrica e Reparos | LinkFlowAI',
+    description: 'Encontre prestadores de serviços de manutenção geral. Encanadores, eletricistas, pintores, soldadores e pedreiros de confiança.',
+    keywords: 'manutenção predial, encanador, eletricista comercial, marido de aluguel, reformas'
+  },
+  'Energia Solar': {
+    title: 'Energia Solar: Instalação e Venda de Placas Solares | LinkFlowAI',
+    description: 'Poupe na conta de luz de forma sustentável. Projetos fotovoltaicos, instalação de painéis solares e manutenção para residências e empresas.',
+    keywords: 'energia solar, placa solar, instalador fotovoltaico, energia limpa'
+  },
+  'Telecomunicações': {
+    title: 'Serviços de Telecomunicações e Redes PABX | LinkFlowAI',
+    description: 'Contrate técnicos de telecomunicações para instalação de PABX, centrais telefônicas, redes de fibra óptica e antenas corporativas.',
+    keywords: 'telecomunicações, pabx, fibra óptica, telefonia empresarial'
+  },
+  'Tradução': {
+    title: 'Tradução Profissional: Tradutores e Intérpretes | LinkFlowAI',
+    description: 'Serviços de tradução juramentada, tradução técnica de documentos, legendagem e interpretação simultânea para eventos.',
+    keywords: 'tradução, tradutor, inglês, espanhol, tradução técnica, intérprete'
+  },
+  'Eventos': {
+    title: 'Eventos: Cerimonialistas, DJs, Buffet e Organização | LinkFlowAI',
+    description: 'Planeje sua festa ou evento corporativo com profissionais experientes. DJs, decoradores, buffet, bartenders e equipe de apoio.',
+    keywords: 'eventos, dj para festa, buffet corporativo, decorador de casamentos'
+  },
+  'Outros': {
+    title: 'Prestadores de Serviços Gerais e Autônomos | LinkFlowAI',
+    description: 'Explore outras categorias de prestadores de serviços qualificados no LinkFlowAI. Contato direto e negociação transparente via WhatsApp.',
+    keywords: 'prestadores de serviço, profissionais autônomos, serviços gerais, linkflowai'
+  }
 };
 
 type SortKey = 'recent' | 'name' | 'rating';
@@ -141,6 +338,124 @@ export default function ServicesDiscovery({ onViewProfile, currentUserProfile }:
       }
     }
   }, []);
+
+  // Dynamic Advanced SEO for selected category
+  useEffect(() => {
+    const categoryName = selectedCategory ? String(selectedCategory) : '';
+    const seo = CATEGORY_SEO_METADATA[categoryName] || {
+      title: 'Vitrine de Serviços & Freelancers Verificados | LinkFlowAI',
+      description: 'Encontre programadores, designers, suporte técnico, TI, segurança eletrônica, eventos e muito mais no LinkFlowAI. Conecte-se e feche direto por WhatsApp.',
+      keywords: 'freelancers, profissionais autônomos, programador, design, segurança eletronica, portaria remota, ti, contabilidade, suporte tecnico, linkflowai'
+    };
+
+    // Store original document title and description
+    const originalTitle = document.title;
+
+    // Set document title
+    document.title = seo.title;
+
+    // Update meta description
+    let metaDesc = document.querySelector('meta[name="description"]');
+    const originalDesc = metaDesc ? metaDesc.getAttribute('content') : '';
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.setAttribute('name', 'description');
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute('content', seo.description);
+
+    // Update meta keywords
+    let metaKeywords = document.querySelector('meta[name="keywords"]');
+    const originalKeywords = metaKeywords ? metaKeywords.getAttribute('content') : '';
+    if (!metaKeywords) {
+      metaKeywords = document.createElement('meta');
+      metaKeywords.setAttribute('name', 'keywords');
+      document.head.appendChild(metaKeywords);
+    }
+    metaKeywords.setAttribute('content', seo.keywords);
+
+    // Update robots index meta tag (ensure Google indexes this search/category page!)
+    let metaRobots = document.querySelector('meta[name="robots"]');
+    const originalRobots = metaRobots ? metaRobots.getAttribute('content') : '';
+    if (!metaRobots) {
+      metaRobots = document.createElement('meta');
+      metaRobots.setAttribute('name', 'robots');
+      document.head.appendChild(metaRobots);
+    }
+    metaRobots.setAttribute('content', 'index, follow');
+
+    // Update canonical link
+    let canonicalLink = document.querySelector('link[rel="canonical"]');
+    const originalCanonical = canonicalLink ? canonicalLink.getAttribute('href') : '';
+    const currentCategoryUrl = categoryName
+      ? `https://linkflowai.com.br/servicos?category=${encodeURIComponent(categoryName)}`
+      : 'https://linkflowai.com.br/servicos';
+    if (!canonicalLink) {
+      canonicalLink = document.createElement('link');
+      canonicalLink.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalLink);
+    }
+    canonicalLink.setAttribute('href', currentCategoryUrl);
+
+    // Update Open Graph tags
+    let ogTitle = document.querySelector('meta[property="og:title"]');
+    if (!ogTitle) { ogTitle = document.createElement('meta'); ogTitle.setAttribute('property', 'og:title'); document.head.appendChild(ogTitle); }
+    ogTitle.setAttribute('content', seo.title);
+
+    let ogDesc = document.querySelector('meta[property="og:description"]');
+    if (!ogDesc) { ogDesc = document.createElement('meta'); ogDesc.setAttribute('property', 'og:description'); document.head.appendChild(ogDesc); }
+    ogDesc.setAttribute('content', seo.description);
+
+    let ogUrl = document.querySelector('meta[property="og:url"]');
+    if (!ogUrl) { ogUrl = document.createElement('meta'); ogUrl.setAttribute('property', 'og:url'); document.head.appendChild(ogUrl); }
+    ogUrl.setAttribute('content', currentCategoryUrl);
+
+    // Dynamic JSON-LD Structured Data
+    const schemaData = {
+      '@context': 'https://schema.org',
+      '@type': 'SearchResultsPage',
+      'name': seo.title,
+      'description': seo.description,
+      'url': currentCategoryUrl,
+      'provider': {
+        '@type': 'Organization',
+        'name': 'LinkFlowAI',
+        'url': 'https://linkflowai.com.br'
+      }
+    };
+
+    let scriptJsonLd = document.getElementById('json-ld-category-seo') as HTMLScriptElement;
+    if (!scriptJsonLd) {
+      scriptJsonLd = document.createElement('script');
+      scriptJsonLd.id = 'json-ld-category-seo';
+      scriptJsonLd.type = 'application/ld+json';
+      document.head.appendChild(scriptJsonLd);
+    }
+    scriptJsonLd.textContent = JSON.stringify(schemaData);
+
+    // Clean up when selectedCategory changes or component unmounts
+    return () => {
+      document.title = originalTitle;
+      if (metaDesc) {
+        if (originalDesc) metaDesc.setAttribute('content', originalDesc);
+        else metaDesc.remove();
+      }
+      if (metaKeywords) {
+        if (originalKeywords) metaKeywords.setAttribute('content', originalKeywords);
+        else metaKeywords.remove();
+      }
+      if (metaRobots) {
+        if (originalRobots) metaRobots.setAttribute('content', originalRobots);
+        else metaRobots.remove();
+      }
+      if (canonicalLink) {
+        if (originalCanonical) canonicalLink.setAttribute('href', originalCanonical);
+        else canonicalLink.remove();
+      }
+      const finalScript = document.getElementById('json-ld-category-seo');
+      if (finalScript) finalScript.remove();
+    };
+  }, [selectedCategory]);
 
   // Stats specific logic to avoid constant recalculations from DB
   const [cachedCities, setCachedCities] = useState<string[]>([]);
@@ -253,7 +568,7 @@ export default function ServicesDiscovery({ onViewProfile, currentUserProfile }:
           displayName: 'Natan Marinho',
           profilePicUrl: p.profilePicUrl || 'https://i.ibb.co/YFV7fWfd/IMG-0259.jpg',
           profession: p.profession || 'CEO & Founder do LinkFlowAI',
-          category: p.category && p.category !== 'Outros' ? p.category : 'Programação',
+          category: p.category && (PRO_CATEGORIES as readonly string[]).includes(p.category) ? p.category : 'Desenvolvimento Web',
           bio: p.bio || 'CEO & Founder do LinkFlowAI 🚀 Desenvolvedor Fullstack | Especialista em criar ecossistemas digitais de alta performance e conexões sem fricção.',
           whatsapp: p.whatsapp || '5581999999999',
           city: p.city || 'Recife PE',
@@ -301,7 +616,7 @@ export default function ServicesDiscovery({ onViewProfile, currentUserProfile }:
         displayName: 'Natan Marinho',
         profilePicUrl: 'https://i.ibb.co/YFV7fWfd/IMG-0259.jpg',
         profession: 'CEO & Founder do LinkFlowAI',
-        category: 'Programação',
+        category: 'Desenvolvimento Web',
         bio: 'CEO & Founder do LinkFlowAI 🚀 Desenvolvedor Fullstack | Especialista em criar ecossistemas digitais de alta performance e conexões sem fricção.',
         whatsapp: '5581999999999',
         city: 'Recife PE',

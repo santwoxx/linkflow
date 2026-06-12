@@ -299,14 +299,14 @@ export default function SeoLandingPage({ slug, onBack, onNavigate }: SeoLandingP
             
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               {[
-                { name: 'Programação', icon: '💻', slug: 'Programação' },
-                { name: 'Design', icon: '🎨', slug: 'Design' },
-                { name: 'Marketing', icon: '📈', slug: 'Marketing' },
-                { name: 'Tráfego Pago', icon: '🎯', slug: 'Tráfego Pago' },
-                { name: 'Inteligência Artificial', icon: '🤖', slug: 'Inteligência Artificial' },
-                { name: 'Consultoria', icon: '💼', slug: 'Consultoria' },
-                { name: 'Vídeo e Edição', icon: '🎬', slug: 'Vídeo e Edição' },
-                { name: 'Copywriting', icon: '✍️', slug: 'Copywriting' }
+                { name: 'Desenvolvimento Web', icon: '💻', slug: 'Desenvolvimento Web' },
+                { name: 'Design Gráfico', icon: '🎨', slug: 'Design Gráfico' },
+                { name: 'Gestão de Tráfego', icon: '📊', slug: 'Gestão de Tráfego' },
+                { name: 'SEO', icon: '🔍', slug: 'SEO' },
+                { name: 'Suporte Técnico', icon: '🛠️', slug: 'Suporte Técnico' },
+                { name: 'TI e Informática', icon: '🖥️', slug: 'TI e Informática' },
+                { name: 'Consultoria Empresarial', icon: '💼', slug: 'Consultoria Empresarial' },
+                { name: 'Eventos', icon: '🎉', slug: 'Eventos' }
               ].map((cat, idx) => (
                 <a
                   key={idx}

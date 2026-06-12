@@ -102,8 +102,16 @@ export default function App() {
     const seoPaths = ['linktree-gratis', 'alternativa-linktree', 'como-colocar-link-na-bio', 'plataforma-freelancer', 'contratar-freelancer'];
 
     if (publicProfile) {
-      const desc = publicProfile.bio || `Confira os links e serviços de ${publicProfile.displayName} no LinkFlowAI`;
-      const pageTitle = `${publicProfile.displayName} (@${publicProfile.username}) | LinkFlowAI`;
+      let desc = publicProfile.bio || `Confira os links e serviços de ${publicProfile.displayName} no LinkFlowAI`;
+      let pageTitle = `${publicProfile.displayName} (@${publicProfile.username}) | LinkFlowAI`;
+      let keywords = `${publicProfile.displayName}, ${publicProfile.username}, linkflowai, link na bio, portfólio`;
+
+      if (publicProfile.username === 'wafort' || publicProfile.username === 'wafort24h') {
+        pageTitle = 'Wafort | Segurança Eletrônica, Portaria Remota e Monitoramento 24h';
+        desc = 'Wafort Segurança Eletrônica e Portaria Remota. Confira nossos canais de atendimento, links úteis e serviços de monitoramento 24h no LinkFlowAI.';
+        keywords = 'wafort, wafort24h, wafort segurança, portaria remota wafort, monitoramento 24h, segurança eletrônica, linkflowai';
+      }
+
       document.title = pageTitle;
       
       // Meta Description
@@ -114,11 +122,29 @@ export default function App() {
         document.head.appendChild(metaDesc);
       }
       metaDesc.setAttribute('content', desc);
+
+      // Meta Keywords
+      let metaKeywords = document.querySelector('meta[name="keywords"]');
+      if (!metaKeywords) {
+        metaKeywords = document.createElement('meta');
+        metaKeywords.setAttribute('name', 'keywords');
+        document.head.appendChild(metaKeywords);
+      }
+      metaKeywords.setAttribute('content', keywords);
+
+      // Meta Robots (Ensure indexed!)
+      let metaRobots = document.querySelector('meta[name="robots"]');
+      if (!metaRobots) {
+        metaRobots = document.createElement('meta');
+        metaRobots.setAttribute('name', 'robots');
+        document.head.appendChild(metaRobots);
+      }
+      metaRobots.setAttribute('content', 'index, follow, max-image-preview:large, max-snippet:-1');
       
       // Open Graph Title
       let ogTitle = document.querySelector('meta[property="og:title"]');
       if (!ogTitle) { ogTitle = document.createElement('meta'); ogTitle.setAttribute('property', 'og:title'); document.head.appendChild(ogTitle); }
-      ogTitle.setAttribute('content', `${publicProfile.displayName} | LinkFlowAI`);
+      ogTitle.setAttribute('content', pageTitle);
       
       // Open Graph Description
       let ogDesc = document.querySelector('meta[property="og:description"]');
@@ -161,6 +187,31 @@ export default function App() {
         if (!twitterImage) { twitterImage = document.createElement('meta'); twitterImage.setAttribute('name', 'twitter:image'); document.head.appendChild(twitterImage); }
         twitterImage.setAttribute('content', publicProfile.profilePicUrl);
       }
+
+      // Dynamic JSON-LD structured data for public profile
+      const schemaData = {
+        '@context': 'https://schema.org',
+        '@type': 'ProfilePage',
+        'name': pageTitle,
+        'description': desc,
+        'url': profileUrl,
+        'mainEntity': {
+          '@type': 'Person',
+          'name': publicProfile.displayName,
+          'alternateName': publicProfile.username,
+          'description': publicProfile.bio || '',
+          'image': publicProfile.profilePicUrl || ''
+        }
+      };
+
+      let scriptJsonLd = document.getElementById('json-ld-profile-seo') as HTMLScriptElement;
+      if (!scriptJsonLd) {
+        scriptJsonLd = document.createElement('script');
+        scriptJsonLd.id = 'json-ld-profile-seo';
+        scriptJsonLd.type = 'application/ld+json';
+        document.head.appendChild(scriptJsonLd);
+      }
+      scriptJsonLd.textContent = JSON.stringify(schemaData);
     } else if (publicView && seoPaths.includes(publicView)) {
       let pageTitle = '';
       let desc = '';
@@ -233,6 +284,8 @@ export default function App() {
       if (publicSlug && !publicProfile) {
         document.title = 'LinkFlowAI | Sua Página de Links + Rede Social';
       }
+      const finalScript = document.getElementById('json-ld-profile-seo');
+      if (finalScript) finalScript.remove();
     };
   }, [publicProfile, publicSlug, publicView]);
 

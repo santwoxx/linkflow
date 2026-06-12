@@ -80,3 +80,30 @@ export function compressImage(
     img.src = URL.createObjectURL(file);
   });
 }
+
+/**
+ * Sanitizes image URLs to convert viewer links (from popular image hosting services like ImgBB or Postimages)
+ * into their direct image file links.
+ */
+export function sanitizeImageUrl(url: string): string {
+  if (!url) return '';
+  
+  let cleaned = url.trim();
+
+  // ImgBB viewer page link to direct image link (ignores the filename and pulls directly)
+  const imgbbRegex = /(?:https?:\/\/)?(?:www\.)?ibb\.co\/([a-zA-Z0-9]+)/i;
+  const imgbbMatch = cleaned.match(imgbbRegex);
+  if (imgbbMatch && imgbbMatch[1]) {
+    return `https://i.ibb.co/${imgbbMatch[1]}/logo.png`;
+  }
+
+  // Postimages viewer page link to direct image link
+  const postimgRegex = /(?:https?:\/\/)?(?:www\.)?postimg\.cc\/([a-zA-Z0-9]+)/i;
+  const postimgMatch = cleaned.match(postimgRegex);
+  if (postimgMatch && postimgMatch[1]) {
+    return `https://i.postimg.cc/${postimgMatch[1]}/logo.png`;
+  }
+
+  return cleaned;
+}
+

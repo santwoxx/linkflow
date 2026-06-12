@@ -1152,7 +1152,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                         <span className="w-2 h-2 rounded-full bg-gradient-to-br from-[#a78bfa] to-indigo-500" /> Cor de Fundo
                       </h4>
                       <div className="flex flex-wrap gap-2.5 bg-[#111111] border border-white/5 rounded-2xl p-4">
-                        {['#0f172a','#1e1b4b','#1a1a2e','#0d1117','#111827','#1c1917','#171717','#1f2937','#020617','#000000','#2d1b69','#1a3a5c','#3b0764','#164e63','#0b3d0b','#3d0c0c','#7c2d12','#4c1d95','#0f0f0f','#262626'].map((c) => (
+                        {['#0f172a','#1e1b4b','#1a1a2e','#0d1117','#111827','#1c1917','#171717','#1f2937','#020617','#000000','#2d1b69','#1a3a5c','#3b0764','#164e63','#0b3d0b','#3d0c0c','#7c2d12','#4c1d95','#0f0f0f','#262626','#ffffff','#f8fafc','#f0fdf4','#fef2f2','#fefce8','#f5f3ff','#ecfeff','#fff7ed','#fdf2f8'].map((c) => (
                           <button key={c} type="button" onClick={() => handlePickColor(c)}
                             className={`w-9 h-9 rounded-full border-2 transition-all cursor-pointer hover:scale-110 shadow-sm ${
                               theme.backgroundColor === c ? 'border-[#a78bfa] scale-110 ring-4 ring-[#a78bfa]/20' : 'border-white/5 hover:border-white/20'

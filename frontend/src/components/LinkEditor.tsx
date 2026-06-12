@@ -185,7 +185,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
         case 'whatsapp':
           defaultTitle = 'Fale no WhatsApp';
           defaultUrl = 'https://wa.me/55';
-          extraData = { iconEmoji: '💬', animation: 'pulse' };
+          extraData = { iconUrl: 'https://i.ibb.co/7dprV27c/wpp-png.png', animation: 'pulse' };
           break;
         case 'telegram':
           defaultTitle = 'Canal do Telegram';
@@ -396,7 +396,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
 
   const BLOCKS_MENU = [
     { type: 'link', label: 'Botão Link', icon: <ExternalLink className="w-4 h-4" /> },
-    { type: 'whatsapp', label: 'WhatsApp', icon: <MessageCircle className="w-4 h-4 text-green-400" /> },
+    { type: 'whatsapp', label: 'WhatsApp', icon: <img src="https://i.ibb.co/7dprV27c/wpp-png.png" alt="WhatsApp" className="w-4 h-4 object-contain" /> },
     { type: 'promo_banner', label: 'Banner Promo', icon: <ImageIcon className="w-4 h-4 text-purple-400" /> },
     { type: 'buy_now', label: 'Botão Compra', icon: <ShoppingBag className="w-4 h-4 text-amber-400" /> },
     { type: 'products', label: 'Produtos', icon: <LayoutTemplate className="w-4 h-4 text-blue-400" /> },
