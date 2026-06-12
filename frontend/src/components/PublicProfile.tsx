@@ -499,7 +499,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
         {activeSocials.map(item => {
           let url = socials[item.key];
           if (item.key === 'whatsapp') {
-            const num = url.replace(/\D/g, '');
+            const num = String(url).replace(/\D/g, '');
             url = `https://wa.me/${num}`;
           } else if (url && !/^https?:\/\//i.test(url)) {
             url = 'https://' + url;
@@ -789,7 +789,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                     )}
                     {proData.whatsapp && (
                       <a
-                        href={`https://wa.me/${proData.whatsapp.replace(/\D/g, '')}?text=Olá! Encontrei seu perfil no LinkFlowAI e gostaria de solicitar um orçamento.`}
+                        href={`https://wa.me/${String(proData.whatsapp).replace(/\D/g, '')}?text=Olá! Encontrei seu perfil no LinkFlowAI e gostaria de solicitar um orçamento.`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="mt-5 w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-emerald-600/30"
@@ -916,7 +916,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                             </div>
                             <div className="flex gap-2 mt-3 pt-3 border-t border-white/5">
                               <a
-                                href={svc.whatsapp ? `https://wa.me/${svc.whatsapp.replace(/\D/g, '')}?text=Olá! Tenho interesse no serviço: ${svc.name}` : svc.contactLink || '#'}
+                                href={svc.whatsapp ? `https://wa.me/${String(svc.whatsapp).replace(/\D/g, '')}?text=Olá! Tenho interesse no serviço: ${svc.name}` : svc.contactLink || '#'}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
@@ -926,7 +926,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                               </a>
                               {svc.whatsapp && (
                                 <a
-                                  href={`https://wa.me/${svc.whatsapp.replace(/\D/g, '')}`}
+                                  href={`https://wa.me/${String(svc.whatsapp).replace(/\D/g, '')}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="py-2.5 px-4 bg-white/10 hover:bg-white/15 text-white text-[11px] font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
