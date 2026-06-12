@@ -10,8 +10,7 @@ import CommunityFeed from './CommunityFeed';
 import DiscoverProfiles from './DiscoverProfiles';
 const AdminPanel = React.lazy(() => import('./AdminPanel'));
 const ProfessionalDashboard = React.lazy(() => import('./ProfessionalDashboard'));
-import GoToNatanDevButton from './GoToNatanDevButton';
-import { Link2, Sparkles, User, LogOut, Check, Copy, ExternalLink, RefreshCw, MessageSquare, Compass, ImageIcon, Crown, Layout, Smartphone, BarChart4, Briefcase, Upload } from 'lucide-react';
+import { Link2, Sparkles, User, LogOut, Check, Copy, ExternalLink, RefreshCw, MessageSquare, Compass, ImageIcon, Crown, Layout, Smartphone, BarChart4, Briefcase, Upload, AtSign } from 'lucide-react';
 import { ADMIN_EMAIL } from '../types';
 import { compressImage } from '../utils/image';
 
@@ -1052,7 +1051,16 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                     >
                       {copiedNotification ? <><Check className="w-3 h-3" /> Copiado!</> : <><Copy className="w-3 h-3" /> Copiar</>}
                     </button>
-                    <GoToNatanDevButton />
+                    <a
+                      href={`/${userProfile.username}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-[10px] font-bold px-3 py-2 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 transition-all cursor-pointer whitespace-nowrap"
+                      title={`Visitar @${userProfile.username} em nova aba`}
+                    >
+                      <AtSign className="w-3 h-3" />
+                      @{userProfile.username}
+                    </a>
                   </div>
                 </div>
                 <div className="mt-2 flex items-center gap-2 bg-black/40 rounded-lg border border-slate-800 px-3 py-2">
@@ -1064,7 +1072,16 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                   >
                     {copiedNotification ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
                   </button>
-                  <GoToNatanDevButton variant="icon" />
+                  <a
+                    href={`/${userProfile.username}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center text-sky-400 hover:text-sky-300 transition-all cursor-pointer"
+                    title={`Visitar @${userProfile.username} em nova aba`}
+                    aria-label={`Visitar @${userProfile.username} em nova aba`}
+                  >
+                    <AtSign className="w-4 h-4" />
+                  </a>
                 </div>
               </div>
               <StatsView links={links} clicks={clicks} views={views} />

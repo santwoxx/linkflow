@@ -882,6 +882,35 @@ export default function App() {
                 updateDoc(userDocRef, { verifiedProfessional: true, serviceEnabled: true }).catch(() => {});
               }
             }
+            if (data.username === 'wafort' || data.username === 'wafort24h') {
+              let needsUpdate = false;
+              if (!data.verifiedProfessional || !data.serviceEnabled) {
+                data.verifiedProfessional = true;
+                data.serviceEnabled = true;
+                needsUpdate = true;
+              }
+              if (!data.theme || data.theme.themeId !== 'custom-premium-wafort') {
+                data.theme = {
+                  themeId: 'custom-premium-wafort',
+                  cardStyle: 'rounded',
+                  fontFamily: 'sans',
+                  buttonColor: '#ffffff',
+                  buttonTextColor: '#0a1128',
+                  backgroundColor: 'bg-[#0a1128] text-slate-100',
+                  avatarFrame: 'gold',
+                  avatarGlow: true,
+                  titleColor: '#d4af37',
+                };
+                needsUpdate = true;
+              }
+              if (needsUpdate) {
+                updateDoc(userDocRef, {
+                  verifiedProfessional: true,
+                  serviceEnabled: true,
+                  theme: data.theme
+                }).catch(() => {});
+              }
+            }
             localStorage.setItem(`linkflow_cached_profile_${firebaseUser.uid}`, JSON.stringify(data));
             if (data.banned) { setBannedUser(data); setUserProfile(null); }
             else { setUserProfile(data); }
