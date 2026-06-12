@@ -215,6 +215,15 @@ service cloud.firestore {
         allow create: if true;  // qualquer visitante pode registrar um clique
         allow update, delete: if isAdmin();
       }
+
+      // ======================================================================
+      // VIEWS /{viewId}  (registro anônimo de visualizações de perfil)
+      // ======================================================================
+      match /views/{viewId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if true;  // qualquer visitante pode registrar uma visualização
+        allow update, delete: if isAdmin();
+      }
     }
 
     // ==========================================================================

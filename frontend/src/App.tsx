@@ -1300,8 +1300,15 @@ export default function App() {
                   placeholder="seu-nome"
                   value={chosenUsername}
                   onChange={(e) => {
-                    // Force lowercase, remove spaces with dash, only accept alphanumeric and special characters
-                    const inputVal = e.target.value.toLowerCase().replace(/\s+/g, '-');
+                    // Normalize accents, replace spaces with hyphens, filter special characters, collapse consecutive dashes/dots
+                    const inputVal = e.target.value
+                      .toLowerCase()
+                      .normalize("NFD")
+                      .replace(/[\u0300-\u036f]/g, "")
+                      .replace(/\s+/g, '-')
+                      .replace(/[^a-z0-9_\-\.]/g, '')
+                      .replace(/-+/g, '-')
+                      .replace(/\.+/g, '.');
                     setChosenUsername(inputVal);
                   }}
                   className={`w-full bg-black text-xs font-mono py-3.5 pl-[130px] pr-10 rounded-xl border focus:outline-none transition-all placeholder-slate-800 ${
@@ -1353,7 +1360,7 @@ export default function App() {
             <button
               id="reserve-slug-btn"
               type="submit"
-              disabled={registering || usernameCheckLoading || usernameAvailable === false || !chosenUsername.trim()}
+              disabled={registering || usernameCheckLoading || usernameAvailable !== true || !chosenUsername.trim()}
               className="w-full py-3.5 bg-[#a78bfa] hover:bg-[#c4b5fd] disabled:bg-slate-800 disabled:text-slate-500 disabled:shadow-none font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 tracking-wide font-sans cursor-pointer transition-all shadow-lg shadow-[#a78bfa]/20 hover:shadow-[#a78bfa]/30"
             >
               {registering ? (
