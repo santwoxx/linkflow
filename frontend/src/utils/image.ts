@@ -43,13 +43,15 @@ export function compressImage(
       }
       ctx.drawImage(img, 0, 0, width, height);
 
+      const format = (file.type === 'image/png' || file.type === 'image/webp' || file.type === 'image/gif' || file.name.toLowerCase().endsWith('.png') || file.name.toLowerCase().endsWith('.webp') || file.name.toLowerCase().endsWith('.gif')) ? 'image/png' : 'image/jpeg';
+
       // Try with the requested quality first; if the result is too large,
       // halve quality and try again (max 3 attempts).
       let result = '';
       let q = Math.min(quality, 0.75); // never exceed 0.75 for upload images
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
-          result = canvas.toDataURL('image/jpeg', q);
+          result = canvas.toDataURL(format, q);
         } catch (err) {
           reject(err);
           return;
@@ -66,7 +68,7 @@ export function compressImage(
         if (ctx2) {
           ctx2.drawImage(img, 0, 0, canvas.width, canvas.height);
           try {
-            result = canvas.toDataURL('image/jpeg', 0.55);
+            result = canvas.toDataURL(format, format === 'image/png' ? undefined : 0.55);
           } catch (err) {
             reject(err);
             return;
