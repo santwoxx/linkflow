@@ -1087,6 +1087,23 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                     </div>
                                   </div>
 
+                                  {/* Background Color Customization */}
+                                  <div className="space-y-2">
+                                    <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
+                                      <Palette className="w-3 h-3 text-[#a78bfa]" /> Cor de Fundo
+                                    </label>
+                                    <div className="flex gap-2">
+                                      <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(editCustomColor) ? editCustomColor : '#111a36'} onChange={(e) => setEditCustomColor(e.target.value)} className="w-9 h-9 rounded border border-white/5 bg-transparent cursor-pointer shrink-0" title="Cor de fundo" />
+                                      <input type="text" placeholder="#111a36" value={editCustomColor} onChange={(e) => setEditCustomColor(e.target.value)} className="flex-1 bg-[#0a0a0a] text-[10px] text-white py-3 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none font-mono" />
+                                      {editCustomColor && <button type="button" onClick={() => setEditCustomColor('')} className="bg-rose-500/10 text-rose-400 text-[10px] font-bold px-2 rounded-lg border border-rose-500/20 cursor-pointer">Limpar</button>}
+                                    </div>
+                                    <div className="flex flex-wrap gap-1 mt-1.5">
+                                      {['#ffffff','#000000','#111a36','#a78bfa','#10b981','#ef4444','#f59e0b','#3b82f6','#6366f1','#ec4899','#8b5cf6'].map(c => (
+                                        <button key={c} type="button" onClick={() => setEditCustomColor(c)} className={`w-5 h-5 rounded-full border-2 transition-all cursor-pointer hover:scale-110 ${editCustomColor === c ? 'border-[#a78bfa] scale-110' : 'border-transparent hover:border-zinc-500'}`} style={{ backgroundColor: c }} title={c} />
+                                      ))}
+                                    </div>
+                                  </div>
+
                                   {/* Color customization */}
                                   <div className="space-y-2">
                                 <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
