@@ -127,6 +127,21 @@ export default function ServicesDiscovery({ onViewProfile, currentUserProfile }:
   const [showFilters, setShowFilters] = useState(false);
   const [sort, setSort] = useState<SortKey>('recent');
 
+  // Pre-select category from URL query parameters (e.g. ?category=Design)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const catParam = params.get('category');
+    if (catParam) {
+      const decodedCat = decodeURIComponent(catParam).trim();
+      const matchedCat = PRO_CATEGORIES.find(
+        (c) => c.toLowerCase() === decodedCat.toLowerCase()
+      );
+      if (matchedCat) {
+        setSelectedCategory(matchedCat);
+      }
+    }
+  }, []);
+
   // Stats specific logic to avoid constant recalculations from DB
   const [cachedCities, setCachedCities] = useState<string[]>([]);
   

@@ -99,7 +99,7 @@ export default function App() {
 
   // Dynamic SEO meta tags for public profiles and SEO pages
   useEffect(() => {
-    const seoPaths = ['linktree-gratis', 'alternativa-linktree', 'como-colocar-link-na-bio'];
+    const seoPaths = ['linktree-gratis', 'alternativa-linktree', 'como-colocar-link-na-bio', 'plataforma-freelancer', 'contratar-freelancer'];
 
     if (publicProfile) {
       const desc = publicProfile.bio || `Confira os links e serviços de ${publicProfile.displayName} no LinkFlowAI`;
@@ -171,6 +171,9 @@ export default function App() {
       } else if (publicView === 'alternativa-linktree') {
         pageTitle = 'A Melhor Alternativa ao Linktree em Português | LinkFlowAI';
         desc = 'Descubra por que milhares de criadores de conteúdo, profissionais liberais e marcas estão migrando do Linktree para o LinkFlowAI.';
+      } else if (publicView === 'plataforma-freelancer' || publicView === 'contratar-freelancer') {
+        pageTitle = 'Plataforma Freelancer Grátis: Contrate Profissionais | LinkFlowAI';
+        desc = 'Encontre os melhores programadores, designers, redatores e profissionais freelancers do Brasil no LinkFlowAI. Contrate sem comissões ou divulgue seus serviços 100% grátis.';
       } else {
         pageTitle = 'Como Colocar Link na Bio do Instagram e TikTok (Guia) | LinkFlowAI';
         desc = 'O guia definitivo para criar sua página de links no LinkFlowAI e inseri-la de forma profissional no topo de suas redes sociais.';
@@ -242,7 +245,7 @@ export default function App() {
 
     const path = window.location.pathname;
     const cleanPath = path.replace(/^\/+|\/+$/g, '');
-    const seoPaths = ['linktree-gratis', 'alternativa-linktree', 'como-colocar-link-na-bio'];
+    const seoPaths = ['linktree-gratis', 'alternativa-linktree', 'como-colocar-link-na-bio', 'plataforma-freelancer', 'contratar-freelancer'];
     const reservedPaths = ['servicos', 'profissional', 'index.html', 'privacy', 'terms', 'admin', ...seoPaths];
 
     // Check custom domain
@@ -1096,6 +1099,24 @@ export default function App() {
     }
   };
 
+  const handleFooterLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+    e.preventDefault();
+    window.history.pushState({}, '', path);
+    const cleanPath = path.replace(/^\/+|\/+$/g, '');
+    const seoPaths = ['linktree-gratis', 'alternativa-linktree', 'como-colocar-link-na-bio', 'plataforma-freelancer', 'contratar-freelancer'];
+    if (seoPaths.includes(cleanPath)) {
+      setPublicView(cleanPath);
+      setPublicSlug(null);
+    } else if (cleanPath === '') {
+      setPublicView(null);
+      setPublicSlug(null);
+    } else {
+      setPublicSlug(cleanPath);
+      setPublicView(null);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   // ----- RENDER NEW PROFESSIONAL MODULE ROUTES -----
   if (publicView === 'servicos') {
     if (publicProProfile) {
@@ -1149,7 +1170,7 @@ export default function App() {
     );
   }
 
-  const seoPaths = ['linktree-gratis', 'alternativa-linktree', 'como-colocar-link-na-bio'];
+  const seoPaths = ['linktree-gratis', 'alternativa-linktree', 'como-colocar-link-na-bio', 'plataforma-freelancer', 'contratar-freelancer'];
   if (publicView && seoPaths.includes(publicView)) {
     return (
       <React.Suspense fallback={
@@ -1163,6 +1184,13 @@ export default function App() {
             window.history.pushState({}, '', '/');
             setPublicView(null);
           }} 
+          onNavigate={(path) => {
+            window.history.pushState({}, '', path);
+            const cleanPath = path.replace(/^\/+|\/+$/g, '');
+            setPublicView(cleanPath);
+            setPublicSlug(null);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
         />
       </React.Suspense>
     );
@@ -1558,19 +1586,33 @@ export default function App() {
       </main>
 
       {/* Footer copyright */}
-      <footer className="px-6 py-6 border-t border-slate-900 text-center text-[10px] text-slate-600 font-medium z-10 flex flex-col sm:flex-row justify-between items-center max-w-4xl w-full mx-auto gap-3">
-        <div className="flex items-center gap-4">
-          <span className="text-slate-500">© 2026 LinkFlowAI do Brasil</span>
-          <button onClick={() => setShowPolicy('terms')} className="text-slate-500 hover:text-slate-300 transition-colors cursor-pointer underline underline-offset-2">
-            Termos de Uso
-          </button>
-          <button onClick={() => setShowPolicy('privacy')} className="text-slate-500 hover:text-slate-300 transition-colors cursor-pointer underline underline-offset-2">
-            Privacidade
-          </button>
+      <footer className="px-6 py-6 border-t border-slate-900 text-center text-[10px] text-slate-600 font-medium z-10 flex flex-col justify-between items-center max-w-4xl w-full mx-auto gap-6">
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-slate-500 border-b border-slate-900/60 pb-5 w-full">
+          <span className="text-slate-600 font-bold">Explorar:</span>
+          <a href="/linktree-gratis" onClick={(e) => handleFooterLinkClick(e, '/linktree-gratis')} className="hover:text-[#a78bfa] hover:underline transition-all">Linktree Grátis</a>
+          <span>•</span>
+          <a href="/alternativa-linktree" onClick={(e) => handleFooterLinkClick(e, '/alternativa-linktree')} className="hover:text-[#a78bfa] hover:underline transition-all">Alternativa Linktree</a>
+          <span>•</span>
+          <a href="/como-colocar-link-na-bio" onClick={(e) => handleFooterLinkClick(e, '/como-colocar-link-na-bio')} className="hover:text-[#a78bfa] hover:underline transition-all">Como Criar Link na Bio</a>
+          <span>•</span>
+          <a href="/plataforma-freelancer" onClick={(e) => handleFooterLinkClick(e, '/plataforma-freelancer')} className="hover:text-[#a78bfa] hover:underline transition-all">Plataforma Freelancer</a>
+          <span>•</span>
+          <a href="/contratar-freelancer" onClick={(e) => handleFooterLinkClick(e, '/contratar-freelancer')} className="hover:text-[#a78bfa] hover:underline transition-all">Contratar Freelancer</a>
         </div>
-        <span className="flex items-center gap-1 text-slate-500">
-          Feito com <Heart className="w-3 h-3 text-[#a78bfa] fill-[#a78bfa]" /> para conexões e interações rápidas.
-        </span>
+        <div className="flex flex-col sm:flex-row justify-between items-center w-full gap-3">
+          <div className="flex items-center gap-4">
+            <span className="text-slate-500">© 2026 LinkFlowAI do Brasil</span>
+            <button onClick={() => setShowPolicy('terms')} className="text-slate-500 hover:text-slate-300 transition-colors cursor-pointer underline underline-offset-2">
+              Termos de Uso
+            </button>
+            <button onClick={() => setShowPolicy('privacy')} className="text-slate-500 hover:text-slate-300 transition-colors cursor-pointer underline underline-offset-2">
+              Privacidade
+            </button>
+          </div>
+          <span className="flex items-center gap-1 text-slate-500">
+            Feito com <Heart className="w-3 h-3 text-[#a78bfa] fill-[#a78bfa]" /> para conexões e interações rápidas.
+          </span>
+        </div>
       </footer>
 
       {/* Terms of Use Modal */}
