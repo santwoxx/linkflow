@@ -932,35 +932,55 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
               <>
               {profile.serviceEnabled && profile.verifiedProfessional && proData && (
                 <div className="w-full max-w-md space-y-4 mb-6">
-                  <h3 className="text-xs font-bold text-center uppercase tracking-widest flex items-center justify-center gap-2 mb-2">
-                    <Briefcase className="w-4 h-4 text-[#a78bfa]" /> Serviços Profissionais
+                  <h3 className={`text-[10px] font-black text-center uppercase tracking-widest flex items-center justify-center gap-2 mb-1.5 opacity-90 ${isLightColor(theme.backgroundColor) ? 'text-zinc-500' : 'text-[#a78bfa]'}`}>
+                    <Briefcase className="w-3.5 h-3.5 shrink-0" /> Serviços Profissionais
                   </h3>
-                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 shadow-xl">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                      <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">Profissional Verificado LinkFlowAI</span>
+                  <div className={`backdrop-blur-xl rounded-3xl p-6 border shadow-2xl transition-all duration-300 hover:scale-[1.01] ${
+                    isLightColor(theme.backgroundColor) 
+                      ? 'bg-white/65 border-black/5 hover:border-[#a78bfa]/40 shadow-black/5' 
+                      : 'bg-[#0b0f19]/65 border-white/10 hover:border-[#a78bfa]/30 shadow-black/20'
+                  }`}>
+                    {/* Badge Profissional Verificado */}
+                    <div className="flex items-center gap-2 mb-3 bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-500 border border-amber-500/20 px-3 py-1.5 rounded-full text-[9px] font-extrabold uppercase tracking-widest w-fit shadow-[0_2px_10px_rgba(245,158,11,0.05)]">
+                      <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 shrink-0" />
+                      <span>Profissional Verificado LinkFlowAI</span>
                     </div>
-                    <h4 className="text-lg font-black text-white mb-1 font-sans">{proData.profession}</h4>
+                    
+                    {/* Profissão */}
+                    <h4 className={`text-xl font-black mb-2 tracking-tight ${
+                      isLightColor(theme.backgroundColor) 
+                        ? 'text-zinc-900' 
+                        : 'bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent'
+                    }`}>{proData.profession}</h4>
+                    
+                    {/* Especialidades */}
                     {proData.skills && proData.skills.length > 0 && (
-                      <div className="mt-3">
-                        <span className="text-[10px] text-white/60 uppercase tracking-wider block mb-2 font-bold">Especialidades:</span>
-                        <div className="flex flex-wrap gap-2">
+                      <div className="mt-4 pt-3 border-t border-white/5">
+                        <span className={`text-[9px] uppercase tracking-wider block mb-2 font-black ${isLightColor(theme.backgroundColor) ? 'text-zinc-400' : 'text-white/45'}`}>Especialidades:</span>
+                        <div className="flex flex-wrap gap-1.5">
                           {proData.skills.map((skill: string, i: number) => (
-                            <span key={i} className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white/10 text-white shadow-sm border border-white/10">
+                            <span key={i} className={`text-[9px] font-extrabold px-3 py-1 rounded-full border transition-colors ${
+                              isLightColor(theme.backgroundColor) 
+                                ? 'bg-zinc-200/50 border-zinc-200/60 text-zinc-700 hover:bg-zinc-200/80' 
+                                : 'bg-[#a78bfa]/5 border-[#a78bfa]/10 text-[#a78bfa] hover:bg-[#a78bfa]/10'
+                            }`}>
                               {skill}
                             </span>
                           ))}
                         </div>
                       </div>
                     )}
+                    
+                    {/* Botão Entrar em contato */}
                     {proData.whatsapp && (
                       <a
                         href={`https://wa.me/${String(proData.whatsapp).replace(/\D/g, '')}?text=Olá! Encontrei seu perfil no LinkFlowAI e gostaria de solicitar um orçamento.`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-5 w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-emerald-600/30"
+                        className="mt-6 w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white text-xs font-black rounded-2xl flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-lg shadow-emerald-600/20 hover:shadow-emerald-500/30 hover:scale-[1.02] active:scale-[0.98] duration-300 group"
                       >
-                        <MessageSquare className="w-4 h-4 shrink-0" /> Entrar em contato
+                        <img src="https://i.ibb.co/7dprV27c/wpp-png.png" alt="WhatsApp" className="w-4 h-4 object-contain shrink-0 group-hover:scale-110 transition-transform duration-300" />
+                        <span className="uppercase tracking-wider font-sans">Entrar em contato</span>
                       </a>
                     )}
                   </div>
