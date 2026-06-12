@@ -25,6 +25,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
   const isAdmin = userProfile.email === ADMIN_EMAIL || userProfile.role === 'admin';
   const [links, setLinks] = useState<LinkItem[]>([]);
   const [clicks, setClicks] = useState<ClickLog[]>([]);
+  const [views, setViews] = useState<any[]>([]);
   // Per-link in-progress edit overrides from LinkEditor; merged into links
   // only for the live preview, never persisted until "Aplicar" is clicked.
   const [linkPreviewOverrides, setLinkPreviewOverrides] = useState<Record<string, Partial<LinkItem>>>({});
@@ -236,19 +237,29 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
           setClicks(parsed.map((c: any) => ({
             id: c.id,
             linkId: c.linkId,
-            timestamp: { toDate: () => new Date(c.timestampDate || Date.now()) } as any
+            timestamp: { toDate: () => new Date(c.timestampDate || Date.now()) } as any,
+            device: c.device || 'Mobile',
+            os: c.os || 'iOS',
+            browser: c.browser || 'Safari',
+            referrer: c.referrer || 'Instagram',
+            language: c.language || 'pt-BR'
           })));
         } else {
           const mockClicks = [
-            { id: 'c-1', linkId: 'link-1', timestampDate: new Date(Date.now() - 3600000).toISOString() },
-            { id: 'c-2', linkId: 'link-1', timestampDate: new Date(Date.now() - 7200000).toISOString() },
-            { id: 'c-3', linkId: 'link-2', timestampDate: new Date(Date.now() - 14400000).toISOString() }
+            { id: 'c-1', linkId: 'link-1', timestampDate: new Date(Date.now() - 3600000).toISOString(), device: 'Mobile', os: 'iOS', browser: 'Safari', referrer: 'Instagram', language: 'pt-BR' },
+            { id: 'c-2', linkId: 'link-1', timestampDate: new Date(Date.now() - 7200000).toISOString(), device: 'Mobile', os: 'Android', browser: 'Chrome', referrer: 'TikTok', language: 'pt-BR' },
+            { id: 'c-3', linkId: 'link-2', timestampDate: new Date(Date.now() - 14400000).toISOString(), device: 'Desktop', os: 'Windows', browser: 'Chrome', referrer: 'Google Search', language: 'en-US' }
           ];
           localStorage.setItem('demo_clicks', JSON.stringify(mockClicks));
           setClicks(mockClicks.map((c: any) => ({
             id: c.id,
             linkId: c.linkId,
-            timestamp: { toDate: () => new Date(c.timestampDate) } as any
+            timestamp: { toDate: () => new Date(c.timestampDate) } as any,
+            device: c.device,
+            os: c.os,
+            browser: c.browser,
+            referrer: c.referrer,
+            language: c.language
           })));
         }
       };
@@ -270,6 +281,11 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
           id: d.id,
           linkId: data.linkId,
           timestamp: data.timestamp,
+          device: data.device,
+          os: data.os,
+          browser: data.browser,
+          referrer: data.referrer,
+          language: data.language
         });
       });
       setClicks(logs);
@@ -280,6 +296,88 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
         console.warn(`Firestore clicks listener está operando em modo offline.`);
       } else {
         handleFirestoreError(error, OperationType.LIST, clicksPath);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [userProfile.uid]);
+
+  // Load mock views for demo user
+  useEffect(() => {
+    if (userProfile.uid !== 'demo-user-123') return;
+
+    const loadDemoViews = () => {
+      const savedViews = localStorage.getItem('demo_views');
+      if (savedViews) {
+        const parsed = JSON.parse(savedViews);
+        setViews(parsed.map((v: any) => ({
+          id: v.id,
+          visitorId: v.visitorId,
+          timestamp: { toDate: () => new Date(v.timestampDate || Date.now()) } as any,
+          device: v.device,
+          os: v.os,
+          browser: v.browser,
+          referrer: v.referrer,
+          language: v.language
+        })));
+      } else {
+        const mockViews = [
+          { id: 'v-1', visitorId: 'v-1', timestampDate: new Date(Date.now() - 3600000).toISOString(), device: 'Mobile', os: 'iOS', browser: 'Safari', referrer: 'Instagram', language: 'pt-BR' },
+          { id: 'v-2', visitorId: 'v-2', timestampDate: new Date(Date.now() - 7200000).toISOString(), device: 'Mobile', os: 'Android', browser: 'Chrome', referrer: 'TikTok', language: 'pt-BR' },
+          { id: 'v-3', visitorId: 'v-3', timestampDate: new Date(Date.now() - 14400000).toISOString(), device: 'Desktop', os: 'Windows', browser: 'Chrome', referrer: 'Google Search', language: 'en-US' },
+          { id: 'v-4', visitorId: 'v-4', timestampDate: new Date(Date.now() - 86400000).toISOString(), device: 'Mobile', os: 'iOS', browser: 'Safari', referrer: 'Instagram', language: 'pt-BR' },
+          { id: 'v-5', visitorId: 'v-5', timestampDate: new Date(Date.now() - 172800000).toISOString(), device: 'Desktop', os: 'macOS', browser: 'Firefox', referrer: 'Direto / Outro', language: 'pt-BR' }
+        ];
+        localStorage.setItem('demo_views', JSON.stringify(mockViews));
+        setViews(mockViews.map((v: any) => ({
+          id: v.id,
+          visitorId: v.visitorId,
+          timestamp: { toDate: () => new Date(v.timestampDate) } as any,
+          device: v.device,
+          os: v.os,
+          browser: v.browser,
+          referrer: v.referrer,
+          language: v.language
+        })));
+      }
+    };
+
+    loadDemoViews();
+    const interval = setInterval(loadDemoViews, 1000);
+    return () => clearInterval(interval);
+  }, [userProfile.uid]);
+
+  // Real user views subscriber
+  useEffect(() => {
+    if (userProfile.uid === 'demo-user-123') return;
+
+    const viewsPath = `users/${userProfile.uid}/views`;
+    const qV = query(collection(db, 'users', userProfile.uid, 'views'), orderBy('timestamp', 'desc'));
+
+    const unsubscribe = onSnapshot(qV, { includeMetadataChanges: true }, (snapshot) => {
+      if (snapshot.metadata.fromCache) return;
+      const logs: any[] = [];
+      snapshot.forEach((d) => {
+        const data = d.data();
+        logs.push({
+          id: d.id,
+          visitorId: data.visitorId,
+          timestamp: data.timestamp,
+          device: data.device,
+          os: data.os,
+          browser: data.browser,
+          referrer: data.referrer,
+          language: data.language
+        });
+      });
+      setViews(logs);
+    }, (error) => {
+      const errMsg = error?.message || String(error);
+      const isOfflineMsg = errMsg.toLowerCase().includes('offline') || errMsg.toLowerCase().includes('network');
+      if (isOfflineMsg) {
+        console.warn(`Firestore views listener está operando em modo offline.`);
+      } else {
+        handleFirestoreError(error, OperationType.LIST, viewsPath);
       }
     });
 
@@ -969,7 +1067,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                   <GoToNatanDevButton variant="icon" />
                 </div>
               </div>
-              <StatsView links={links} clicks={clicks} />
+              <StatsView links={links} clicks={clicks} views={views} />
             </div>
           )}
 

@@ -74,7 +74,7 @@ export interface UserTheme {
   wallpaperBlur?: number;
   wallpaperNoise?: boolean;
   wallpaperVideoUrl?: string;
-  gradientDirection?: 'linear-up' | 'linear-down' | 'radial';
+  gradientDirection?: 'linear-up' | 'linear-down' | 'radial' | 'linear-right' | 'linear-left';
 
   // Stickers
   stickers?: StickerItem[];
@@ -253,7 +253,25 @@ export interface ClickLog {
   id: string;
   linkId: string;
   timestamp: any;
+  visitorId?: string;
+  device?: string;
+  os?: string;
+  browser?: string;
+  referrer?: string;
+  language?: string;
 }
+
+export interface ViewLog {
+  id: string;
+  timestamp: any;
+  visitorId: string;
+  device: string;
+  os: string;
+  browser: string;
+  referrer: string;
+  language: string;
+}
+
 
 export const AVAILABLE_THEMES: ThemeConfig[] = [
   {

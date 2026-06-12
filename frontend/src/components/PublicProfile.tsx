@@ -23,6 +23,75 @@ const TiktokIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+// Helper to extract visitor meta information
+function getClientMetadata() {
+  const ua = navigator.userAgent || '';
+  const lang = navigator.language || 'pt-BR';
+  
+  // Referrer parsing
+  let referrer = 'Direto';
+  const ref = document.referrer ? document.referrer.toLowerCase() : '';
+  if (ref) {
+    if (ref.includes('instagram.com')) referrer = 'Instagram';
+    else if (ref.includes('tiktok.com')) referrer = 'TikTok';
+    else if (ref.includes('t.co') || ref.includes('twitter.com') || ref.includes('x.com')) referrer = 'X / Twitter';
+    else if (ref.includes('facebook.com')) referrer = 'Facebook';
+    else if (ref.includes('linkedin.com')) referrer = 'LinkedIn';
+    else if (ref.includes('google.com')) referrer = 'Google';
+    else if (ref.includes('wa.me') || ref.includes('whatsapp.com')) referrer = 'WhatsApp';
+    else {
+      try {
+        const url = new URL(document.referrer);
+        referrer = url.hostname.replace('www.', '');
+      } catch (e) {
+        referrer = 'Outros';
+      }
+    }
+  }
+
+  // Device type
+  let device = 'Desktop';
+  if (/tablet|ipad|playbook|silk/i.test(ua)) {
+    device = 'Tablet';
+  } else if (/mobile|iphone|ipod|android|blackberry|iemobile|opera mini/i.test(ua)) {
+    device = 'Mobile';
+  }
+
+  // OS detection
+  let os = 'Outro';
+  if (/windows/i.test(ua)) os = 'Windows';
+  else if (/macintosh|mac os x/i.test(ua)) os = 'macOS';
+  else if (/iphone|ipad|ipod/i.test(ua)) os = 'iOS';
+  else if (/android/i.test(ua)) os = 'Android';
+  else if (/linux/i.test(ua)) os = 'Linux';
+
+  // Browser detection
+  let browser = 'Outro';
+  if (/chrome|crios/i.test(ua) && !/edge|edg|opr|opera/i.test(ua)) browser = 'Chrome';
+  else if (/safari/i.test(ua) && !/chrome|crios|android/i.test(ua)) browser = 'Safari';
+  else if (/firefox|fxios/i.test(ua)) browser = 'Firefox';
+  else if (/edge|edg/i.test(ua)) browser = 'Edge';
+  else if (/opera|opr/i.test(ua)) browser = 'Opera';
+
+  return {
+    device,
+    os,
+    browser,
+    referrer,
+    language: lang
+  };
+}
+
+// Helper to get or create visitor tracking ID
+function getOrCreateVisitorId() {
+  let visitorId = localStorage.getItem('linkflow_visitor_id');
+  if (!visitorId) {
+    visitorId = `visitor-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+    localStorage.setItem('linkflow_visitor_id', visitorId);
+  }
+  return visitorId;
+}
+
 interface PublicProfileProps {
   profile: UserProfile;
   links: LinkItem[];
@@ -238,6 +307,60 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
     return () => unsubscribe();
   }, [previewMode]);
 
+  // Record dynamic page views on mount
+  useEffect(() => {
+    if (previewMode || !profile.uid) return;
+
+    const recordPageView = async () => {
+      const lastViewKey = `lf_view_${profile.uid}`;
+      const lastViewTime = localStorage.getItem(lastViewKey);
+      const now = Date.now();
+      const visitorId = getOrCreateVisitorId();
+      const meta = getClientMetadata();
+
+      // Check if already viewed in the last 24h
+      if (lastViewTime && now - parseInt(lastViewTime, 10) < 24 * 60 * 60 * 1000) {
+        return;
+      }
+
+      // Demo Profile simulation
+      if (profile.uid === 'demo-user-123') {
+        const savedViews = localStorage.getItem('demo_views');
+        const list = savedViews ? JSON.parse(savedViews) : [];
+        list.unshift({
+          id: `v-${Date.now()}`,
+          visitorId,
+          timestampDate: new Date().toISOString(),
+          ...meta
+        });
+        localStorage.setItem('demo_views', JSON.stringify(list));
+        localStorage.setItem(lastViewKey, now.toString());
+        console.log(`[Demo] View gravada com sucesso!`);
+        return;
+      }
+
+      try {
+        const viewsRef = collection(db, 'users', profile.uid, 'views');
+        const viewDocRef = doc(viewsRef);
+        const viewId = viewDocRef.id;
+
+        await setDoc(viewDocRef, {
+          id: viewId,
+          timestamp: serverTimestamp(),
+          visitorId,
+          ...meta
+        });
+        localStorage.setItem(lastViewKey, now.toString());
+        console.log(`Visualização gravada com sucesso!`);
+      } catch (error) {
+        console.error("Incapaz de registrar visualização:", error);
+      }
+    };
+
+    recordPageView();
+  }, [profile.uid, previewMode]);
+
+
   // Extract styling rules from config
   const theme = profile.theme;
   const layout = theme.layout || DEFAULT_LAYOUT;
@@ -308,12 +431,16 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
     }
 
     if (profile.uid === 'demo-user-123') {
+      const visitorId = getOrCreateVisitorId();
+      const meta = getClientMetadata();
       const savedClicks = localStorage.getItem('demo_clicks');
       const list = savedClicks ? JSON.parse(savedClicks) : [];
       list.unshift({
         id: `c-${Date.now()}`,
         linkId: link.id,
-        timestampDate: new Date().toISOString()
+        timestampDate: new Date().toISOString(),
+        visitorId,
+        ...meta
       });
       localStorage.setItem('demo_clicks', JSON.stringify(list));
       console.log(`[Demo] Clique local gravado com sucesso!`);
@@ -321,6 +448,8 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
     }
 
     try {
+      const visitorId = getOrCreateVisitorId();
+      const meta = getClientMetadata();
       // Create a unique Click identifier
       const clicksRef = collection(db, 'users', profile.uid, 'clicks');
       const clickDocRef = doc(clicksRef);
@@ -329,7 +458,9 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
       await setDoc(clickDocRef, {
         id: clickId,
         linkId: link.id,
-        timestamp: serverTimestamp()
+        timestamp: serverTimestamp(),
+        visitorId,
+        ...meta
       });
       console.log(`Clique gravado com sucesso!`);
     } catch (error) {
