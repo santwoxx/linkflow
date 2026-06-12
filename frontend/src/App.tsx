@@ -892,14 +892,16 @@ export default function App() {
               if (!data.theme || data.theme.themeId !== 'custom-premium-wafort') {
                 data.theme = {
                   themeId: 'custom-premium-wafort',
-                  cardStyle: 'rounded',
-                  fontFamily: 'sans',
+                  cardStyle: 'shadow',
+                  fontFamily: 'outfit',
                   buttonColor: '#ffffff',
-                  buttonTextColor: '#0a1128',
-                  backgroundColor: 'bg-[#0a1128] text-slate-100',
+                  buttonTextColor: '#050b18',
+                  backgroundColor: 'bg-[#050b18] text-slate-100',
                   avatarFrame: 'gold',
-                  avatarGlow: true,
+                  avatarGlow: false,
                   titleColor: '#d4af37',
+                  borderRadius: 'medium',
+                  buttonHoverEffect: 'lift',
                 };
                 needsUpdate = true;
               }

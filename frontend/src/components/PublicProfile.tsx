@@ -554,34 +554,43 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
   const btnStyle = getButtonStyle();
 
   // --- RENDER HELPERS ---
-  const RenderAvatar = ({ profile: p, theme: t, avatarSizeClass: sizeClass, avatarBorderSize: borderSize }: { profile: UserProfile; theme: any; avatarSizeClass: string; avatarBorderSize: string }) => (
-    <div className={`flex ${layout.avatarAlignment === 'left' ? 'justify-start w-full' : layout.avatarAlignment === 'right' ? 'justify-end w-full' : 'justify-center'}`}>
-      {p.profilePicUrl ? (
-        <div className="relative inline-block">
-          {t.avatarFrame === 'story' && <div className="absolute -inset-1.5 rounded-full z-0" style={{ background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', borderRadius: '50%' }}></div>}
-          {t.avatarFrame === 'gold' && <div className="absolute -inset-1.5 rounded-full z-0 bg-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.6)]"></div>}
-          {t.avatarFrame === 'neon' && <div className="absolute -inset-1.5 rounded-full z-0 bg-cyan-400 shadow-[0_0_25px_rgba(34,211,238,0.9)] animate-pulse"></div>}
-          {t.avatarFrame === 'cyberpunk' && <div className="absolute -inset-1.5 rounded-sm z-0 bg-fuchsia-500 transform rotate-45"></div>}
-          {t.avatarFrame === 'rainbow' && <div className="absolute -inset-2 rounded-full z-0 animate-spin" style={{ background: 'conic-gradient(#ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff, #ff0000)', borderRadius: '50%', animationDuration: '4s' }}></div>}
-          {t.avatarFrame === 'fire' && <div className="absolute -inset-1.5 rounded-full z-0" style={{ background: 'linear-gradient(135deg, #ff4500 0%, #ff8c00 50%, #ffd700 100%)', borderRadius: '50%', boxShadow: '0 0 25px rgba(255,100,0,0.7)' }}></div>}
-          <img id="profile-avatar" src={p.profilePicUrl} referrerPolicy="no-referrer" alt={p.displayName}
-            className={`${sizeClass} rounded-full object-cover ${borderSize} border-[#0a1128] bg-[#0a1128] relative z-10 ${t.avatarGlow ? 'shadow-[0_0_25px_rgba(255,255,255,0.25)]' : 'shadow-lg'}`} />
-        </div>
-      ) : (
-        <div className="relative inline-block">
-          {t.avatarFrame === 'story' && <div className="absolute -inset-1.5 rounded-full z-0" style={{ background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', borderRadius: '50%' }}></div>}
-          {t.avatarFrame === 'gold' && <div className="absolute -inset-1.5 rounded-full z-0 bg-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.6)]"></div>}
-          {t.avatarFrame === 'neon' && <div className="absolute -inset-1.5 rounded-full z-0 bg-cyan-400 shadow-[0_0_25px_rgba(34,211,238,0.9)] animate-pulse"></div>}
-          {t.avatarFrame === 'cyberpunk' && <div className="absolute -inset-1.5 rounded-sm z-0 bg-fuchsia-500 transform rotate-45"></div>}
-          {t.avatarFrame === 'rainbow' && <div className="absolute -inset-2 rounded-full z-0 animate-spin" style={{ background: 'conic-gradient(#ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff, #ff0000)', borderRadius: '50%', animationDuration: '4s' }}></div>}
-          {t.avatarFrame === 'fire' && <div className="absolute -inset-1.5 rounded-full z-0" style={{ background: 'linear-gradient(135deg, #ff4500 0%, #ff8c00 50%, #ffd700 100%)', borderRadius: '50%', boxShadow: '0 0 25px rgba(255,100,0,0.7)' }}></div>}
-          <div id="avatar-fallback" className={`${sizeClass} rounded-full bg-gradient-to-tr from-emerald-500 to-indigo-600 flex items-center justify-center text-white text-3xl font-bold ${borderSize} border-[#0a1128] relative z-10 ${t.avatarGlow ? 'shadow-[0_0_25px_rgba(255,255,255,0.25)]' : 'shadow-lg'}`}>
-            {p.displayName ? p.displayName.charAt(0).toUpperCase() : '?'}
+  const RenderAvatar = ({ profile: p, theme: t, avatarSizeClass: sizeClass, avatarBorderSize: borderSize }: { profile: UserProfile; theme: any; avatarSizeClass: string; avatarBorderSize: string }) => {
+    const isGoldThin = t.avatarFrame === 'gold';
+    const isNeonThin = t.avatarFrame === 'neon';
+    
+    return (
+      <div className={`flex ${layout.avatarAlignment === 'left' ? 'justify-start w-full' : layout.avatarAlignment === 'right' ? 'justify-end w-full' : 'justify-center'}`}>
+        {p.profilePicUrl ? (
+          <div className="relative inline-block">
+            {t.avatarFrame === 'story' && <div className="absolute -inset-1.5 rounded-full z-0" style={{ background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', borderRadius: '50%' }}></div>}
+            {t.avatarFrame === 'cyberpunk' && <div className="absolute -inset-1.5 rounded-sm z-0 bg-fuchsia-500 transform rotate-45"></div>}
+            {t.avatarFrame === 'rainbow' && <div className="absolute -inset-2 rounded-full z-0 animate-spin" style={{ background: 'conic-gradient(#ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff, #ff0000)', borderRadius: '50%', animationDuration: '4s' }}></div>}
+            {t.avatarFrame === 'fire' && <div className="absolute -inset-1.5 rounded-full z-0" style={{ background: 'linear-gradient(135deg, #ff4500 0%, #ff8c00 50%, #ffd700 100%)', borderRadius: '50%', boxShadow: '0 0 25px rgba(255,100,0,0.7)' }}></div>}
+            <img id="profile-avatar" src={p.profilePicUrl} referrerPolicy="no-referrer" alt={p.displayName}
+              className={`${sizeClass} rounded-full object-cover relative z-10 ${
+                isGoldThin ? 'border-2 border-[#d4af37] shadow-[0_0_15px_rgba(212,175,55,0.4)]' :
+                isNeonThin ? 'border-2 border-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.75)]' :
+                `${borderSize} border-[#0a1128]`
+              } bg-[#0a1128] ${t.avatarGlow && !isGoldThin && !isNeonThin ? 'shadow-[0_0_25px_rgba(255,255,255,0.25)]' : 'shadow-lg'}`} />
           </div>
-        </div>
-      )}
-    </div>
-  );
+        ) : (
+          <div className="relative inline-block">
+            {t.avatarFrame === 'story' && <div className="absolute -inset-1.5 rounded-full z-0" style={{ background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', borderRadius: '50%' }}></div>}
+            {t.avatarFrame === 'cyberpunk' && <div className="absolute -inset-1.5 rounded-sm z-0 bg-fuchsia-500 transform rotate-45"></div>}
+            {t.avatarFrame === 'rainbow' && <div className="absolute -inset-2 rounded-full z-0 animate-spin" style={{ background: 'conic-gradient(#ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff, #ff0000)', borderRadius: '50%', animationDuration: '4s' }}></div>}
+            {t.avatarFrame === 'fire' && <div className="absolute -inset-1.5 rounded-full z-0" style={{ background: 'linear-gradient(135deg, #ff4500 0%, #ff8c00 50%, #ffd700 100%)', borderRadius: '50%', boxShadow: '0 0 25px rgba(255,100,0,0.7)' }}></div>}
+            <div id="avatar-fallback" className={`${sizeClass} rounded-full bg-gradient-to-tr from-emerald-500 to-indigo-600 flex items-center justify-center text-white text-3xl font-bold relative z-10 ${
+              isGoldThin ? 'border-2 border-[#d4af37] shadow-[0_0_15px_rgba(212,175,55,0.4)]' :
+              isNeonThin ? 'border-2 border-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.75)]' :
+              `${borderSize} border-[#0a1128]`
+            } ${t.avatarGlow && !isGoldThin && !isNeonThin ? 'shadow-[0_0_25px_rgba(255,255,255,0.25)]' : 'shadow-lg'}`}>
+              {p.displayName ? p.displayName.charAt(0).toUpperCase() : '?'}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const titleColor = theme.titleColor || '#ffffff';
   const titleStyle_ = theme.titleStyle || 'text';
