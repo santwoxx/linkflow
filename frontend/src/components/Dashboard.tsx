@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserProfile, LinkItem, ClickLog } from '../types';
+import { UserProfile, LinkItem, ClickLog, ViewLog } from '../types';
 import { db, OperationType, handleFirestoreError, logoutUser } from '../firebase';
 import { collection, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, onSnapshot, query, orderBy, getDocs, where, limit } from 'firebase/firestore';
 import LinkEditor from './LinkEditor';
@@ -24,7 +24,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
   const isAdmin = userProfile.email === ADMIN_EMAIL || userProfile.role === 'admin';
   const [links, setLinks] = useState<LinkItem[]>([]);
   const [clicks, setClicks] = useState<ClickLog[]>([]);
-  const [views, setViews] = useState<any[]>([]);
+  const [views, setViews] = useState<ViewLog[]>([]);
   // Per-link in-progress edit overrides from LinkEditor; merged into links
   // only for the live preview, never persisted until "Aplicar" is clicked.
   const [linkPreviewOverrides, setLinkPreviewOverrides] = useState<Record<string, Partial<LinkItem>>>({});
@@ -272,7 +272,6 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
     const q = query(collection(db, 'users', userProfile.uid, 'clicks'), orderBy('timestamp', 'desc'));
 
     const unsubscribe = onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
-      if (snapshot.metadata.fromCache) return;
       const logs: ClickLog[] = [];
       snapshot.forEach((d) => {
         const data = d.data();
@@ -354,8 +353,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
     const qV = query(collection(db, 'users', userProfile.uid, 'views'), orderBy('timestamp', 'desc'));
 
     const unsubscribe = onSnapshot(qV, { includeMetadataChanges: true }, (snapshot) => {
-      if (snapshot.metadata.fromCache) return;
-      const logs: any[] = [];
+      const logs: ViewLog[] = [];
       snapshot.forEach((d) => {
         const data = d.data();
         logs.push({

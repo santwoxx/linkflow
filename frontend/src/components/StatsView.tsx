@@ -34,7 +34,9 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
   const clickCountMap = useMemo(() => {
     const map: Record<string, number> = {};
     clicks.forEach((click) => {
-      map[click.linkId] = (map[click.linkId] || 0) + 1;
+      if (click.linkId) {
+        map[click.linkId] = (map[click.linkId] || 0) + 1;
+      }
     });
     return map;
   }, [clicks]);
@@ -72,13 +74,13 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
     return (totalClicks / totalViews) * 100;
   }, [totalClicks, totalViews]);
 
-  // CTR Level styling and feedback
+  // CTR Level styling and feedback (High Premium Design)
   const ctrConfig = useMemo(() => {
-    if (ctr === 0) return { label: 'Sem dados', color: 'text-zinc-500', bg: 'bg-zinc-500/10 border-zinc-500/20' };
-    if (ctr < 1.5) return { label: 'Baixo', color: 'text-rose-400', bg: 'bg-rose-500/10 border-rose-500/20' };
-    if (ctr < 4.5) return { label: 'Normal', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' };
-    if (ctr < 8.0) return { label: 'Muito Bom', color: 'text-violet-400', bg: 'bg-violet-500/10 border-violet-500/20' };
-    return { label: 'Excelente!', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' };
+    if (ctr === 0) return { label: 'Sem dados', color: 'text-slate-400', bg: 'bg-slate-500/10 border-slate-500/20 shadow-[0_0_15px_rgba(148,163,184,0.05)]' };
+    if (ctr < 1.5) return { label: 'Baixo', color: 'text-rose-400', bg: 'bg-rose-500/10 border-rose-500/20 shadow-[0_0_15px_rgba(244,63,94,0.05)]' };
+    if (ctr < 4.5) return { label: 'Normal', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.05)]' };
+    if (ctr < 8.0) return { label: 'Muito Bom', color: 'text-violet-400', bg: 'bg-violet-500/10 border-violet-500/20 shadow-[0_0_15px_rgba(139,92,246,0.05)]' };
+    return { label: 'Excelente!', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.05)]' };
   }, [ctr]);
 
   // 7 days comparative data (clicks vs views)
@@ -125,7 +127,8 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
       if (d.clicks > max) max = d.clicks;
       if (d.views > max) max = d.views;
     });
-    return max;
+    // Set a neat step threshold
+    return Math.ceil(max * 1.15);
   }, [last7DaysData]);
 
   // Calculate Peak Hours and Top Day based on views
@@ -241,7 +244,6 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
     const counts: Record<string, number> = {};
     views.forEach((v) => {
       let lang = v.language || 'pt-BR';
-      // Normalize to 2-letter uppercase or keep full
       lang = lang.split('-')[0].toUpperCase();
       counts[lang] = (counts[lang] || 0) + 1;
     });
@@ -345,84 +347,96 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
   return (
     <div id="statistics-manager" className="space-y-6 pb-20">
       
-      {/* 1. Header Overview Cards (Premium Style) */}
+      {/* 1. Header Overview Cards (Premium Glassmorphic Theme) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Views Card */}
-        <div className="bg-[#0a0a0a] p-5 rounded-2xl border border-white/5 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-transparent opacity-50 pointer-events-none" />
+        <div className="bg-[#090d16]/70 backdrop-blur-md p-5 rounded-3xl border border-white/[0.06] shadow-xl relative overflow-hidden group hover:border-indigo-500/30 transition-all duration-300">
+          <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all duration-500 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.03] via-transparent to-transparent opacity-50 pointer-events-none" />
           <div className="relative flex justify-between items-start">
-            <div>
-              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+            <div className="space-y-3">
+              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5 select-none">
                 <Eye className="w-3.5 h-3.5 text-indigo-400" /> Visualizações
               </span>
-              <h4 className="text-3xl font-extrabold text-white mt-3 font-mono tracking-tight">
-                {totalViews}
-              </h4>
-              <p className="text-[10px] text-zinc-500 mt-2">Acessos à sua página</p>
+              <div>
+                <h4 className="text-3xl font-extrabold text-white font-mono tracking-tight group-hover:text-indigo-300 transition-colors">
+                  {totalViews}
+                </h4>
+                <p className="text-[10px] text-zinc-500 mt-1">Visitas gerais ao perfil</p>
+              </div>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center text-indigo-400 group-hover:scale-105 transition-transform">
-              <Eye className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-500/25 group-hover:border-indigo-500/40 transition-all duration-300 shadow-inner">
+              <Eye className="w-4.5 h-4.5" />
             </div>
           </div>
         </div>
 
         {/* Total Clicks Card */}
-        <div className="bg-[#0a0a0a] p-5 rounded-2xl border border-white/5 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 via-transparent to-transparent opacity-50 pointer-events-none" />
+        <div className="bg-[#090d16]/70 backdrop-blur-md p-5 rounded-3xl border border-white/[0.06] shadow-xl relative overflow-hidden group hover:border-violet-500/30 transition-all duration-300">
+          <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-violet-500/10 rounded-full blur-2xl group-hover:bg-violet-500/20 transition-all duration-500 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.03] via-transparent to-transparent opacity-50 pointer-events-none" />
           <div className="relative flex justify-between items-start">
-            <div>
-              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+            <div className="space-y-3">
+              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5 select-none">
                 <MousePointerClick className="w-3.5 h-3.5 text-violet-400" /> Cliques
               </span>
-              <h4 className="text-3xl font-extrabold text-white mt-3 font-mono tracking-tight">
-                {totalClicks}
-              </h4>
-              <p className="text-[10px] text-zinc-500 mt-2">Cliques acumulados</p>
+              <div>
+                <h4 className="text-3xl font-extrabold text-white font-mono tracking-tight group-hover:text-violet-300 transition-colors">
+                  {totalClicks}
+                </h4>
+                <p className="text-[10px] text-zinc-500 mt-1">Cliques em botões</p>
+              </div>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/25 flex items-center justify-center text-violet-400 group-hover:scale-105 transition-transform">
-              <MousePointerClick className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 group-hover:scale-110 group-hover:bg-violet-500/25 group-hover:border-violet-500/40 transition-all duration-300 shadow-inner">
+              <MousePointerClick className="w-4.5 h-4.5" />
             </div>
           </div>
         </div>
 
         {/* Unique Visitors Card */}
-        <div className="bg-[#0a0a0a] p-5 rounded-2xl border border-white/5 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-transparent opacity-50 pointer-events-none" />
+        <div className="bg-[#090d16]/70 backdrop-blur-md p-5 rounded-3xl border border-white/[0.06] shadow-xl relative overflow-hidden group hover:border-blue-500/30 transition-all duration-300">
+          <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all duration-500 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/[0.03] via-transparent to-transparent opacity-50 pointer-events-none" />
           <div className="relative flex justify-between items-start">
-            <div>
-              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-blue-400" /> Visitantes Únicos
+            <div className="space-y-3">
+              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5 select-none">
+                <Users className="w-3.5 h-3.5 text-blue-400" /> Visitantes
               </span>
-              <h4 className="text-3xl font-extrabold text-white mt-3 font-mono tracking-tight">
-                {uniqueVisitors}
-              </h4>
-              <p className="text-[10px] text-zinc-500 mt-2">Deduplicado por sessão</p>
+              <div>
+                <h4 className="text-3xl font-extrabold text-white font-mono tracking-tight group-hover:text-blue-300 transition-colors">
+                  {uniqueVisitors}
+                </h4>
+                <p className="text-[10px] text-zinc-500 mt-1">Visitantes únicos</p>
+              </div>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/25 flex items-center justify-center text-blue-400 group-hover:scale-105 transition-transform">
-              <Users className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 group-hover:bg-blue-500/25 group-hover:border-blue-500/40 transition-all duration-300 shadow-inner">
+              <Users className="w-4.5 h-4.5" />
             </div>
           </div>
         </div>
 
         {/* Conversion Rate Card */}
-        <div className="bg-[#0a0a0a] p-5 rounded-2xl border border-white/5 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent opacity-50 pointer-events-none" />
+        <div className="bg-[#090d16]/70 backdrop-blur-md p-5 rounded-3xl border border-white/[0.06] shadow-xl relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-300">
+          <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-500 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.03] via-transparent to-transparent opacity-50 pointer-events-none" />
           <div className="relative flex justify-between items-start">
-            <div>
-              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
-                <Percent className="w-3.5 h-3.5 text-emerald-400" /> Taxa de Clique (CTR)
+            <div className="space-y-3">
+              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5 select-none">
+                <Percent className="w-3.5 h-3.5 text-emerald-400" /> Taxa CTR
               </span>
-              <h4 className="text-3xl font-extrabold text-white mt-3 font-mono tracking-tight">
-                {ctr.toFixed(1)}%
-              </h4>
-              <div className="mt-2 flex items-center gap-1.5">
-                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${ctrConfig.bg} ${ctrConfig.color}`}>
-                  {ctrConfig.label}
-                </span>
+              <div>
+                <h4 className="text-3xl font-extrabold text-white font-mono tracking-tight group-hover:text-emerald-300 transition-colors">
+                  {ctr.toFixed(1)}%
+                </h4>
+                <div className="mt-1 flex items-center gap-1.5">
+                  <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded border tracking-wider uppercase ${ctrConfig.bg} ${ctrConfig.color}`}>
+                    {ctrConfig.label}
+                  </span>
+                </div>
               </div>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform">
-              <Percent className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 group-hover:bg-emerald-500/25 group-hover:border-emerald-500/40 transition-all duration-300 shadow-inner">
+              <Percent className="w-4.5 h-4.5" />
             </div>
           </div>
         </div>
@@ -430,115 +444,139 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
 
       {/* 2. Top-level insights */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-[#0a0a0a] p-4 rounded-xl border border-white/5 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center shrink-0">
-            <Clock className="w-4 h-4 text-orange-400" />
+        <div className="bg-[#090d16]/50 backdrop-blur-md p-4 rounded-2xl border border-white/[0.05] flex items-center gap-3.5 hover:border-white/10 transition-colors">
+          <div className="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center shrink-0">
+            <Clock className="w-4.5 h-4.5 text-orange-400" />
           </div>
           <div>
-            <p className="text-[9px] uppercase font-bold tracking-widest text-zinc-500">Horário de Pico</p>
-            <p className="text-xs font-bold text-white">Por volta das <span className="text-orange-400">{peakHour}</span></p>
+            <p className="text-[9px] uppercase font-black tracking-widest text-zinc-500">Horário de Pico</p>
+            <p className="text-xs font-extrabold text-white mt-0.5">Por volta das <span className="text-orange-400">{peakHour}</span></p>
           </div>
         </div>
 
-        <div className="bg-[#0a0a0a] p-4 rounded-xl border border-white/5 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
-            <Calendar className="w-4 h-4 text-emerald-400" />
+        <div className="bg-[#090d16]/50 backdrop-blur-md p-4 rounded-2xl border border-white/[0.05] flex items-center gap-3.5 hover:border-white/10 transition-colors">
+          <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+            <Calendar className="w-4.5 h-4.5 text-emerald-400" />
           </div>
           <div>
-            <p className="text-[9px] uppercase font-bold tracking-widest text-zinc-500">Melhor Dia</p>
-            <p className="text-xs font-bold text-white capitalize">{topDayLabel}</p>
+            <p className="text-[9px] uppercase font-black tracking-widest text-zinc-500">Melhor Dia de Acesso</p>
+            <p className="text-xs font-extrabold text-white capitalize mt-0.5">{topDayLabel}</p>
           </div>
         </div>
 
-        <div className="bg-[#0a0a0a] p-4 rounded-xl border border-white/5 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0">
-            <BarChart3 className="w-4 h-4 text-indigo-400" />
+        <div className="bg-[#090d16]/50 backdrop-blur-md p-4 rounded-2xl border border-white/[0.05] flex items-center gap-3.5 hover:border-white/10 transition-colors">
+          <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
+            <BarChart3 className="w-4.5 h-4.5 text-indigo-400" />
           </div>
           <div>
-            <p className="text-[9px] uppercase font-bold tracking-widest text-zinc-500">Links Ativos</p>
-            <p className="text-xs font-bold text-white"><span className="text-indigo-400">{activeLinksCount}</span> / {links.length} no perfil</p>
+            <p className="text-[9px] uppercase font-black tracking-widest text-zinc-500">Links Ativos</p>
+            <p className="text-xs font-extrabold text-white mt-0.5"><span className="text-indigo-400">{activeLinksCount}</span> / {links.length} no perfil</p>
           </div>
         </div>
       </div>
 
       {/* 3. Graphic Chart View (Views vs Clicks comparison) */}
-      <div className="bg-[#0a0a0a] p-6 rounded-2xl border border-white/5 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div className="bg-[#090d16]/70 backdrop-blur-md p-6 rounded-3xl border border-white/[0.06] shadow-xl space-y-6 relative overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-widest">
-              Comparativo dos Últimos 7 Dias
+            <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-widest flex items-center gap-1.5">
+              <TrendingUp className="w-4 h-4 text-indigo-400" /> Comparativo de Acessos (Últimos 7 Dias)
             </h3>
-            <p className="text-[10px] text-zinc-500 mt-0.5">Visão paralela entre visualizações de perfil e cliques em botões</p>
+            <p className="text-[10px] text-zinc-500 mt-1">Interação entre visualizações de página e cliques em blocos</p>
           </div>
-          <div className="flex items-center gap-3 text-[10px] font-bold">
-            <span className="flex items-center gap-1 text-indigo-400">
-              <span className="w-2.5 h-2.5 bg-indigo-500/40 border border-indigo-400 rounded-sm inline-block"></span> Visualizações
+          <div className="flex items-center gap-4 text-[10px] font-bold bg-white/[0.02] border border-white/[0.05] px-3.5 py-1.5 rounded-full select-none">
+            <span className="flex items-center gap-1.5 text-indigo-400">
+              <span className="w-2.5 h-2.5 bg-indigo-500/30 border border-indigo-400/50 rounded-sm inline-block shadow-[0_0_8px_rgba(99,102,241,0.15)]" />
+              Visualizações
             </span>
-            <span className="flex items-center gap-1 text-emerald-400">
-              <span className="w-2.5 h-2.5 bg-emerald-400 border border-emerald-300 rounded-sm inline-block shadow-[0_0_8px_rgba(16,185,129,0.3)]"></span> Cliques
+            <span className="flex items-center gap-1.5 text-emerald-400">
+              <span className="w-2.5 h-2.5 bg-emerald-500/30 border border-emerald-400/50 rounded-sm inline-block shadow-[0_0_8px_rgba(16,185,129,0.15)]" />
+              Cliques
             </span>
           </div>
         </div>
 
         {/* SVG/CSS Double-bar Column Graph */}
-        <div className="relative h-60 w-full flex items-end justify-between pt-6 gap-2 border-b border-white/10 pb-4">
-          {/* Background Grid Lines */}
-          <div className="absolute inset-0 pointer-events-none flex flex-col justify-between pb-8">
-            <div className="w-full h-[1px] bg-white/5"></div>
-            <div className="w-full h-[1px] bg-white/5"></div>
-            <div className="w-full h-[1px] bg-white/5"></div>
-            <div className="w-full h-[1px] bg-white/5"></div>
+        <div className="relative h-60 w-full flex items-end justify-between pt-6 pl-0 sm:pl-8 pr-2 pb-4">
+          
+          {/* Y-axis Label Scale (Left side) */}
+          <div className="absolute left-0 top-6 bottom-10 hidden sm:flex flex-col justify-between text-[9px] font-mono text-zinc-500 select-none pointer-events-none text-right w-6 pr-2">
+            <span>{maxValOnChart}</span>
+            <span>{Math.round(maxValOnChart * 0.75)}</span>
+            <span>{Math.round(maxValOnChart * 0.5)}</span>
+            <span>{Math.round(maxValOnChart * 0.25)}</span>
+            <span>0</span>
           </div>
 
-          {last7DaysData.map((day, idx) => {
-            const viewsPct = (day.views / maxValOnChart) * 100;
-            const clicksPct = (day.clicks / maxValOnChart) * 100;
-            
-            return (
-              <div key={idx} className="flex-1 flex flex-col items-center h-full group relative z-10">
-                <div className="flex-1 w-full flex items-end justify-center gap-1.5 relative px-1">
-                  
-                  {/* Tooltip on hover */}
-                  <div className="absolute -top-12 scale-0 group-hover:scale-100 opacity-0 group-hover:opacity-100 transition-all bg-zinc-950 text-white text-[10px] px-2.5 py-1.5 rounded-lg border border-white/10 shadow-2xl z-20 whitespace-nowrap text-left leading-relaxed">
-                    <p className="font-bold text-zinc-400 mb-0.5">{day.fullDate}</p>
-                    <p className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 bg-indigo-400 rounded-full inline-block"></span> Views: <strong className="text-white font-mono">{day.views}</strong></p>
-                    <p className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 bg-emerald-400 rounded-full inline-block"></span> Cliques: <strong className="text-white font-mono">{day.clicks}</strong></p>
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-zinc-950 border-r border-b border-white/10 rotate-45"></div>
+          {/* Background Grid Lines */}
+          <div className="absolute left-0 sm:left-8 right-2 top-6 bottom-10 pointer-events-none flex flex-col justify-between">
+            <div className="w-full h-[1px] bg-white/[0.04]" />
+            <div className="w-full h-[1px] bg-white/[0.04]" />
+            <div className="w-full h-[1px] bg-white/[0.04]" />
+            <div className="w-full h-[1px] bg-white/[0.04]" />
+            <div className="w-full h-[1px] bg-white/[0.08]" />
+          </div>
+
+          {/* Graph Columns */}
+          <div className="flex-1 h-full flex items-end justify-between gap-3 sm:gap-4 z-10 relative">
+            {last7DaysData.map((day, idx) => {
+              const viewsPct = maxValOnChart > 0 ? (day.views / maxValOnChart) * 100 : 0;
+              const clicksPct = maxValOnChart > 0 ? (day.clicks / maxValOnChart) * 100 : 0;
+              
+              return (
+                <div key={idx} className="flex-1 flex flex-col items-center h-full group relative">
+                  <div className="flex-1 w-full flex items-end justify-center gap-1 sm:gap-2 relative px-0.5">
+                    
+                    {/* Tooltip on hover */}
+                    <div className="absolute -top-14 scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100 pointer-events-none transition-all duration-200 bg-[#0c1220]/95 text-white text-[10px] p-2.5 rounded-2xl border border-white/10 shadow-2xl z-30 whitespace-nowrap text-left leading-relaxed">
+                      <p className="font-extrabold text-zinc-300 border-b border-white/10 pb-1 mb-1.5 flex items-center gap-1.5 uppercase tracking-wide">
+                        <Calendar className="w-3 h-3 text-indigo-400" /> {day.fullDate}
+                      </p>
+                      <p className="flex items-center gap-2 font-medium">
+                        <span className="w-2 h-2 bg-indigo-500 rounded-full shadow-[0_0_6px_rgba(99,102,241,0.5)]" />
+                        Views: <strong className="text-white font-mono">{day.views}</strong>
+                      </p>
+                      <p className="flex items-center gap-2 font-medium">
+                        <span className="w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_6px_rgba(16,185,129,0.5)]" />
+                        Cliques: <strong className="text-white font-mono">{day.clicks}</strong>
+                      </p>
+                      <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#0c1220] border-r border-b border-white/10 rotate-45" />
+                    </div>
+
+                    {/* Views Bar (Indigo Rounded Column) */}
+                    <div
+                      style={{ height: `${Math.max(viewsPct, 2.5)}%` }}
+                      className={`relative w-2/5 rounded-t-full transition-all duration-700 ${
+                        day.views > 0
+                          ? 'bg-gradient-to-t from-indigo-600/40 via-indigo-500/70 to-indigo-400 border border-indigo-400/30 shadow-[0_0_15px_rgba(99,102,241,0.15)] hover:scale-x-105'
+                          : 'bg-white/[0.03]'
+                      }`}
+                    >
+                      {day.views > 0 && <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent rounded-t-full" />}
+                    </div>
+
+                    {/* Clicks Bar (Emerald Rounded Column) */}
+                    <div
+                      style={{ height: `${Math.max(clicksPct, 2.5)}%` }}
+                      className={`relative w-2/5 rounded-t-full transition-all duration-700 ${
+                        day.clicks > 0
+                          ? 'bg-gradient-to-t from-emerald-600/40 via-emerald-500 to-emerald-300 border border-emerald-400/30 shadow-[0_0_15px_rgba(16,185,129,0.2)] hover:scale-x-105'
+                          : 'bg-white/[0.03]'
+                      }`}
+                    >
+                      {day.clicks > 0 && <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent rounded-t-full" />}
+                    </div>
                   </div>
 
-                  {/* Views Bar */}
-                  <div
-                    style={{ height: `${Math.max(viewsPct, 2)}%` }}
-                    className={`relative w-2/5 rounded-t-[3px] transition-all duration-500 overflow-hidden ${
-                      day.views > 0
-                        ? 'bg-gradient-to-t from-indigo-600/50 to-indigo-400/80 border-t border-indigo-400/30'
-                        : 'bg-white/5'
-                    }`}
-                  >
-                    {day.views > 0 && <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent"></div>}
-                  </div>
-
-                  {/* Clicks Bar */}
-                  <div
-                    style={{ height: `${Math.max(clicksPct, 2)}%` }}
-                    className={`relative w-2/5 rounded-t-[3px] transition-all duration-500 overflow-hidden ${
-                      day.clicks > 0
-                        ? 'bg-gradient-to-t from-emerald-600 to-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.3)]'
-                        : 'bg-white/5'
-                    }`}
-                  >
-                    {day.clicks > 0 && <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent"></div>}
-                  </div>
+                  {/* Day Label (X-Axis) */}
+                  <span className="text-[9px] text-zinc-500 font-bold mt-3.5 select-none text-center leading-tight">
+                    <span className="hidden sm:block">{day.fullDate}</span>
+                    <span className="block sm:hidden">{day.dateLabel}</span>
+                  </span>
                 </div>
-
-                {/* Day label */}
-                <span className="text-[10px] text-zinc-500 font-bold mt-3 select-none text-center leading-tight">
-                  <span className="hidden sm:block">{day.fullDate}</span>
-                  <span className="block sm:hidden">{day.dateLabel}</span>
-                </span>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -546,76 +584,87 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Left: Button performance list (2/3 width) */}
-        <div className="lg:col-span-2 bg-[#0a0a0a] p-6 rounded-2xl border border-white/5 space-y-6">
-          <div>
-            <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-widest">
-              Performance por Botão
-            </h3>
-            <p className="text-[10px] text-zinc-500 mt-0.5">Cliques individuais de cada item ativo ou inativo</p>
+        <div className="lg:col-span-2 bg-[#090d16]/70 backdrop-blur-md p-6 rounded-3xl border border-white/[0.06] shadow-xl space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-widest">
+                Performance por Botão
+              </h3>
+              <p className="text-[10px] text-zinc-500 mt-1">Estatísticas individuais por bloco configurado</p>
+            </div>
+            <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-2 py-0.5 border border-indigo-500/20 rounded-md font-bold uppercase tracking-wider">Ordenado</span>
           </div>
 
           {linkStats.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-10 text-center">
-              <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mb-3">
-                <BarChart3 className="w-5 h-5 text-zinc-500" />
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mb-3.5 border border-white/5 shadow-inner">
+                <BarChart3 className="w-5 h-5 text-zinc-500 animate-pulse" />
               </div>
-              <p className="text-sm text-zinc-400">Nenhum dado disponível.</p>
-              <p className="text-[10px] text-zinc-500 mt-1">Crie links para ver as estatísticas.</p>
+              <p className="text-sm font-semibold text-zinc-400">Nenhum bloco ou link disponível</p>
+              <p className="text-[10px] text-zinc-500 mt-1 max-w-[200px]">Crie botões ou blocos de conteúdo no construtor para monitorar cliques.</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {linkStats.map((link) => {
+            <div className="space-y-5">
+              {linkStats.map((link, idx) => {
                 const maxVal = Math.max(...linkStats.map(l => l.clicksCount), 1);
                 const rankPercent = (link.clicksCount / maxVal) * 100;
                 
                 return (
-                  <div key={link.id} className="space-y-2 group">
+                  <div key={link.id} className="space-y-2 group bg-white/[0.01] hover:bg-white/[0.02] p-3 rounded-2xl border border-white/[0.02] hover:border-white/[0.05] transition-all">
                     <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-zinc-200 truncate pr-4 flex items-center gap-1.5">
-                        {link.title}
+                      <div className="font-bold text-zinc-200 truncate pr-4 flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-md bg-white/5 border border-white/10 text-[9px] font-mono text-zinc-400 flex items-center justify-center font-bold">
+                          #{idx + 1}
+                        </span>
+                        <span className="truncate group-hover:text-white transition-colors">{link.title}</span>
                         {link.type && link.type !== 'link' && (
-                          <span className="text-[9px] bg-white/5 text-zinc-400 px-1.5 py-0.2 rounded border border-white/5 capitalize scale-90">
+                          <span className="text-[8px] bg-indigo-500/10 text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-500/20 capitalize font-extrabold tracking-wide scale-90 origin-left">
                             {link.type.replace('_', ' ')}
                           </span>
                         )}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-zinc-400 text-[10px]">
-                          {totalClicks > 0 ? ((link.clicksCount / totalClicks) * 100).toFixed(0) : 0}% do total
+                      </div>
+                      <div className="flex items-center gap-2.5 shrink-0">
+                        <span className="font-mono text-zinc-500 text-[10px] hidden sm:inline-block">
+                          {totalClicks > 0 ? ((link.clicksCount / totalClicks) * 100).toFixed(0) : 0}%
                         </span>
-                        <span className="font-mono text-white font-bold bg-[#a78bfa]/15 text-[#a78bfa] px-2.5 py-0.5 rounded-md text-[11px] shrink-0 border border-[#a78bfa]/10">
-                          {link.clicksCount} cliques
+                        <span className="font-mono text-white font-extrabold bg-[#a78bfa]/15 text-[#a78bfa] px-2.5 py-0.5 rounded-lg text-[10px] border border-[#a78bfa]/10 shadow-[0_2px_8px_rgba(167,139,250,0.08)]">
+                          {link.clicksCount} clicks
                         </span>
                       </div>
                     </div>
 
-                    {/* Horizontal Bar Visualizer */}
-                    <div className="w-full h-1.5 rounded-full bg-white/5 overflow-hidden">
+                    {/* Progress Bar with Shimmer Animation */}
+                    <div className="w-full h-2 rounded-full bg-white/[0.04] overflow-hidden p-[1px] border border-white/[0.03]">
                       <div
                         style={{ width: `${rankPercent}%` }}
-                        className={`h-full rounded-full transition-all duration-700 relative ${
+                        className={`h-full rounded-full transition-all duration-1000 relative ${
                           link.active
-                            ? 'bg-gradient-to-r from-[#a78bfa] to-indigo-500'
-                            : 'bg-zinc-600'
+                            ? 'bg-gradient-to-r from-indigo-600 via-[#a78bfa] to-emerald-400'
+                            : 'bg-zinc-700'
                         }`}
                       >
-                        {link.active && link.clicksCount > 0 && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent w-full -translate-x-full animate-shimmer"></div>}
+                        {link.active && link.clicksCount > 0 && (
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent w-full -translate-x-full animate-shimmer" />
+                        )}
                       </div>
                     </div>
                     
-                    {/* URL and Status */}
+                    {/* URL and Status Row */}
                     <div className="flex justify-between items-center text-[10px]">
                       <a 
                         href={link.url} 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className="text-zinc-500 truncate hover:text-zinc-300 transition-colors flex items-center gap-1"
+                        className="text-zinc-500 truncate hover:text-zinc-300 transition-colors flex items-center gap-1 max-w-[80%] font-medium"
                         title={link.url}
                       >
-                        {link.url} <ExternalLink className="w-2.5 h-2.5 shrink-0" />
+                        <span className="truncate">{link.url}</span>
+                        <ExternalLink className="w-2.5 h-2.5 shrink-0" />
                       </a>
-                      {!link.active && (
-                        <span className="text-[8px] uppercase font-extrabold text-rose-500 tracking-wider">Desativado</span>
+                      {!link.active ? (
+                        <span className="text-[8px] uppercase font-extrabold text-rose-500 tracking-wider">Inativo</span>
+                      ) : (
+                        <span className="text-[8px] uppercase font-bold text-emerald-500/80 tracking-wider">Ativo</span>
                       )}
                     </div>
                   </div>
@@ -625,34 +674,40 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
           )}
         </div>
 
-        {/* Right sidebar: Breakdown of Devices and Social sources */}
+        {/* Right sidebar: Traffic Sources & Devices */}
         <div className="space-y-6">
           
           {/* Traffic Sources / Referrers */}
-          <div className="bg-[#0a0a0a] p-5 rounded-2xl border border-white/5 space-y-4">
+          <div className="bg-[#090d16]/70 backdrop-blur-md p-5 rounded-3xl border border-white/[0.06] shadow-xl space-y-4">
             <div>
               <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-widest">
                 Origem do Tráfego
               </h3>
-              <p className="text-[9px] text-zinc-500">De onde vêm seus visitantes</p>
+              <p className="text-[9px] text-zinc-500 mt-0.5">Canais de referência de entrada</p>
             </div>
 
             {referrersDist.length === 0 ? (
-              <p className="text-xs text-zinc-500 text-center py-6">Aguardando dados de tráfego...</p>
+              <div className="text-center py-8">
+                <Globe className="w-6 h-6 text-zinc-600 mx-auto animate-pulse mb-2" />
+                <p className="text-[10px] text-zinc-500 italic">Aguardando novos dados...</p>
+              </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3.5">
                 {referrersDist.map((item, idx) => (
-                  <div key={idx} className="space-y-1">
+                  <div key={idx} className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${getReferrerBadgeClass(item.name)}`}>
+                      <span className={`px-2 py-0.5 rounded-md text-[9px] font-extrabold tracking-wider uppercase border ${getReferrerBadgeClass(item.name)}`}>
                         {item.name}
                       </span>
-                      <span className="font-mono font-bold text-white">{item.percentage.toFixed(0)}% <span className="text-zinc-500 text-[10px]">({item.count})</span></span>
+                      <span className="font-mono font-extrabold text-white text-[11px]">
+                        {item.percentage.toFixed(0)}% 
+                        <span className="text-zinc-500 text-[9px] font-normal ml-1">({item.count})</span>
+                      </span>
                     </div>
-                    <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 bg-white/[0.04] rounded-full overflow-hidden p-[1px]">
                       <div 
                         style={{ width: `${item.percentage}%` }}
-                        className="h-full bg-indigo-500 rounded-full"
+                        className="h-full bg-gradient-to-r from-indigo-500 to-indigo-400 rounded-full shadow-[0_0_6px_rgba(99,102,241,0.4)]"
                       />
                     </div>
                   </div>
@@ -661,33 +716,39 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
             )}
           </div>
 
-          {/* Devices and Specs */}
-          <div className="bg-[#0a0a0a] p-5 rounded-2xl border border-white/5 space-y-4">
+          {/* Devices Distribution */}
+          <div className="bg-[#090d16]/70 backdrop-blur-md p-5 rounded-3xl border border-white/[0.06] shadow-xl space-y-4">
             <div>
               <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-widest">
                 Dispositivos
               </h3>
-              <p className="text-[9px] text-zinc-500">Formatos e telas utilizadas</p>
+              <p className="text-[9px] text-zinc-500 mt-0.5">Resoluções e formatos utilizados</p>
             </div>
 
             {devicesDist.length === 0 ? (
-              <p className="text-xs text-zinc-500 text-center py-6">Sem dados de dispositivos.</p>
+              <div className="text-center py-8">
+                <Smartphone className="w-6 h-6 text-zinc-600 mx-auto animate-pulse mb-2" />
+                <p className="text-[10px] text-zinc-500 italic">Sem registros de tela</p>
+              </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {devicesDist.map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-white/5 border border-white/5 flex items-center justify-center shrink-0">
+                  <div key={idx} className="flex items-center gap-3 bg-white/[0.01] border border-white/[0.03] p-2 rounded-2xl hover:bg-white/[0.02] transition-colors">
+                    <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-zinc-300">
                       {getDeviceIcon(item.name)}
                     </div>
-                    <div className="flex-1">
-                      <div className="flex justify-between text-xs font-bold text-white mb-1">
-                        <span>{item.name}</span>
-                        <span>{item.percentage.toFixed(0)}% <span className="text-zinc-500 text-[9px] font-mono">({item.count})</span></span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between text-xs font-bold text-white mb-1.5">
+                        <span className="capitalize">{item.name}</span>
+                        <span className="font-mono text-[11px]">
+                          {item.percentage.toFixed(0)}% 
+                          <span className="text-zinc-500 text-[9px] font-normal ml-1">({item.count})</span>
+                        </span>
                       </div>
-                      <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                      <div className="w-full h-1 bg-white/[0.04] rounded-full overflow-hidden">
                         <div 
                           style={{ width: `${item.percentage}%` }}
-                          className="h-full bg-indigo-400 rounded-full"
+                          className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"
                         />
                       </div>
                     </div>
@@ -703,22 +764,22 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
         {/* Systems Distribution */}
-        <div className="bg-[#0a0a0a] p-5 rounded-2xl border border-white/5 space-y-4">
+        <div className="bg-[#090d16]/70 backdrop-blur-md p-5 rounded-3xl border border-white/[0.06] shadow-xl space-y-4">
           <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-widest flex items-center gap-2">
-            <Laptop className="w-4 h-4 text-zinc-400" /> Sistemas Operacionais
+            <Laptop className="w-4 h-4 text-violet-400" /> Sistemas Operacionais
           </h3>
           {osDist.length === 0 ? (
-            <p className="text-xs text-zinc-500 py-4 text-center">Nenhum sistema detectado.</p>
+            <p className="text-xs text-zinc-500 py-6 text-center italic">Nenhum SO detectado</p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               {osDist.map((item, idx) => (
-                <div key={idx} className="space-y-1">
+                <div key={idx} className="space-y-1.5">
                   <div className="flex justify-between text-xs">
-                    <span className="text-zinc-300 font-medium">{item.name}</span>
-                    <span className="font-mono font-bold text-white text-right">{item.percentage.toFixed(0)}%</span>
+                    <span className="text-zinc-300 font-semibold">{item.name}</span>
+                    <span className="font-mono font-extrabold text-white text-[11px]">{item.percentage.toFixed(0)}%</span>
                   </div>
-                  <div className="w-full h-1 bg-white/5 rounded-full">
-                    <div style={{ width: `${item.percentage}%` }} className="h-full bg-zinc-400 rounded-full" />
+                  <div className="w-full h-1 bg-white/[0.04] rounded-full overflow-hidden">
+                    <div style={{ width: `${item.percentage}%` }} className="h-full bg-violet-400 rounded-full" />
                   </div>
                 </div>
               ))}
@@ -727,22 +788,22 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
         </div>
 
         {/* Browsers Distribution */}
-        <div className="bg-[#0a0a0a] p-5 rounded-2xl border border-white/5 space-y-4">
+        <div className="bg-[#090d16]/70 backdrop-blur-md p-5 rounded-3xl border border-white/[0.06] shadow-xl space-y-4">
           <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-widest flex items-center gap-2">
-            <Compass className="w-4 h-4 text-zinc-400" /> Navegadores
+            <Compass className="w-4 h-4 text-blue-400" /> Navegadores
           </h3>
           {browsersDist.length === 0 ? (
-            <p className="text-xs text-zinc-500 py-4 text-center">Nenhum navegador detectado.</p>
+            <p className="text-xs text-zinc-500 py-6 text-center italic">Nenhum navegador detectado</p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               {browsersDist.map((item, idx) => (
-                <div key={idx} className="space-y-1">
+                <div key={idx} className="space-y-1.5">
                   <div className="flex justify-between text-xs">
-                    <span className="text-zinc-300 font-medium">{item.name}</span>
-                    <span className="font-mono font-bold text-white text-right">{item.percentage.toFixed(0)}%</span>
+                    <span className="text-zinc-300 font-semibold">{item.name}</span>
+                    <span className="font-mono font-extrabold text-white text-[11px]">{item.percentage.toFixed(0)}%</span>
                   </div>
-                  <div className="w-full h-1 bg-white/5 rounded-full">
-                    <div style={{ width: `${item.percentage}%` }} className="h-full bg-zinc-400 rounded-full" />
+                  <div className="w-full h-1 bg-white/[0.04] rounded-full overflow-hidden">
+                    <div style={{ width: `${item.percentage}%` }} className="h-full bg-blue-400 rounded-full" />
                   </div>
                 </div>
               ))}
@@ -751,22 +812,22 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
         </div>
 
         {/* Browser Languages */}
-        <div className="bg-[#0a0a0a] p-5 rounded-2xl border border-white/5 space-y-4">
+        <div className="bg-[#090d16]/70 backdrop-blur-md p-5 rounded-3xl border border-white/[0.06] shadow-xl space-y-4">
           <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-widest flex items-center gap-2">
-            <Languages className="w-4 h-4 text-zinc-400" /> Idiomas do Navegador
+            <Languages className="w-4 h-4 text-emerald-400" /> Idiomas do Navegador
           </h3>
           {languagesDist.length === 0 ? (
-            <p className="text-xs text-zinc-500 py-4 text-center">Nenhum idioma detectado.</p>
+            <p className="text-xs text-zinc-500 py-6 text-center italic">Nenhum idioma detectado</p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               {languagesDist.map((item, idx) => (
-                <div key={idx} className="space-y-1">
+                <div key={idx} className="space-y-1.5">
                   <div className="flex justify-between text-xs">
-                    <span className="text-zinc-300 font-mono text-xs font-semibold">{item.name}</span>
-                    <span className="font-mono font-bold text-white text-right">{item.percentage.toFixed(0)}%</span>
+                    <span className="text-zinc-300 font-mono font-bold">{item.name}</span>
+                    <span className="font-mono font-extrabold text-white text-[11px]">{item.percentage.toFixed(0)}%</span>
                   </div>
-                  <div className="w-full h-1 bg-white/5 rounded-full">
-                    <div style={{ width: `${item.percentage}%` }} className="h-full bg-zinc-400 rounded-full" />
+                  <div className="w-full h-1 bg-white/[0.04] rounded-full overflow-hidden">
+                    <div style={{ width: `${item.percentage}%` }} className="h-full bg-emerald-400 rounded-full" />
                   </div>
                 </div>
               ))}
@@ -775,27 +836,31 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
         </div>
       </div>
 
-      {/* 6. Live Feed timeline (Real Time View) */}
-      <div className="bg-[#0a0a0a] p-6 rounded-2xl border border-white/5 space-y-5">
+      {/* 6. Live Feed timeline (Real Time Command Center) */}
+      <div className="bg-[#090d16]/70 backdrop-blur-md p-6 rounded-3xl border border-white/[0.06] shadow-xl space-y-5">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-widest flex items-center gap-2">
-              <Activity className="w-4 h-4 text-[#a78bfa] animate-pulse" /> Acessos em Tempo Real (Live Feed)
+              <Activity className="w-4 h-4 text-[#a78bfa] animate-pulse" /> Acessos em Tempo Real
             </h3>
-            <p className="text-[10px] text-zinc-500 mt-0.5">Atividades em tempo real registradas em seu perfil</p>
+            <p className="text-[10px] text-zinc-500 mt-1">Histórico instantâneo de conexões e interações</p>
           </div>
-          <span className="text-[9px] bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded text-emerald-400 font-bold flex items-center gap-1 animate-pulse">
-            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span> Live
+          <span className="text-[9px] bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1 rounded-full text-emerald-400 font-extrabold flex items-center gap-1.5 select-none shadow-[0_0_12px_rgba(16,185,129,0.1)]">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+            LIVE RADAR
           </span>
         </div>
 
         {liveEvents.length === 0 ? (
-          <div className="text-center py-10">
-            <p className="text-xs text-zinc-500">Aguardando novas atividades em seu perfil...</p>
-            <p className="text-[10px] text-zinc-600 mt-1 italic">Qualquer acesso ou clique aparecerá aqui instantaneamente</p>
+          <div className="text-center py-12 bg-white/[0.01] rounded-2xl border border-white/[0.02]">
+            <p className="text-xs text-zinc-500">Aguardando novos eventos e visitas de usuários...</p>
+            <p className="text-[10px] text-zinc-600 mt-1.5 italic">Os dados de visitantes e cliques de botões serão sincronizados aqui na velocidade da rede.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[480px] overflow-y-auto pr-2 custom-scrollbar">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[420px] overflow-y-auto pr-2 custom-scrollbar">
             {liveEvents.map((event) => {
               const visitorHash = event.visitorId.startsWith('visitor-') 
                 ? event.visitorId.slice(-6) 
@@ -806,53 +871,54 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
               return (
                 <div 
                   key={event.id} 
-                  className={`p-4 rounded-xl border transition-colors flex flex-col justify-between space-y-3 ${
+                  className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between space-y-3.5 hover:-translate-y-0.5 ${
                     isClick 
-                      ? 'bg-violet-950/5 border-violet-500/10 hover:border-violet-500/25' 
-                      : 'bg-indigo-950/5 border-indigo-500/10 hover:border-indigo-500/25'
+                      ? 'bg-violet-950/10 border-violet-500/20 hover:border-violet-500/40 hover:bg-violet-950/15' 
+                      : 'bg-indigo-950/10 border-indigo-500/20 hover:border-indigo-500/40 hover:bg-indigo-950/15'
                   }`}
                 >
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-1">
-                      <span className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full border tracking-wide ${
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="space-y-1.5 min-w-0">
+                      <span className={`text-[8px] font-extrabold uppercase px-2 py-0.5 rounded-md border tracking-wider ${
                         isClick 
                           ? 'bg-violet-500/10 text-violet-400 border-violet-500/20' 
                           : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
                       }`}>
-                        {isClick ? 'Clique em Botão' : 'Visualização de Perfil'}
+                        {isClick ? 'Clique em Link' : 'Visita ao Perfil'}
                       </span>
-                      <h4 className="text-xs font-bold text-white pt-1">
-                        {isClick ? `Clicou em: "${event.linkTitle}"` : 'Visitou o seu perfil'}
+                      <h4 className="text-xs font-bold text-white pt-1 truncate max-w-[220px]">
+                        {isClick ? `Clicou: "${event.linkTitle}"` : 'Visitou seu perfil'}
                       </h4>
                     </div>
 
-                    <span className="text-[9px] font-mono text-zinc-500 bg-white/5 px-2 py-0.5 rounded border border-white/5">
+                    <span className="text-[9px] font-mono font-bold text-zinc-500 bg-white/5 px-2.5 py-0.5 rounded-lg border border-white/5 shrink-0 flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-zinc-600" />
                       {event.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                     </span>
                   </div>
 
                   {/* Device, referrer and browser metadata row */}
-                  <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[9px] text-zinc-400">
-                    <span className="bg-white/5 border border-white/5 px-1.5 py-0.5 rounded flex items-center gap-1">
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[8.5px] text-zinc-400 font-medium select-none">
+                    <span className="bg-white/5 border border-white/5 px-1.5 py-0.5 rounded-md flex items-center gap-1">
                       {getDeviceIcon(event.device)}
-                      <span>{event.device}</span>
+                      <span className="capitalize">{event.device}</span>
                     </span>
-                    <span className="bg-white/5 border border-white/5 px-1.5 py-0.5 rounded">
+                    <span className="bg-white/5 border border-white/5 px-1.5 py-0.5 rounded-md">
                       OS: {event.os}
                     </span>
-                    <span className="bg-white/5 border border-white/5 px-1.5 py-0.5 rounded">
-                      Browser: {event.browser}
+                    <span className="bg-white/5 border border-white/5 px-1.5 py-0.5 rounded-md">
+                      {event.browser}
                     </span>
                     {event.referrer && (
-                      <span className={`px-1.5 py-0.5 rounded border ${getReferrerBadgeClass(event.referrer)}`}>
+                      <span className={`px-1.5 py-0.5 rounded-md border ${getReferrerBadgeClass(event.referrer)}`}>
                         Ref: {event.referrer}
                       </span>
                     )}
-                    <span className="bg-white/5 border border-white/5 px-1.5 py-0.5 rounded font-mono">
-                      Visitante: #{visitorHash}
+                    <span className="bg-white/5 border border-white/5 px-1.5 py-0.5 rounded-md font-mono text-zinc-500">
+                      ID: #{visitorHash}
                     </span>
-                    <span className="bg-white/5 border border-white/5 px-1.5 py-0.5 rounded font-mono uppercase">
-                      ({event.language.split('-')[0]})
+                    <span className="bg-white/5 border border-white/5 px-1.5 py-0.5 rounded-md font-mono uppercase text-zinc-500">
+                      {event.language.split('-')[0]}
                     </span>
                   </div>
                 </div>

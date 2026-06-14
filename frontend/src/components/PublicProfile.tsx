@@ -427,6 +427,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
   // Active links sorted by order and filtered by scheduling
   const activeLinks = links
     .filter((l) => {
+      if ((profile.username === 'natanmarinho.dev' || profile.username === 'natanmarinho-dev') && l.type === 'scheduling') return false;
       if (!l.active) return false;
       if (l.scheduleEnabled) {
         const now = new Date();

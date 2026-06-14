@@ -485,41 +485,6 @@ export default function App() {
 
       const defaultLinks: LinkItem[] = [
         {
-          id: 'natan-booking',
-          userId: 'natan-marinho-ceo-123',
-          title: 'Agendamento de Consultorias',
-          url: '5581999999999',
-          active: true,
-          order: 1,
-          type: 'scheduling',
-          animation: 'glow',
-          content: [
-            {
-              id: 'svc-n1',
-              name: 'Mentoria & Consultoria Técnica',
-              description: 'Sessão individual para arquitetura de software, SaaS e escalabilidade.',
-              price: 'R$ 300,00',
-              duration: '1h 00m'
-            },
-            {
-              id: 'svc-n2',
-              name: 'Desenvolvimento de Landing Page Premium',
-              description: 'Página ultra rápida com design moderno, SEO otimizado e conversão focada.',
-              price: 'Sob Orçamento',
-              duration: '5 dias'
-            },
-            {
-              id: 'svc-n3',
-              name: 'Integração de Métodos de Pagamento',
-              description: 'Configuração completa de checkout transparente (Mercado Pago, Stripe, etc.).',
-              price: 'R$ 800,00',
-              duration: '2 dias'
-            }
-          ],
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        {
           id: 'natan-instagram',
           userId: 'natan-marinho-ceo-123',
           title: 'Siga no Instagram @natanmarinho.dev',
@@ -754,7 +719,7 @@ export default function App() {
         if (cancelled) return;
 
         if (querySnapshot.empty) {
-          if (publicSlug === 'nails_camilebezerra' || publicSlug === 'natanmarinho-dev') {
+          if (publicSlug === 'nails_camilebezerra' || publicSlug === 'natanmarinho.dev') {
             applyCamileMock();
             return;
           }
@@ -822,7 +787,7 @@ export default function App() {
           return;
         }
         if (querySnapshot.empty) {
-          if (publicSlug === 'nails_camilebezerra' || publicSlug === 'natanmarinho-dev') {
+          if (publicSlug === 'nails_camilebezerra' || publicSlug === 'natanmarinho.dev') {
             applyCamileMock();
             return;
           }
