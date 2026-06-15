@@ -36,9 +36,24 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(reg => console.log('Service Worker registrado!', reg))
-          .catch(err => console.log('Erro ao registrar Service Worker:', err));
+        const isLocalhost = window.location.hostname === 'localhost' || 
+                            window.location.hostname === '127.0.0.1' || 
+                            window.location.hostname.startsWith('192.168.');
+
+        if (isLocalhost) {
+          // Desregistra qualquer Service Worker ativo em desenvolvimento para evitar problemas de cache
+          navigator.serviceWorker.getRegistrations().then((registrations) => {
+            for (let registration of registrations) {
+              registration.unregister().then((success) => {
+                if (success) console.log('Service Worker de desenvolvimento desinstalado com sucesso.');
+              });
+            }
+          });
+        } else {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(reg => console.log('Service Worker registrado!', reg))
+            .catch(err => console.log('Erro ao registrar Service Worker:', err));
+        }
       });
     }
   </script>
