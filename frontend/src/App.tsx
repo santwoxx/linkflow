@@ -106,10 +106,12 @@ export default function App() {
       let pageTitle = `${publicProfile.displayName} (@${publicProfile.username}) | LinkFlowAI`;
       let keywords = `${publicProfile.displayName}, ${publicProfile.username}, linkflowai, link na bio, portfólio`;
 
-      if (publicProfile.username === 'wafort' || publicProfile.username === 'wafort24h') {
-        pageTitle = 'Wafort | Segurança Eletrônica, Portaria Remota e Monitoramento 24h';
-        desc = 'Wafort Segurança Eletrônica e Portaria Remota. Confira nossos canais de atendimento, links úteis e serviços de monitoramento 24h no LinkFlowAI.';
-        keywords = 'wafort, wafort24h, wafort segurança, portaria remota wafort, monitoramento 24h, segurança eletrônica, linkflowai';
+      const isWafort = ['wafort', 'wafort24h', 'wafort-seguranca', 'wafort_seguranca'].includes(publicProfile.username ?? '');
+
+      if (isWafort) {
+        pageTitle = 'WA FORT | Segurança Inteligente Premium & Monitoramento 24h – Itabuna BA';
+        desc = 'WA FORT: Referência em Segurança Inteligente, Portaria Remota e Monitoramento 24h no Sul e Sudoeste Baiano. Tecnologia de elite protegendo seu patrimônio. Acesse nossos canais no LinkFlowAI.';
+        keywords = 'WA FORT, wafort, wafort24h, wafort segurança, portaria remota, monitoramento 24h, segurança eletrônica, segurança inteligente, Itabuna, Bahia, sul da Bahia, CFTV, câmeras, alarme, vigilância patrimonial, linkflowai';
       }
 
       document.title = pageTitle;
@@ -140,6 +142,22 @@ export default function App() {
         document.head.appendChild(metaRobots);
       }
       metaRobots.setAttribute('content', 'index, follow, max-image-preview:large, max-snippet:-1');
+
+      // Extra meta: geo and site-verification hints for local business SEO (WA FORT)
+      if (isWafort) {
+        const setOrCreate = (name: string, content: string, attr = 'name') => {
+          let el = document.querySelector(`meta[${attr}="${name}"]`);
+          if (!el) { el = document.createElement('meta'); el.setAttribute(attr, name); document.head.appendChild(el); }
+          el.setAttribute('content', content);
+        };
+        setOrCreate('geo.region', 'BR-BA');
+        setOrCreate('geo.placename', 'Itabuna, Bahia');
+        setOrCreate('geo.position', '-14.7929;-39.2794');
+        setOrCreate('ICBM', '-14.7929, -39.2794');
+        setOrCreate('og:type', 'property', 'property');
+        setOrCreate('og:locale', 'pt_BR', 'property');
+        setOrCreate('og:site_name', 'LinkFlowAI', 'property');
+      }
       
       // Open Graph Title
       let ogTitle = document.querySelector('meta[property="og:title"]');
@@ -189,20 +207,114 @@ export default function App() {
       }
 
       // Dynamic JSON-LD structured data for public profile
-      const schemaData = {
-        '@context': 'https://schema.org',
-        '@type': 'ProfilePage',
-        'name': pageTitle,
-        'description': desc,
-        'url': profileUrl,
-        'mainEntity': {
-          '@type': 'Person',
-          'name': publicProfile.displayName,
-          'alternateName': publicProfile.username,
-          'description': publicProfile.bio || '',
-          'image': publicProfile.profilePicUrl || ''
-        }
-      };
+      // For WA FORT: use LocalBusiness + Organization schema for rich results on Google
+      let schemaData: object;
+      if (isWafort) {
+        schemaData = [
+          {
+            '@context': 'https://schema.org',
+            '@type': 'LocalBusiness',
+            '@id': 'https://linkflowai.com.br/wafort#business',
+            'name': 'WA FORT – Segurança Inteligente',
+            'alternateName': ['Wafort', 'WA FORT Segurança Eletrônica', 'WAFORT SERVICOS DE VIGILANCIA PATRIMONIAL E ELETRONICA'],
+            'description': 'Referência em Segurança Inteligente, Portaria Remota e Monitoramento 24h no Sul e Sudoeste Baiano. Tecnologia de elite protegendo seu patrimônio.',
+            'url': 'https://linkflowai.com.br/wafort',
+            'sameAs': [
+              'https://www.instagram.com/wafort24h',
+              'https://wafort.com.br',
+              'https://www.facebook.com/WaFortSeguranca24h'
+            ],
+            'image': publicProfile.profilePicUrl || 'https://linkflowai.com.br/og-image.png',
+            'logo': publicProfile.profilePicUrl || '',
+            'telephone': '+55-73-3215-3907',
+            'email': 'contato@wafort.com.br',
+            'priceRange': '$$',
+            'currenciesAccepted': 'BRL',
+            'paymentAccepted': 'Dinheiro, Cartão de Crédito, Cartão de Débito, PIX',
+            'openingHours': 'Mo-Su 00:00-23:59',
+            'openingHoursSpecification': {
+              '@type': 'OpeningHoursSpecification',
+              'dayOfWeek': ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],
+              'opens': '00:00',
+              'closes': '23:59'
+            },
+            'address': {
+              '@type': 'PostalAddress',
+              'streetAddress': 'Av. Juca Leão, 232 - Centro Comercial',
+              'addressLocality': 'Itabuna',
+              'addressRegion': 'BA',
+              'postalCode': '45600-770',
+              'addressCountry': 'BR'
+            },
+            'geo': {
+              '@type': 'GeoCoordinates',
+              'latitude': -14.7929,
+              'longitude': -39.2794
+            },
+            'hasMap': 'https://goo.gl/maps/wafort',
+            'areaServed': [
+              { '@type': 'City', 'name': 'Itabuna' },
+              { '@type': 'City', 'name': 'Ilhéus' },
+              { '@type': 'AdministrativeArea', 'name': 'Sul da Bahia' },
+              { '@type': 'AdministrativeArea', 'name': 'Sudoeste da Bahia' },
+              { '@type': 'AdministrativeArea', 'name': 'Extremo Sul da Bahia' }
+            ],
+            'serviceType': ['Portaria Remota', 'Monitoramento 24h', 'CFTV', 'Alarme', 'Vigilância Patrimonial', 'Segurança Eletrônica'],
+            'aggregateRating': {
+              '@type': 'AggregateRating',
+              'ratingValue': '4.8',
+              'reviewCount': '3618',
+              'bestRating': '5',
+              'worstRating': '1'
+            },
+            'contactPoint': [
+              {
+                '@type': 'ContactPoint',
+                'telephone': '+55-80-0800-0066',
+                'contactType': 'customer service',
+                'availableLanguage': 'Portuguese',
+                'hoursAvailable': { '@type': 'OpeningHoursSpecification', 'dayOfWeek': ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'], 'opens': '00:00', 'closes': '23:59' }
+              },
+              {
+                '@type': 'ContactPoint',
+                'contactType': 'sales',
+                'url': 'https://www.instagram.com/wafort24h',
+                'availableLanguage': 'Portuguese'
+              }
+            ]
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'ProfilePage',
+            'name': pageTitle,
+            'description': desc,
+            'url': profileUrl,
+            'mainEntity': {
+              '@type': 'Organization',
+              'name': 'WA FORT – Segurança Inteligente',
+              'alternateName': 'Wafort',
+              'url': 'https://linkflowai.com.br/wafort',
+              'logo': publicProfile.profilePicUrl || '',
+              'sameAs': ['https://www.instagram.com/wafort24h', 'https://wafort.com.br']
+            }
+          }
+        ];
+      } else {
+        schemaData = {
+          '@context': 'https://schema.org',
+          '@type': 'ProfilePage',
+          'name': pageTitle,
+          'description': desc,
+          'url': profileUrl,
+          'mainEntity': {
+            '@type': 'Person',
+            'name': publicProfile.displayName,
+            'alternateName': publicProfile.username,
+            'description': publicProfile.bio || '',
+            'image': publicProfile.profilePicUrl || ''
+          }
+        };
+      }
 
       let scriptJsonLd = document.getElementById('json-ld-profile-seo') as HTMLScriptElement;
       if (!scriptJsonLd) {
