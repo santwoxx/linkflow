@@ -408,6 +408,36 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
   // Premium text alignment
   const textAlignClass = theme.textAlign === 'left' ? 'text-left' : 'text-center';
 
+  // Cover styling helpers
+  const getCoverContainerStyle = () => {
+    const styles: React.CSSProperties = {};
+    if (profile.coverGradient) {
+      styles.background = profile.coverGradient;
+    } else if (profile.coverColor) {
+      styles.backgroundColor = profile.coverColor;
+      styles.backgroundImage = 'none';
+    }
+    return styles;
+  };
+
+  const getCoverImageClass = () => {
+    const pos = profile.coverPosition || 'center';
+    return `w-full h-full object-cover transition-all duration-300 ${
+      pos === 'top' ? 'object-top' : pos === 'bottom' ? 'object-bottom' : 'object-center'
+    }`;
+  };
+
+  const renderCoverOverlay = () => {
+    const overlayVal = profile.coverOverlay !== undefined ? profile.coverOverlay : 0;
+    if (overlayVal <= 0) return null;
+    return (
+      <div 
+        className="absolute inset-0 bg-black pointer-events-none transition-all duration-300 z-[2]"
+        style={{ opacity: overlayVal / 100 }}
+      />
+    );
+  };
+
   // Premium button size
   const buttonSizeClass = theme.buttonSize === 'small' ? 'py-3 px-4 text-[11px]' :
     theme.buttonSize === 'large' ? 'py-5 px-8 text-sm' : 'py-4 px-6 text-xs';
@@ -761,13 +791,16 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
         {/* Hero layout - full-bleed cover with text overlay */}
         {theme.headerStyle === 'hero' ? (
           <div id="profile-card-hero" className={`w-full ${contentMaxW} relative ${layout.elementSpacing === 'compact' ? 'mb-4' : layout.elementSpacing === 'spacious' ? 'mb-8' : 'mb-6'} rounded-2xl overflow-hidden`}>
-            <div className="w-full h-56 relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950/50 to-slate-900">
+            <div className="w-full h-56 relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950/50 to-slate-900" style={getCoverContainerStyle()}>
               {profile.coverUrl ? (
-                <img src={profile.coverUrl} alt="Hero" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+                <img src={profile.coverUrl} alt="Hero" referrerPolicy="no-referrer" className={getCoverImageClass()} />
               ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-[#a78bfa]/30 via-slate-950/60 to-indigo-950/30" />
+                !profile.coverGradient && !profile.coverColor && (
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#a78bfa]/30 via-slate-950/60 to-indigo-950/30" />
+                )
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+              {renderCoverOverlay()}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-[3]" />
               <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col items-center text-center">
                 <RenderAvatar profile={profile} theme={theme} avatarSizeClass="w-20 h-20" avatarBorderSize="border-4" />
                 <RenderName profile={profile} isOwner={isOwner} layoutMt="mt-3" />
@@ -780,14 +813,17 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
         ) : layout.headerLayout === 'stacked' && (
           <div id="profile-card-header" className={`w-full ${contentMaxW} ${layout.elementSpacing === 'compact' ? 'mb-4' : layout.elementSpacing === 'spacious' ? 'mb-8' : 'mb-6'} rounded-2xl overflow-hidden bg-black/20 border border-white/5 shadow-md`}>
             {layout.showCover && (
-              <div className="w-full h-32 relative overflow-hidden bg-gradient-to-tr from-slate-900 via-indigo-950/50 to-slate-900 border-b border-white/5">
+              <div className="w-full h-32 relative overflow-hidden bg-gradient-to-tr from-slate-900 via-indigo-950/50 to-slate-900 border-b border-white/5" style={getCoverContainerStyle()}>
                 {profile.coverUrl ? (
-                  <img src={profile.coverUrl} alt="Foto de Capa" referrerPolicy="no-referrer" className="w-full h-full object-cover transition-all duration-300" />
+                  <img src={profile.coverUrl} alt="Foto de Capa" referrerPolicy="no-referrer" className={getCoverImageClass()} />
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-[#a78bfa]/20 via-slate-950/40 to-indigo-950/15">
-                    <div role="img" className="w-full h-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.08)_0%,transparent_70%)]" />
-                  </div>
+                  !profile.coverGradient && !profile.coverColor && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-[#a78bfa]/20 via-slate-950/40 to-indigo-950/15">
+                      <div role="img" className="w-full h-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.08)_0%,transparent_70%)]" />
+                    </div>
+                  )
                 )}
+                {renderCoverOverlay()}
               </div>
             )}
             <div className={`flex flex-col items-center ${layout.avatarAlignment === 'left' ? 'items-start px-4' : layout.avatarAlignment === 'right' ? 'items-end px-4' : 'items-center px-4'} pb-6 ${layout.showCover ? 'mt-4' : 'mt-6'} relative z-10`}>
@@ -803,14 +839,17 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
         {layout.headerLayout === 'detached' && (
           <>
             {layout.showCover && (
-              <div className={`w-full ${contentMaxW} h-32 rounded-2xl overflow-hidden bg-black/20 border border-white/5 shadow-md mb-4`}>
+              <div className={`w-full ${contentMaxW} h-32 rounded-2xl overflow-hidden bg-black/20 border border-white/5 shadow-md mb-4 relative`} style={getCoverContainerStyle()}>
                 {profile.coverUrl ? (
-                  <img src={profile.coverUrl} alt="Foto de Capa" referrerPolicy="no-referrer" className="w-full h-full object-cover transition-all duration-300" />
+                  <img src={profile.coverUrl} alt="Foto de Capa" referrerPolicy="no-referrer" className={getCoverImageClass()} />
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-[#a78bfa]/20 via-slate-950/40 to-indigo-950/15">
-                    <div role="img" className="w-full h-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.08)_0%,transparent_70%)]" />
-                  </div>
+                  !profile.coverGradient && !profile.coverColor && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-[#a78bfa]/20 via-slate-950/40 to-indigo-950/15">
+                      <div role="img" className="w-full h-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.08)_0%,transparent_70%)]" />
+                    </div>
+                  )
                 )}
+                {renderCoverOverlay()}
               </div>
             )}
             <div className={`w-full ${contentMaxW} rounded-2xl bg-black/20 border border-white/5 shadow-md p-6 ${layout.elementSpacing === 'compact' ? 'mb-4' : layout.elementSpacing === 'spacious' ? 'mb-8' : 'mb-6'}`}>
@@ -840,14 +879,17 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
         {(!layout.headerLayout || layout.headerLayout === 'overlapping') && theme.headerStyle !== 'hero' && (
           <div id="profile-card-header" className={`w-full ${contentMaxW} relative ${layout.elementSpacing === 'compact' ? 'mb-4' : layout.elementSpacing === 'spacious' ? 'mb-8' : 'mb-6'} rounded-2xl overflow-hidden bg-black/20 border border-white/5 shadow-md`}>
             {layout.showCover && (
-              <div className="w-full h-32 relative overflow-hidden bg-gradient-to-tr from-slate-900 via-indigo-950/50 to-slate-900 border-b border-white/5">
+              <div className="w-full h-32 relative overflow-hidden bg-gradient-to-tr from-slate-900 via-indigo-950/50 to-slate-900 border-b border-white/5" style={getCoverContainerStyle()}>
                 {profile.coverUrl ? (
-                  <img src={profile.coverUrl} alt="Foto de Capa" referrerPolicy="no-referrer" className="w-full h-full object-cover transition-all duration-300" />
+                  <img src={profile.coverUrl} alt="Foto de Capa" referrerPolicy="no-referrer" className={getCoverImageClass()} />
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-[#a78bfa]/20 via-slate-950/40 to-indigo-950/15">
-                    <div role="img" className="w-full h-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.08)_0%,transparent_70%)]" />
-                  </div>
+                  !profile.coverGradient && !profile.coverColor && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-[#a78bfa]/20 via-slate-950/40 to-indigo-950/15">
+                      <div role="img" className="w-full h-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.08)_0%,transparent_70%)]" />
+                    </div>
+                  )
                 )}
+                {renderCoverOverlay()}
               </div>
             )}
             <div className={`flex flex-col items-center ${layout.avatarAlignment === 'left' ? 'items-start pl-5' : layout.avatarAlignment === 'right' ? 'items-end pr-5' : 'items-center'} px-4 pb-6 ${layout.showCover ? 'mt-[-48px]' : 'mt-6'} relative z-10`}>
