@@ -3,7 +3,7 @@ import { UserProfile, LinkItem, ADMIN_EMAIL, DEFAULT_LAYOUT } from '../types';
 import { db, auth } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { ExternalLink, Copy, Check, Sparkles, MessageSquare, Link as LinkIcon, LogIn, Star, Crown, UserPlus, UserCheck, Briefcase, ShoppingBag, Clock, ShieldCheck, Music, Calendar, X, Instagram, Youtube, Linkedin, Github, Twitter } from 'lucide-react';
+import { ExternalLink, Copy, Check, Sparkles, MessageSquare, Link as LinkIcon, LogIn, Star, Crown, UserPlus, UserCheck, Briefcase, ShoppingBag, Clock, ShieldCheck, Music, Calendar, X, Instagram, Youtube, Linkedin, Github, Twitter, Upload, FileText, Loader2, Mail } from 'lucide-react';
 import CommunityFeed from './CommunityFeed';
 import { isFollowing, followUser, unfollowUser } from '../utils/follow';
 import GoToNatanDevButton from './GoToNatanDevButton';
@@ -117,6 +117,17 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('');
 
+  // Resume Submission State
+  const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
+  const [resumeDestination, setResumeDestination] = useState('');
+  const [resumeName, setResumeName] = useState('');
+  const [resumeEmail, setResumeEmail] = useState('');
+  const [resumePhone, setResumePhone] = useState('');
+  const [resumeMessage, setResumeMessage] = useState('');
+  const [resumeFile, setResumeFile] = useState<{ name: string; data: string } | null>(null);
+  const [isSendingResume, setIsSendingResume] = useState(false);
+  const [resumeSent, setResumeSent] = useState(false);
+
   const handleOpenBooking = (svc: any, whatsappUrl: string) => {
     setSelectedService(svc);
     // Extract phone number from link.url or fallback to profile whatsapp or default
@@ -161,6 +172,82 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
     // Open whatsapp in new tab
     window.open(waUrl, '_blank');
     setIsBookingOpen(false);
+  };
+
+  const handleOpenResumeModal = (link: LinkItem) => {
+    setResumeDestination(link.url || profile.email || '');
+    setResumeName('');
+    setResumeEmail('');
+    setResumePhone('');
+    setResumeMessage('');
+    setResumeFile(null);
+    setResumeSent(false);
+    setIsResumeModalOpen(true);
+  };
+
+  const handleResumeFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setResumeFile({
+        name: file.name,
+        data: reader.result as string,
+      });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleSubmitResume = async () => {
+    if (!resumeName.trim() || !resumeEmail.trim()) {
+      alert('Por favor, preencha seu nome e email.');
+      return;
+    }
+
+    setIsSendingResume(true);
+    try {
+      // Store in Firestore under user's resumes collection
+      if (!previewMode && profile.uid && profile.uid !== 'demo-user-123') {
+        const resumesRef = collection(db, 'users', profile.uid, 'resumes');
+        await setDoc(doc(resumesRef), {
+          candidateName: resumeName.trim(),
+          candidateEmail: resumeEmail.trim(),
+          candidatePhone: resumePhone.trim(),
+          message: resumeMessage.trim(),
+          resumeFile: resumeFile?.data || '',
+          resumeFileName: resumeFile?.name || '',
+          destinationEmail: resumeDestination,
+          createdAt: serverTimestamp(),
+        });
+
+        // Also try to send via backend API
+        try {
+          const apiUrl = `${window.location.protocol}//${window.location.hostname}:3001/api/send-resume`;
+          await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              candidateName: resumeName.trim(),
+              candidateEmail: resumeEmail.trim(),
+              candidatePhone: resumePhone.trim(),
+              message: resumeMessage.trim(),
+              resumeFile: resumeFile?.data || '',
+              resumeFileName: resumeFile?.name || '',
+              destinationEmail: resumeDestination || profile.email || '',
+            }),
+          });
+        } catch (apiErr) {
+          console.warn('Backend email sending unavailable, resume stored in Firestore:', apiErr);
+        }
+      }
+      setResumeSent(true);
+    } catch (err) {
+      console.error('Erro ao enviar currículo:', err);
+      alert('Erro ao enviar currículo. Tente novamente.');
+    } finally {
+      setIsSendingResume(false);
+    }
   };
 
   // Check professional profile
@@ -1164,6 +1251,37 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                   );
                 }
 
+                // Send Resume Block (Enviar Currículo)
+                if (link.type === 'send_resume') {
+                  return (
+                    <div key={link.id} className="w-full max-w-md">
+                      <button
+                        onClick={() => handleOpenResumeModal(link)}
+                        className={`${btnStyle.className} relative flex items-center justify-between group overflow-visible`}
+                        style={btnStyle.style}
+                      >
+                        <span className="w-4"></span>
+                        <div className="flex flex-col items-center w-full min-w-0 py-1.5 select-none relative">
+                          <div className="flex items-center justify-center gap-2">
+                            <FileText className="w-4 h-4 shrink-0" />
+                            <span className="font-extrabold text-xs sm:text-sm tracking-wide truncate">
+                              {link.title}
+                            </span>
+                          </div>
+                          {link.subtitle && (
+                            <span className="text-[10px] sm:text-[11px] opacity-75 font-normal tracking-wide mt-1 leading-tight truncate max-w-full">
+                              {link.subtitle}
+                            </span>
+                          )}
+                        </div>
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <ExternalLink className="w-4 h-4 shrink-0" />
+                        </span>
+                      </button>
+                    </div>
+                  );
+                }
+
                 // Scheduling Block (Agendamento Feminino/Delicado)
                 if (link.type === 'scheduling') {
                   const services = link.content || [];
@@ -1472,6 +1590,141 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
           </a>
         )}
       </div>
+      {/* Resume Modal */}
+      {isResumeModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white text-zinc-800 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-orange-100 flex flex-col animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="relative bg-gradient-to-r from-orange-50 to-amber-50 px-6 py-5 border-b border-orange-100">
+              <h3 className="text-base font-extrabold text-zinc-900 flex items-center gap-2 font-sans">
+                <FileText className="w-5 h-5 text-orange-500" />
+                {resumeSent ? 'Currículo Enviado!' : 'Enviar Currículo'}
+              </h3>
+              <p className="text-xs text-zinc-500 mt-0.5">
+                {resumeSent ? 'Recebemos sua candidatura com sucesso!' : 'Preencha seus dados para se candidatar'}
+              </p>
+              <button
+                onClick={() => setIsResumeModalOpen(false)}
+                className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-black/5 text-zinc-400 hover:text-zinc-600 transition-all cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {resumeSent ? (
+              <div className="p-10 text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto">
+                  <Check className="w-8 h-8 text-emerald-600" />
+                </div>
+                <p className="text-sm text-zinc-600">Seu currículo foi enviado. Entraremos em contato em breve!</p>
+                <button
+                  onClick={() => setIsResumeModalOpen(false)}
+                  className="px-6 py-2.5 text-xs bg-zinc-200 hover:bg-zinc-300 text-zinc-700 font-bold rounded-xl transition-all cursor-pointer"
+                >
+                  Fechar
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="p-6 space-y-4 overflow-y-auto max-h-[60vh] text-left">
+                  <div>
+                    <label className="block text-[10px] text-zinc-500 font-bold uppercase tracking-wide mb-1">Seu Nome *</label>
+                    <input
+                      type="text"
+                      required
+                      value={resumeName}
+                      onChange={(e) => setResumeName(e.target.value)}
+                      placeholder="Digite seu nome completo"
+                      className="w-full bg-zinc-50 text-xs text-zinc-800 py-3 px-4 rounded-xl border border-zinc-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 transition-all outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-zinc-500 font-bold uppercase tracking-wide mb-1">Seu Email *</label>
+                    <input
+                      type="email"
+                      required
+                      value={resumeEmail}
+                      onChange={(e) => setResumeEmail(e.target.value)}
+                      placeholder="seu@email.com"
+                      className="w-full bg-zinc-50 text-xs text-zinc-800 py-3 px-4 rounded-xl border border-zinc-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 transition-all outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-zinc-500 font-bold uppercase tracking-wide mb-1">Telefone (Opcional)</label>
+                    <input
+                      type="text"
+                      value={resumePhone}
+                      onChange={(e) => setResumePhone(e.target.value)}
+                      placeholder="Ex: (11) 99999-9999"
+                      className="w-full bg-zinc-50 text-xs text-zinc-800 py-3 px-4 rounded-xl border border-zinc-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 transition-all outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-zinc-500 font-bold uppercase tracking-wide mb-1">Mensagem (Opcional)</label>
+                    <textarea
+                      rows={3}
+                      value={resumeMessage}
+                      onChange={(e) => setResumeMessage(e.target.value)}
+                      placeholder="Conte um pouco sobre você e sua experiência..."
+                      className="w-full bg-zinc-50 text-xs text-zinc-800 py-3 px-4 rounded-xl border border-zinc-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 transition-all outline-none resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-zinc-500 font-bold uppercase tracking-wide mb-1">Anexar Currículo (PDF, DOC, DOCX, PNG, JPG)</label>
+                    <label className="flex items-center gap-3 p-4 bg-orange-50/50 border-2 border-dashed border-orange-200 rounded-xl cursor-pointer hover:bg-orange-50 hover:border-orange-300 transition-all">
+                      <Upload className="w-5 h-5 text-orange-400 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-zinc-700">{resumeFile ? resumeFile.name : 'Clique para selecionar arquivo'}</p>
+                        <p className="text-[10px] text-zinc-400">PDF, DOC, DOCX, PNG ou JPG (máx 5MB)</p>
+                      </div>
+                      {resumeFile && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setResumeFile(null);
+                          }}
+                          className="p-1 rounded-full hover:bg-orange-200 text-orange-500 cursor-pointer"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                        className="hidden"
+                        onChange={handleResumeFileUpload}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="bg-zinc-50 px-6 py-4 border-t border-zinc-150 flex gap-2 justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setIsResumeModalOpen(false)}
+                    className="px-4 py-2.5 text-xs text-zinc-500 rounded-xl hover:bg-zinc-200 font-bold transition-all cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSubmitResume}
+                    disabled={isSendingResume || !resumeName.trim() || !resumeEmail.trim()}
+                    className="px-5 py-2.5 text-xs bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold rounded-xl transition-all shadow-md shadow-orange-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer"
+                  >
+                    {isSendingResume ? (
+                      <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Enviando...</>
+                    ) : (
+                      <><Mail className="w-3.5 h-3.5" /> Enviar Currículo</>
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Booking Modal */}
       {isBookingOpen && selectedService && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">

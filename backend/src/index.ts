@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import { healthRouter } from './routes/health.js';
 import { geminiRouter } from './routes/gemini.js';
+import { sendResumeRouter } from './routes/send-resume.js';
 import { seoRouter } from './routes/seo.js';
 import { sitemapRouter } from './routes/sitemap.js';
 
@@ -20,7 +21,7 @@ app.use(helmet({
 }));
 app.use(cors({ origin: corsOrigin, credentials: true }));
 app.use(morgan('short'));
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: '5mb' }));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -49,6 +50,7 @@ app.use('/api', limiter);
 // ── API routes ───────────────────────────────────────────────────────────────
 app.use('/api/health', healthRouter);
 app.use('/api/gemini', geminiRouter);
+app.use('/api/send-resume', sendResumeRouter);
 
 // ── SEO routes (no /api prefix, served at root-level paths) ─────────────────
 

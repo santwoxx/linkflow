@@ -1,96 +1,153 @@
-const CACHE_NAME = 'linkflow-v2';
-const ASSETS = [
-  '/',
-  '/index.html',
+// ─────────────────────────────────────────────────────────────────────────────
+// LinkFlowAI Service Worker
+// Estratégia: Network-First para HTML/navegação + Cache-First SEGURO para assets
+//
+// PROBLEMA CORRIGIDO: assets com hash (JS/CSS do Vite) não devem nunca ser
+// servidos de um cache que contém o arquivo de um build anterior. O SW agora
+// valida o Content-Type antes de cacheár, e NUNCA faz fallback de assets para
+// index.html (o que causava o erro "MIME type text/html" no console).
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Bump esta versão a CADA DEPLOY para forçar re-instalação e limpeza de cache.
+const CACHE_VERSION = 'linkflow-v5';
+const STATIC_CACHE  = `${CACHE_VERSION}-static`;
+const HTML_CACHE    = `${CACHE_VERSION}-html`;
+
+// Apenas estes arquivos previsíveis são pré-cacheados na instalação.
+// Arquivos de assets (JS/CSS com hash) SÃO CACHEADOS ON-DEMAND, não aqui.
+const PRECACHE_URLS = [
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png',
   '/icon-maskable.png',
-  '/robots.txt',
-  '/sitemap.xml'
 ];
 
-// Instalação do Service Worker
-self.addEventListener('install', (e) => {
-  self.skipWaiting(); // Força o novo Service Worker a se tornar ativo imediatamente
-  e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
-    })
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Retorna true se a URL é um asset estático do Vite (tem hash no nome). */
+function isViteAsset(url) {
+  return url.pathname.startsWith('/assets/');
+}
+
+/** Retorna true se é uma request de navegação (carrega uma página HTML). */
+function isNavigationRequest(request, url) {
+  return request.mode === 'navigate' ||
+    (request.method === 'GET' && request.headers.get('accept')?.includes('text/html'));
+}
+
+/** Retorna true se a resposta tem um Content-Type válido para o que foi pedido. */
+function hasValidMime(response, url) {
+  const ct = response.headers.get('content-type') || '';
+  if (url.pathname.endsWith('.css'))  return ct.includes('text/css');
+  if (url.pathname.endsWith('.js'))   return ct.includes('javascript') || ct.includes('wasm');
+  if (url.pathname.endsWith('.json')) return ct.includes('json');
+  return true; // para outros tipos (imagens, fontes etc.) não verificar
+}
+
+// ── Install ───────────────────────────────────────────────────────────────────
+self.addEventListener('install', (event) => {
+  // skipWaiting força o novo SW a ativar imediatamente,
+  // garantindo que o cache antigo seja limpo antes da página carregar assets.
+  self.skipWaiting();
+
+  event.waitUntil(
+    caches.open(STATIC_CACHE).then((cache) => cache.addAll(PRECACHE_URLS))
   );
 });
 
-// Ativação do Service Worker - Limpa caches antigos
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            console.log('Service Worker: Limpando cache antigo', cache);
-            return caches.delete(cache);
+// ── Activate ──────────────────────────────────────────────────────────────────
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys
+          // Deleta TODOS os caches que não são do CACHE_VERSION atual.
+          .filter((key) => !key.startsWith(CACHE_VERSION))
+          .map((key) => {
+            console.log('[SW] Deletando cache antigo:', key);
+            return caches.delete(key);
+          })
+      )
+    ).then(() => self.clients.claim())
+  );
+});
+
+// ── Fetch ─────────────────────────────────────────────────────────────────────
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+
+  // 1. Ignorar requisições não-GET e externas (Firebase, APIs, CDNs etc.)
+  if (event.request.method !== 'GET') return;
+  if (url.origin !== self.location.origin) return;
+
+  // 2. Assets do Vite (/assets/*.js, /assets/*.css) — Cache-First ESTRITO
+  //    - Se encontrado no cache E com MIME correto → cache
+  //    - Se não encontrado → rede; só cacheia se MIME for correto
+  //    - NUNCA faz fallback para index.html
+  if (isViteAsset(url)) {
+    event.respondWith(
+      caches.open(STATIC_CACHE).then(async (cache) => {
+        const cached = await cache.match(event.request);
+        if (cached) {
+          // Valida o MIME do que está cacheado (defesa extra)
+          if (hasValidMime(cached, url)) return cached;
+          // MIME inválido no cache → deleta e busca da rede
+          await cache.delete(event.request);
+        }
+
+        try {
+          const networkResponse = await fetch(event.request);
+          // Só cacheia se 200 e MIME correto
+          if (networkResponse.ok && hasValidMime(networkResponse, url)) {
+            cache.put(event.request, networkResponse.clone());
           }
-        })
-      );
-    }).then(() => self.clients.claim()) // Garante que o service worker controle todos os clientes imediatamente
-  );
-});
-
-// Intercepta as requisições
-self.addEventListener('fetch', (e) => {
-  const url = new URL(e.request.url);
-
-  // Evita interceptar requisições para a API do Firebase ou outras APIs externas/métodos não GET
-  if (e.request.method !== 'GET' || url.origin !== self.location.origin) {
+          return networkResponse;
+        } catch {
+          // Offline e sem cache → retorna erro limpo (não index.html!)
+          return new Response('Asset não disponível offline.', {
+            status: 503,
+            headers: { 'Content-Type': 'text/plain' },
+          });
+        }
+      })
+    );
     return;
   }
 
-  // Estratégia Network-First para a página principal (HTML/Rotas de navegação)
-  // Isso garante que o index.html seja sempre buscado na rede se estiver online,
-  // evitando que arquivos JS antigos (com hashes antigos) sejam carregados a partir de um index.html em cache.
-  const isHtmlRequest = e.request.mode === 'navigate' || 
-                        url.pathname === '/' || 
-                        url.pathname === '/index.html';
-
-  if (isHtmlRequest) {
-    e.respondWith(
-      fetch(e.request)
+  // 3. Navegação HTML (SPA routes) — Network-First
+  //    - Sempre tenta rede primeiro para pegar o index.html mais recente
+  //    - Fallback para cache HTML apenas se offline
+  if (isNavigationRequest(event.request, url)) {
+    event.respondWith(
+      fetch(event.request)
         .then((response) => {
-          // Salva uma cópia atualizada do HTML no cache
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(e.request, responseClone);
-          });
-          return response;
-        })
-        .catch(() => {
-          // Se estiver offline, retorna do cache
-          return caches.match(e.request);
-        })
-    );
-  } else {
-    // Para outros recursos estáticos (JS, CSS, imagens), usa Cache-First
-    // Como os arquivos JS/CSS do Vite possuem hashes no nome, eles nunca mudam.
-    e.respondWith(
-      caches.match(e.request).then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        
-        return fetch(e.request).then((response) => {
-          // Não cacheia respostas que não sejam de sucesso (ex: 404 de arquivos inexistentes)
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(HTML_CACHE).then((c) => c.put('/index.html', clone));
           }
-          
-          // Cacheia novos recursos estáticos
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(e.request, responseClone);
-          });
           return response;
-        });
-      })
+        })
+        .catch(async () => {
+          const cached = await caches.match('/index.html', { cacheName: HTML_CACHE });
+          return cached || new Response('Offline — sem conexão.', {
+            status: 503,
+            headers: { 'Content-Type': 'text/html; charset=utf-8' },
+          });
+        })
     );
+    return;
   }
+
+  // 4. Outros recursos estáticos (ícones, manifest, robots, etc.) — Stale-While-Revalidate
+  event.respondWith(
+    caches.open(STATIC_CACHE).then(async (cache) => {
+      const cached = await cache.match(event.request);
+      const fetchPromise = fetch(event.request).then((response) => {
+        if (response.ok) cache.put(event.request, response.clone());
+        return response;
+      }).catch(() => cached);
+
+      return cached || fetchPromise;
+    })
+  );
 });

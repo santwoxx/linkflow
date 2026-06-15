@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LinkItem, BlockType, FONTS_LIST } from '../types';
 import { compressImage } from '../utils/image';
-import { Plus, Trash2, ArrowUp, ArrowDown, ExternalLink, Edit2, Check, X, ToggleLeft, ToggleRight, Loader2, Sparkles, Tag, Smile, Zap, MessageCircle, ShoppingBag, Image as ImageIcon, Star, Briefcase, CreditCard, LayoutTemplate, Palette, Type, Square, Droplet, Eye, EyeOff, Maximize, Minimize, AlignLeft, AlignCenter, AlignRight, Upload, AlertTriangle, Calendar, Clock, PlusCircle } from 'lucide-react';
+import { Plus, Trash2, ArrowUp, ArrowDown, ExternalLink, Edit2, Check, X, ToggleLeft, ToggleRight, Loader2, Sparkles, Tag, Smile, Zap, MessageCircle, ShoppingBag, Image as ImageIcon, Star, Briefcase, CreditCard, LayoutTemplate, Palette, Type, Square, Droplet, Eye, EyeOff, Maximize, Minimize, AlignLeft, AlignCenter, AlignRight, Upload, AlertTriangle, Calendar, Clock, PlusCircle, FileText } from 'lucide-react';
 
 interface LinkEditorProps {
   links: LinkItem[];
@@ -49,6 +49,7 @@ const getBlockLeftBorder = (type: BlockType) => {
     case 'testimonials': return 'border-l-[4px] border-l-yellow-500 pl-4';
     case 'services': return 'border-l-[4px] border-l-teal-500 pl-4';
     case 'scheduling': return 'border-l-[4px] border-l-pink-500 pl-4';
+    case 'send_resume': return 'border-l-[4px] border-l-orange-500 pl-4';
     default: return 'border-l-[4px] border-l-indigo-500 pl-4';
   }
 };
@@ -251,6 +252,11 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
             ]
           };
           break;
+        case 'send_resume':
+          defaultTitle = 'Envie seu Currículo';
+          defaultUrl = '';
+          extraData = { iconEmoji: '📄', subtitle: 'Candidate-se enviando seu currículo' };
+          break;
       }
 
       await onAdd(defaultTitle, defaultUrl, type, extraData);
@@ -404,6 +410,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
     { type: 'testimonials', label: 'Depoimentos', icon: <Star className="w-4 h-4 text-yellow-400" /> },
     { type: 'services', label: 'Serviços', icon: <Briefcase className="w-4 h-4 text-emerald-400" /> },
     { type: 'scheduling', label: 'Agendamento', icon: <Calendar className="w-4 h-4 text-pink-400" /> },
+    { type: 'send_resume', label: 'Enviar Currículo', icon: <FileText className="w-4 h-4 text-orange-400" /> },
   ] as const;
 
   return (
@@ -536,13 +543,14 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                               />
                             </div>
 
-                            {(link.type === 'link' || link.type === 'whatsapp' || link.type === 'telegram' || link.type === 'buy_now' || link.type === 'promo_banner') && (
+                            {(link.type === 'link' || link.type === 'whatsapp' || link.type === 'telegram' || link.type === 'buy_now' || link.type === 'promo_banner' || link.type === 'send_resume') && (
                               <div>
-                                <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">Link de Destino / URL</label>
+                                <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2">Email de destino (para receber currículos)</label>
                                 <input
                                   type="text"
                                   value={editUrl}
                                   onChange={(e) => setEditUrl(e.target.value)}
+                                  placeholder="seu@email.com"
                                   className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none placeholder-zinc-600 font-mono"
                                 />
                               </div>
@@ -938,7 +946,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                       {editTab === 'style' && (
                         <div className="space-y-4 animate-in fade-in duration-200">
                           {/* Common styling & attention geters */}
-                          {(link.type === 'link' || link.type === 'whatsapp' || link.type === 'buy_now' || link.type === 'telegram') && (
+                          {(link.type === 'link' || link.type === 'whatsapp' || link.type === 'buy_now' || link.type === 'telegram' || link.type === 'send_resume') && (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                               <div>
                                 <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
@@ -1041,7 +1049,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                           )}
 
                           {/* Advanced properties accordion wrapper */}
-                          {(link.type === 'link' || link.type === 'whatsapp' || link.type === 'buy_now' || link.type === 'telegram' || link.type === 'payment') && (
+                          {(link.type === 'link' || link.type === 'whatsapp' || link.type === 'buy_now' || link.type === 'telegram' || link.type === 'payment' || link.type === 'send_resume') && (
                             <div className="bg-[#111111] border border-white/5 rounded-2xl overflow-hidden">
                               <button
                                 type="button"

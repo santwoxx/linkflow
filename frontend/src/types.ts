@@ -190,7 +190,7 @@ export interface ProfessionalProfile {
 }
 
 
-export type BlockType = 'link' | 'whatsapp' | 'telegram' | 'buy_now' | 'payment' | 'products' | 'services' | 'service_card' | 'testimonials' | 'gallery' | 'promo_banner' | 'scheduling';
+export type BlockType = 'link' | 'whatsapp' | 'telegram' | 'buy_now' | 'payment' | 'products' | 'services' | 'service_card' | 'testimonials' | 'gallery' | 'promo_banner' | 'scheduling' | 'send_resume';
 
 export interface ProductItem {
   id: string;

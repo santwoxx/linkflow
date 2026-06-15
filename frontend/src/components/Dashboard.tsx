@@ -931,23 +931,23 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
         </div>
       </aside>
 
-      {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0f172a]/95 backdrop-blur-xl border-t border-slate-800/60 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-        <div className="flex items-center justify-around p-2">
-          {navItems.slice(0, 5).map((item: any) => (
+      {/* Mobile bottom nav — scrollable so ALL tabs are reachable */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0f172a]/95 backdrop-blur-xl border-t border-slate-800/60 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+        <div className="flex items-center overflow-x-auto scrollbar-none px-2 py-2 gap-1">
+          {navItems.map((item: any) => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className="relative flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all cursor-pointer group"
+              className="relative flex flex-col items-center gap-0.5 py-1.5 px-2.5 rounded-xl transition-all cursor-pointer group shrink-0 min-w-[52px]"
             >
               {activeTab === item.id && (
                 <div className="absolute inset-0 bg-[#a78bfa]/10 rounded-xl" />
               )}
-              <span className={`relative z-10 transition-transform duration-200 ${activeTab === item.id ? 'text-[#a78bfa] -translate-y-0.5 scale-110' : 'text-slate-500 group-hover:text-slate-300'}`}>
+              <span className={`relative z-10 transition-transform duration-200 ${activeTab === item.id ? 'text-[#a78bfa] scale-110' : 'text-slate-500 group-hover:text-slate-300'}`}>
                 {item.icon}
               </span>
-              <span className={`relative z-10 text-[9px] font-bold tracking-wide transition-colors ${activeTab === item.id ? 'text-[#a78bfa]' : 'text-transparent hidden'}`}>
-                {activeTab === item.id && item.label}
+              <span className={`relative z-10 text-[9px] font-semibold tracking-wide transition-colors leading-none ${activeTab === item.id ? 'text-[#a78bfa]' : 'text-slate-600'}`}>
+                {item.label}
               </span>
             </button>
           ))}
@@ -973,8 +973,8 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
       </div>
 
       {/* MAIN CONTENT */}
-      <main className={`flex-1 flex pt-16 md:pt-0 pb-24 md:pb-0 ${activeTab === 'design' || activeTab === 'links' ? '' : 'overflow-y-auto'}`}>
-        <div id="controls-panel-container" className={`flex-1 ${activeTab === 'design' || activeTab === 'links' ? 'flex flex-col lg:flex-row' : 'overflow-y-auto'} ${activeTab === 'feed' ? 'max-w-2xl mx-auto px-4 py-4 md:py-6' : activeTab === 'design' || activeTab === 'links' ? '' : 'p-4 sm:p-5 md:p-6 space-y-6 md:max-w-3xl lg:max-w-4xl mx-auto w-full'}`}>
+      <main className={`flex-1 flex pt-[60px] md:pt-0 pb-[72px] md:pb-0 ${activeTab === 'design' || activeTab === 'links' ? '' : 'overflow-y-auto'}`} style={{ paddingBottom: 'calc(72px + env(safe-area-inset-bottom, 0px))' }}>
+        <div id="controls-panel-container" className={`flex-1 min-w-0 ${activeTab === 'design' || activeTab === 'links' ? 'flex flex-col lg:flex-row' : 'overflow-y-auto'} ${activeTab === 'feed' ? 'max-w-2xl mx-auto w-full px-4 py-4 md:py-6' : activeTab === 'design' || activeTab === 'links' ? '' : 'p-4 sm:p-5 md:p-6 space-y-6 md:max-w-3xl lg:max-w-4xl mx-auto w-full'}`}>
 
           {/* TAB: SOCIAL COMMUNITY FEED (default) */}
           {activeTab === 'feed' && (
@@ -1148,7 +1148,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                       </h3>
                       <span className="text-[9px] text-zinc-500 font-mono tracking-wider uppercase border border-white/5 bg-white/5 px-2.5 py-1 rounded-md">Selecione</span>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                       {LAYOUT_PRESETS.map((p) => {
                         const isActive = activeLayout === p.id;
                         return (
@@ -1583,13 +1583,14 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
         <div
           role="status"
           aria-live="polite"
-          className={`fixed bottom-6 right-6 z-[100] px-4 py-3 rounded-2xl shadow-2xl border text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4 duration-200 ${
+          className={`fixed right-4 z-[100] px-4 py-3 rounded-2xl shadow-2xl border text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4 duration-200 ${
             saveToast.kind === 'error'
               ? 'bg-rose-950/90 border-rose-500/30 text-rose-200'
               : saveToast.kind === 'theme'
               ? 'bg-[#0f172a]/95 border-[#a78bfa]/40 text-[#a78bfa]'
               : 'bg-emerald-950/90 border-emerald-500/30 text-emerald-200'
           }`}
+          style={{ bottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}
         >
           <span
             className={`w-2 h-2 rounded-full ${
