@@ -43,6 +43,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [copiedNotification, setCopiedNotification] = useState(false);
   const [saveToast, setSaveToast] = useState<{ kind: 'success' | 'error' | 'theme'; message: string } | null>(null);
+  const [colorTab, setColorTab] = useState<'dark' | 'light' | 'gradient'>('dark');
 
   // Sync state with parent userProfile changes
   useEffect(() => {
@@ -118,6 +119,42 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
     'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&auto=format&fit=crop&q=80'
+  ];
+
+  const DARK_BACKGROUNDS = [
+    { name: 'Midnight Blue', value: '#020617' },
+    { name: 'Slate Night', value: '#0f172a' },
+    { name: 'Dark Indigo', value: '#1e1b4b' },
+    { name: 'Noir Absolute', value: '#000000' },
+    { name: 'Cyber Blue', value: '#0d1117' },
+    { name: 'Pure Charcoal', value: '#171717' },
+    { name: 'Deep Purple', value: '#2d1b69' },
+    { name: 'Gothic Obsidian', value: '#1a1a2e' },
+    { name: 'Deep Forest', value: '#0b3d0b' },
+    { name: 'Crimson Night', value: '#3d0c0c' },
+  ];
+
+  const LIGHT_BACKGROUNDS = [
+    { name: 'Pure White', value: '#ffffff' },
+    { name: 'Snowy Slate', value: '#f8fafc' },
+    { name: 'Mint White', value: '#f0fdf4' },
+    { name: 'Rose Petal', value: '#fef2f2' },
+    { name: 'Warm Cream', value: '#fefce8' },
+    { name: 'Lilac Haze', value: '#f5f3ff' },
+    { name: 'Ice Cyan', value: '#ecfeff' },
+    { name: 'Peach Sunset', value: '#fff7ed' },
+    { name: 'Sakura Blush', value: '#fdf2f8' },
+  ];
+
+  const GRADIENT_BACKGROUNDS = [
+    { name: 'Sunset Glow', value: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
+    { name: 'Neon Cyber', value: 'linear-gradient(135deg, #f77062 0%, #fe5196 100%)' },
+    { name: 'Ocean Haze', value: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
+    { name: 'Purple Night', value: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
+    { name: 'Deep Space', value: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)' },
+    { name: 'Fresh Mint', value: 'linear-gradient(135deg, #00b4db 0%, #0083b0 100%)' },
+    { name: 'Lemon Sun', value: 'linear-gradient(135deg, #f7971e 0%, #ffd200 100%)' },
+    { name: 'Lavender Blush', value: 'linear-gradient(135deg, #ee9ca7 0%, #ffdde1 100%)' },
   ];
 
   // 1. Subscribe to Links lists in real-time or local fallback
@@ -720,6 +757,11 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
     const { backgroundGradient: _, backgroundImageUrl: __, ...rest } = theme;
     handleThemeChange({ ...rest, themeId: 'custom', backgroundColor: color, backgroundType: 'color' });
   };
+
+  const handlePickGradient = (gradient: string) => {
+    const { backgroundImageUrl: __, ...rest } = theme;
+    handleThemeChange({ ...rest, themeId: 'custom', backgroundGradient: gradient, backgroundType: 'gradient' });
+  };
   // 7. Update Theme specifically (passed down to ThemeSelector)
   // Both this and handleSaveProfile route through persistProfile so the
   // Firestore document state is consistent regardless of which UI the user
@@ -1144,21 +1186,163 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                   </div>
                   
                   <div className="relative z-10 flex flex-col gap-8">
-                    {/* Cor de fundo */}
-                    <div className="space-y-4">
-                      <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-gradient-to-br from-[#a78bfa] to-indigo-500" /> Cor de Fundo
-                      </h4>
-                      <div className="flex flex-wrap gap-2.5 bg-[#111111] border border-white/5 rounded-2xl p-4">
-                        {['#0f172a','#1e1b4b','#1a1a2e','#0d1117','#111827','#1c1917','#171717','#1f2937','#020617','#000000','#2d1b69','#1a3a5c','#3b0764','#164e63','#0b3d0b','#3d0c0c','#7c2d12','#4c1d95','#0f0f0f','#262626','#ffffff','#f8fafc','#f0fdf4','#fef2f2','#fefce8','#f5f3ff','#ecfeff','#fff7ed','#fdf2f8'].map((c) => (
-                          <button key={c} type="button" onClick={() => handlePickColor(c)}
-                            className={`w-9 h-9 rounded-full border-2 transition-all cursor-pointer hover:scale-110 shadow-sm ${
-                              theme.backgroundColor === c ? 'border-[#a78bfa] scale-110 ring-4 ring-[#a78bfa]/20' : 'border-white/5 hover:border-white/20'
-                            }`}
-                            style={{ backgroundColor: c }} title={c} />
-                        ))}
-                      </div>
-                    </div>
+                     {/* Cor de Fundo */}
+                     <div className="space-y-4">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-gradient-to-br from-[#a78bfa] to-indigo-500" /> Cor de Fundo
+                          </h4>
+                          
+                          {/* Sub-tabs for presets */}
+                          <div className="flex gap-1 bg-black/40 p-1 rounded-lg border border-white/5">
+                            {([
+                              { id: 'dark', label: 'Escuro' },
+                              { id: 'light', label: 'Claro' },
+                              { id: 'gradient', label: 'Gradientes' },
+                            ] as const).map((tab) => (
+                              <button
+                                key={tab.id}
+                                type="button"
+                                onClick={() => setColorTab(tab.id)}
+                                className={`px-2.5 py-1 rounded-md text-[9px] font-bold transition-all uppercase tracking-wider cursor-pointer ${
+                                  colorTab === tab.id
+                                    ? 'bg-[#a78bfa]/15 text-[#a78bfa] border border-[#a78bfa]/20'
+                                    : 'text-zinc-500 hover:text-zinc-300 border border-transparent'
+                                }`}
+                              >
+                                {tab.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Presets List */}
+                        <div className="flex flex-wrap gap-2.5 bg-[#111111] border border-white/5 rounded-2xl p-4">
+                          {colorTab === 'dark' && DARK_BACKGROUNDS.map((c) => (
+                            <button
+                              key={c.value}
+                              type="button"
+                              onClick={() => handlePickColor(c.value)}
+                              className={`w-9 h-9 rounded-full border-2 transition-all cursor-pointer hover:scale-110 shadow-sm relative group ${
+                                theme.backgroundType === 'color' && theme.backgroundColor === c.value
+                                  ? 'border-[#a78bfa] scale-110 ring-4 ring-[#a78bfa]/20'
+                                  : 'border-white/5 hover:border-white/20'
+                              }`}
+                              style={{ backgroundColor: c.value }}
+                              title={c.name}
+                            >
+                              <span className="absolute bottom-full left-1/2 -translate-x-1/2 bg-black text-[8px] text-white px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap mb-1 z-[50]">{c.name}</span>
+                            </button>
+                          ))}
+                          
+                          {colorTab === 'light' && LIGHT_BACKGROUNDS.map((c) => (
+                            <button
+                              key={c.value}
+                              type="button"
+                              onClick={() => handlePickColor(c.value)}
+                              className={`w-9 h-9 rounded-full border-2 transition-all cursor-pointer hover:scale-110 shadow-sm relative group ${
+                                theme.backgroundType === 'color' && theme.backgroundColor === c.value
+                                  ? 'border-[#a78bfa] scale-110 ring-4 ring-[#a78bfa]/20'
+                                  : 'border-white/5 hover:border-white/20'
+                              }`}
+                              style={{ backgroundColor: c.value }}
+                              title={c.name}
+                            >
+                              <span className="absolute bottom-full left-1/2 -translate-x-1/2 bg-black text-[8px] text-white px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap mb-1 z-[50]">{c.name}</span>
+                            </button>
+                          ))}
+
+                          {colorTab === 'gradient' && GRADIENT_BACKGROUNDS.map((c) => (
+                            <button
+                              key={c.value}
+                              type="button"
+                              onClick={() => handlePickGradient(c.value)}
+                              className={`w-9 h-9 rounded-full border-2 transition-all cursor-pointer hover:scale-110 shadow-sm relative group ${
+                                theme.backgroundType === 'gradient' && theme.backgroundGradient === c.value
+                                  ? 'border-[#a78bfa] scale-110 ring-4 ring-[#a78bfa]/20'
+                                  : 'border-white/5 hover:border-white/20'
+                              }`}
+                              style={{ background: c.value }}
+                              title={c.name}
+                            >
+                              <span className="absolute bottom-full left-1/2 -translate-x-1/2 bg-black text-[8px] text-white px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap mb-1 z-[50]">{c.name}</span>
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Custom Color/Gradient Builder */}
+                        <div className="bg-[#111111] border border-white/5 rounded-2xl p-5 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] text-zinc-500 font-mono tracking-wide uppercase">Tipo de Fundo</span>
+                            <div className="flex gap-1.5 p-1 bg-[#0a0a0a] rounded-xl border border-white/5 max-w-[200px]">
+                              <button
+                                type="button"
+                                onClick={() => handlePickColor(theme.backgroundColor || '#0f172a')}
+                                className={`px-4 py-1.5 rounded-lg text-[9px] font-bold transition-all cursor-pointer uppercase tracking-wider ${
+                                  theme.backgroundType !== 'gradient'
+                                    ? 'bg-white/10 text-white border border-white/10'
+                                    : 'text-zinc-500 hover:text-zinc-300'
+                                }`}
+                              >
+                                Sólido
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handlePickGradient(theme.backgroundGradient || 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)')}
+                                className={`px-4 py-1.5 rounded-lg text-[9px] font-bold transition-all cursor-pointer uppercase tracking-wider ${
+                                  theme.backgroundType === 'gradient'
+                                    ? 'bg-white/10 text-white border border-white/10'
+                                    : 'text-zinc-500 hover:text-zinc-300'
+                                }`}
+                              >
+                                Gradiente
+                              </button>
+                            </div>
+                          </div>
+
+                          {theme.backgroundType === 'gradient' ? (
+                            <div className="space-y-2">
+                              <label className="text-[10px] text-zinc-500 font-mono tracking-wide uppercase flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-[#a78bfa]" /> Gradiente CSS Personalizado
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)"
+                                value={theme.backgroundGradient || ''}
+                                onChange={(e) => handlePickGradient(e.target.value)}
+                                className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all placeholder-zinc-600 font-mono outline-none"
+                              />
+                              <div className="h-10 w-full rounded-xl border border-white/5 mt-2 shadow-inner" style={{ background: theme.backgroundGradient || 'transparent' }} />
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              <label className="text-[10px] text-zinc-500 font-mono tracking-wide uppercase flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-pink-400" /> Cor Sólida Personalizada
+                              </label>
+                              <div className="flex gap-2">
+                                <input
+                                  type="color"
+                                  value={(() => {
+                                    const c = (theme.backgroundColor || '').trim();
+                                    if (/^#[0-9a-fA-F]{6}$/.test(c)) return c;
+                                    return '#0f172a';
+                                  })()}
+                                  onChange={(e) => handlePickColor(e.target.value)}
+                                  className="w-12 h-12 rounded-xl border border-white/5 bg-transparent cursor-pointer shrink-0 animate-in fade-in"
+                                  title="Cor sólida de fundo"
+                                />
+                                <input
+                                  type="text"
+                                  placeholder="#0f172a"
+                                  value={theme.backgroundColor || ''}
+                                  onChange={(e) => handlePickColor(e.target.value)}
+                                  className="flex-1 bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all placeholder-zinc-600 font-mono outline-none"
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                     </div>
 
                     {/* Posicao e Estrutura */}
                     <div className="space-y-4">
