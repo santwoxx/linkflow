@@ -10,7 +10,7 @@ import CommunityFeed from './CommunityFeed';
 import DiscoverProfiles from './DiscoverProfiles';
 const AdminPanel = React.lazy(() => import('./AdminPanel'));
 const ProfessionalDashboard = React.lazy(() => import('./ProfessionalDashboard'));
-import { Link2, Sparkles, User, LogOut, Check, Copy, ExternalLink, RefreshCw, MessageSquare, Compass, ImageIcon, Crown, Layout, Smartphone, BarChart4, Briefcase, Upload, AtSign } from 'lucide-react';
+import { Link2, Sparkles, User, LogOut, Check, Copy, ExternalLink, RefreshCw, MessageSquare, Compass, ImageIcon, Crown, Layout, Smartphone, BarChart4, Briefcase, Upload, AtSign, X } from 'lucide-react';
 import { ADMIN_EMAIL } from '../types';
 import { compressImage } from '../utils/image';
 
@@ -74,31 +74,52 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
     theme: theme,
   };
 
+  const [showMobilePreview, setShowMobilePreview] = useState(false);
+
   // Reusable live phone preview (sticky) used by Construtor and Aparência tabs
   const previewLinks: LinkItem[] = links.map(l =>
     linkPreviewOverrides[l.id] ? { ...l, ...linkPreviewOverrides[l.id] } : l
   );
 
-  const renderPhonePreview = () => (
-    <div className="hidden lg:flex shrink-0 w-[380px] self-stretch border-l border-slate-800/40 bg-[#050b18]/60">
-      <div className="sticky top-0 w-full max-h-screen overflow-y-auto flex flex-col items-center gap-3 p-6">
-        <div className="flex items-center gap-1.5 text-[10px] text-[#a78bfa] font-semibold tracking-wider uppercase select-none">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#a78bfa] animate-pulse"></span>
-          Pré-visualização ao Vivo
-        </div>
-        <div className="w-[300px] rounded-[44px] overflow-hidden border-[8px] border-zinc-700/90 bg-zinc-950 shadow-2xl shadow-black/60 relative">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-zinc-900 rounded-b-2xl z-10 flex items-center justify-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
-            <span className="w-10 h-1 rounded-full bg-zinc-700" />
+  const renderPhonePreview = (options?: { mobile?: boolean }) => {
+    const isMobile = options?.mobile;
+    return (
+      <div className={`${isMobile ? 'fixed inset-0 z-50 bg-[#050b18]/95 backdrop-blur-xl flex flex-col' : 'hidden lg:flex shrink-0 w-[380px] self-stretch border-l border-slate-800/40 bg-[#050b18]/60'}`}>
+        <div className={`${isMobile ? 'flex-1 flex flex-col items-center justify-center p-4 overflow-y-auto' : 'sticky top-0 w-full max-h-screen overflow-y-auto flex flex-col items-center gap-3 p-6'}`}>
+          {isMobile && (
+            <div className="w-full flex items-center justify-between mb-4 px-2">
+              <div className="flex items-center gap-1.5 text-[10px] text-[#a78bfa] font-semibold tracking-wider uppercase select-none">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#a78bfa] animate-pulse"></span>
+                Pré-visualização ao Vivo
+              </div>
+              <button
+                onClick={() => setShowMobilePreview(false)}
+                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+          {!isMobile && (
+            <div className="flex items-center gap-1.5 text-[10px] text-[#a78bfa] font-semibold tracking-wider uppercase select-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#a78bfa] animate-pulse"></span>
+              Pré-visualização ao Vivo
+            </div>
+          )}
+          <div className="w-[300px] rounded-[44px] overflow-hidden border-[8px] border-zinc-700/90 bg-zinc-950 shadow-2xl shadow-black/60 relative">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-zinc-900 rounded-b-2xl z-10 flex items-center justify-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
+              <span className="w-10 h-1 rounded-full bg-zinc-700" />
+            </div>
+            <div className="w-full overflow-y-auto" style={{ height: '620px' }}>
+              <PublicProfile profile={livePreviewProfile} links={previewLinks} previewMode={true} />
+            </div>
           </div>
-          <div className="w-full overflow-y-auto" style={{ height: '620px' }}>
-            <PublicProfile profile={livePreviewProfile} links={previewLinks} previewMode={true} />
-          </div>
+          <p className="text-[9px] text-zinc-600 text-center mt-3">As alterações aparecem aqui em tempo real</p>
         </div>
-        <p className="text-[9px] text-zinc-600 text-center">As alterações aparecem aqui em tempo real</p>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Suggested pre-made avatar avatars for fast personalizations
   const AVATAR_TEMPLATES = [
@@ -1024,6 +1045,20 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                 />
                 <div className="h-10" />
               </div>
+
+              {/* Mobile preview toggle button */}
+              <button
+                onClick={() => setShowMobilePreview(true)}
+                className="lg:hidden fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-[#a78bfa] to-indigo-600 text-white shadow-xl shadow-[#a78bfa]/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                title="Pré-visualizar"
+                style={{ bottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}
+              >
+                <Smartphone className="w-6 h-6" />
+              </button>
+
+              {/* Mobile preview overlay */}
+              {showMobilePreview && renderPhonePreview({ mobile: true })}
+
               {renderPhonePreview()}
             </div>
           )}
