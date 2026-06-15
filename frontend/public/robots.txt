@@ -1,3 +1,26 @@
 User-agent: *
 Allow: /
+Crawl-delay: 1
+
+# Sitemaps
 Sitemap: https://linkflowai.com.br/sitemap.xml
+
+# Páginas importantes para rastrear
+Allow: /wafort
+Allow: /wafort24h
+Allow: /linktree-gratis
+Allow: /alternativa-linktree
+Allow: /como-colocar-link-na-bio
+Allow: /plataforma-freelancer
+Allow: /contratar-freelancer
+Allow: /servicos
+
+# Googlebot específico
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Bingbot
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
