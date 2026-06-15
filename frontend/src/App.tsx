@@ -300,21 +300,52 @@ export default function App() {
           }
         ];
       } else {
-        schemaData = {
-          '@context': 'https://schema.org',
-          '@type': 'ProfilePage',
-          'name': pageTitle,
-          'description': desc,
-          'url': profileUrl,
-          'mainEntity': {
-            '@type': 'Person',
-            'name': publicProfile.displayName,
-            'alternateName': publicProfile.username,
-            'description': publicProfile.bio || '',
-            'image': publicProfile.profilePicUrl || ''
+        // Rich SEO for ALL users: generate smart title/description/keywords
+        const isPro = publicProfile.verifiedProfessional && publicProfile.serviceEnabled;
+        const profession = (publicProfile as any).profession || '';
+
+        if (isPro && profession) {
+          pageTitle = `${publicProfile.displayName} – ${profession} | LinkFlowAI`;
+          if (!publicProfile.bio) {
+            desc = `${publicProfile.displayName} é ${profession}. Veja serviços, portfólio e contatos no LinkFlowAI.`;
           }
-        };
+          keywords = `${publicProfile.displayName}, ${publicProfile.username}, ${profession}, freelancer, profissional, contratar ${profession}, ${profession} Brasil, linkflowai`;
+        }
+
+        const skills = (publicProfile as any).skills || [];
+        if (skills.length > 0) {
+          keywords += `, ${skills.slice(0, 6).join(', ')}`;
+        }
+
+        schemaData = [
+          {
+            '@context': 'https://schema.org',
+            '@type': 'ProfilePage',
+            'name': pageTitle,
+            'description': desc,
+            'url': profileUrl,
+            'mainEntity': {
+              '@type': isPro ? 'Organization' : 'Person',
+              'name': publicProfile.displayName,
+              'alternateName': publicProfile.username,
+              'description': publicProfile.bio || desc,
+              'image': publicProfile.profilePicUrl || '',
+              'url': profileUrl,
+              ...(profession ? { 'jobTitle': profession } : {}),
+              ...(skills.length > 0 ? { 'knowsAbout': skills } : {}),
+            }
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            'itemListElement': [
+              { '@type': 'ListItem', 'position': 1, 'name': 'LinkFlowAI', 'item': 'https://linkflowai.com.br/' },
+              { '@type': 'ListItem', 'position': 2, 'name': publicProfile.displayName || publicProfile.username, 'item': profileUrl }
+            ]
+          }
+        ];
       }
+
 
       let scriptJsonLd = document.getElementById('json-ld-profile-seo') as HTMLScriptElement;
       if (!scriptJsonLd) {

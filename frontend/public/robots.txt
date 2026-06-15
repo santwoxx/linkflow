@@ -2,12 +2,10 @@ User-agent: *
 Allow: /
 Crawl-delay: 1
 
-# Sitemaps
+# Sitemap dinâmico (lista todos os usuários automaticamente)
 Sitemap: https://linkflowai.com.br/sitemap.xml
 
-# Páginas importantes para rastrear
-Allow: /wafort
-Allow: /wafort24h
+# Páginas de SEO estratégicas
 Allow: /linktree-gratis
 Allow: /alternativa-linktree
 Allow: /como-colocar-link-na-bio
@@ -15,7 +13,11 @@ Allow: /plataforma-freelancer
 Allow: /contratar-freelancer
 Allow: /servicos
 
-# Googlebot específico
+# Perfis verificados estratégicos
+Allow: /wafort
+Allow: /wafort24h
+
+# Googlebot – sem delay, acesso total
 User-agent: Googlebot
 Allow: /
 Crawl-delay: 0
@@ -24,3 +26,16 @@ Crawl-delay: 0
 User-agent: Bingbot
 Allow: /
 Crawl-delay: 1
+
+# Outros bots de redes sociais
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
