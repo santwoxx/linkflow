@@ -1016,6 +1016,15 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                       <span className="text-[9px] text-zinc-500 font-mono truncate bg-black/40 border border-slate-800 px-2 py-1 rounded-lg max-w-[120px] sm:max-w-[200px]">{publicProfileUrl}</span>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
+                      {/* Preview button — visible on small screens where the side panel is hidden */}
+                      <button
+                        type="button"
+                        onClick={() => setShowMobilePreview(true)}
+                        className="lg:hidden flex items-center gap-1.5 text-[10px] font-bold px-3 py-2 rounded-lg bg-[#a78bfa]/10 hover:bg-[#a78bfa]/20 text-[#a78bfa] border border-[#a78bfa]/20 transition-all cursor-pointer"
+                        title="Pré-visualizar"
+                      >
+                        <Smartphone className="w-3 h-3" /> Preview
+                      </button>
                       <button
                         type="button"
                         onClick={handleCopyLink}
@@ -1046,14 +1055,14 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                 <div className="h-10" />
               </div>
 
-              {/* Mobile preview toggle button */}
+              {/* Floating mobile preview button (fallback for very small screens) */}
               <button
                 onClick={() => setShowMobilePreview(true)}
-                className="lg:hidden fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-[#a78bfa] to-indigo-600 text-white shadow-xl shadow-[#a78bfa]/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                className="lg:hidden fixed right-4 z-40 w-12 h-12 rounded-full bg-gradient-to-br from-[#a78bfa] to-indigo-600 text-white shadow-xl shadow-[#a78bfa]/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-all cursor-pointer sm:hidden"
                 title="Pré-visualizar"
                 style={{ bottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}
               >
-                <Smartphone className="w-6 h-6" />
+                <Smartphone className="w-5 h-5" />
               </button>
 
               {/* Mobile preview overlay */}
@@ -1604,6 +1613,19 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                 <div className="h-10" />
 
               </div>{/* END LEFT COLUMN */}
+
+              {/* Mobile preview button for Aparência tab */}
+              <button
+                onClick={() => setShowMobilePreview(true)}
+                className="lg:hidden fixed right-4 z-40 w-12 h-12 rounded-full bg-gradient-to-br from-[#a78bfa] to-indigo-600 text-white shadow-xl shadow-[#a78bfa]/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                title="Pré-visualizar"
+                style={{ bottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}
+              >
+                <Smartphone className="w-5 h-5" />
+              </button>
+
+              {/* Mobile preview overlay for Aparência tab */}
+              {showMobilePreview && renderPhonePreview({ mobile: true })}
 
               {renderPhonePreview()}
 
