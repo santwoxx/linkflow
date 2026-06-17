@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { UserProfile, LinkItem, ADMIN_EMAIL, DEFAULT_LAYOUT } from '../types';
 import { db, auth } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { collection, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, getDoc, setDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ExternalLink, Copy, Check, Sparkles, MessageSquare, Link as LinkIcon, LogIn, Star, Crown, UserPlus, UserCheck, Briefcase, ShoppingBag, Clock, ShieldCheck, Music, Calendar, X, Instagram, Youtube, Linkedin, Github, Twitter, Upload, FileText, Loader2, Mail } from 'lucide-react';
 import CommunityFeed from './CommunityFeed';
 import { isFollowing, followUser, unfollowUser } from '../utils/follow';
@@ -210,7 +210,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
       // Store in Firestore under user's resumes collection
       if (!previewMode && profile.uid && profile.uid !== 'demo-user-123') {
         const resumesRef = collection(db, 'users', profile.uid, 'resumes');
-        await setDoc(doc(resumesRef), {
+        await addDoc(resumesRef, {
           candidateName: resumeName.trim(),
           candidateEmail: resumeEmail.trim(),
           candidatePhone: resumePhone.trim(),
@@ -1679,8 +1679,10 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                       </div>
                       {resumeFile && (
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.preventDefault();
+                            e.stopPropagation();
                             setResumeFile(null);
                           }}
                           className="p-1 rounded-full hover:bg-orange-200 text-orange-500 cursor-pointer"
