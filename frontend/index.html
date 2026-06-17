@@ -33,28 +33,163 @@
   <link rel="icon" type="image/svg+xml"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>🔗</text></svg>" />
   <link rel="manifest" href="/manifest.json" />
+
+  <!-- ═══════════════════════════════════════════════════════
+       PERFORMANCE: Preconnect + DNS-prefetch para recursos críticos
+       Elimina latência de DNS + TCP nas primeiras requisições
+  ═══════════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://firestore.googleapis.com" />
+  <link rel="preconnect" href="https://identitytoolkit.googleapis.com" />
+  <link rel="dns-prefetch" href="https://firebase.googleapis.com" />
+  <link rel="dns-prefetch" href="https://storage.googleapis.com" />
+  <link rel="dns-prefetch" href="https://i.ibb.co" />
+
+  <!-- ═══════════════════════════════════════════════════════
+       PERFORMANCE: Fontes via <link> não-bloqueante com font-display=swap
+       Substitui o @import bloqueante do CSS — reduz FCP em ~300-600ms
+       font-display=swap elimina FOIT (Flash of Invisible Text)
+  ═══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Syne:wght@400;500;700;800&family=Bebas+Neue&family=Caveat:wght@400;700&display=swap"
+    media="print" onload="this.media='all'" />
+  <noscript>
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" />
+  </noscript>
+
+  <!-- ═══════════════════════════════════════════════════════
+       INLINE SKELETON — elimina tela em branco durante carregamento
+       Aparece instantaneamente antes do React montar
+  ═══════════════════════════════════════════════════════ -->
+  <style>
+    body { margin: 0; background: #050b18; }
+    #app-skeleton {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; min-height: 100vh; background: #050b18;
+    }
+    .sk-logo {
+      width: 52px; height: 52px; border-radius: 16px;
+      background: linear-gradient(135deg, #a78bfa, #4f46e5);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; margin-bottom: 20px;
+      box-shadow: 0 0 30px rgba(167,139,250,0.35);
+      animation: sk-pulse 1.6s ease-in-out infinite;
+    }
+    .sk-bar {
+      height: 4px; background: rgba(167,139,250,0.12);
+      border-radius: 2px; margin-bottom: 8px; overflow: hidden;
+    }
+    .sk-bar-fill {
+      height: 100%; width: 40%; border-radius: 2px;
+      background: linear-gradient(90deg, #a78bfa, #818cf8, #a78bfa);
+      background-size: 200% 100%;
+      animation: sk-shimmer 1.4s ease-in-out infinite;
+    }
+    .sk-label {
+      font-size: 11px; color: rgba(167,139,250,0.45);
+      letter-spacing: 0.12em; text-transform: uppercase; margin-top: 8px;
+      font-family: system-ui, sans-serif;
+    }
+    @keyframes sk-pulse {
+      0%,100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(0.95); opacity: 0.8; }
+    }
+    @keyframes sk-shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+
+  <!-- Service Worker: Registro + Verificação de update automático a cada 30min -->
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        const isLocalhost = window.location.hostname === 'localhost' || 
-                            window.location.hostname === '127.0.0.1' || 
-                            window.location.hostname.startsWith('192.168.');
+      window.addEventListener('load', function() {
+        var isLocalhost = window.location.hostname === 'localhost' ||
+                          window.location.hostname === '127.0.0.1' ||
+                          window.location.hostname.startsWith('192.168.');
 
         if (isLocalhost) {
-          // Desregistra qualquer Service Worker ativo em desenvolvimento para evitar problemas de cache
-          navigator.serviceWorker.getRegistrations().then((registrations) => {
-            for (let registration of registrations) {
-              registration.unregister().then((success) => {
-                if (success) console.log('Service Worker de desenvolvimento desinstalado com sucesso.');
-              });
-            }
+          navigator.serviceWorker.getRegistrations().then(function(regs) {
+            regs.forEach(function(reg) { reg.unregister(); });
           });
         } else {
-          navigator.serviceWorker.register('/service-worker.js')
-            .then(reg => console.log('Service Worker registrado!', reg))
-            .catch(err => console.log('Erro ao registrar Service Worker:', err));
+          navigator.serviceWorker.register('/service-worker.js').then(function(reg) {
+            // Verifica se já tem um SW esperando (caso de reload sem fechar a aba)
+            if (reg.waiting) { showUpdateToast(reg.waiting); }
+
+            reg.addEventListener('updatefound', function() {
+              var newWorker = reg.installing;
+              if (!newWorker) return;
+              newWorker.addEventListener('statechange', function() {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  showUpdateToast(newWorker);
+                }
+              });
+            });
+
+            // Verifica por updates a cada 30 minutos quando o app está aberto
+            setInterval(function() { reg.update(); }, 30 * 60 * 1000);
+          }).catch(function(err) {
+            console.warn('[SW] Registro falhou:', err);
+          });
+
+          // Recarrega quando o novo SW toma controle (após clicar "Atualizar agora")
+          var refreshing = false;
+          navigator.serviceWorker.addEventListener('controllerchange', function() {
+            if (!refreshing) { refreshing = true; window.location.reload(); }
+          });
         }
       });
+    }
+
+    function showUpdateToast(worker) {
+      if (document.getElementById('sw-update-toast')) return;
+      var toast = document.createElement('div');
+      toast.id = 'sw-update-toast';
+      toast.style.cssText = [
+        'position:fixed','bottom:24px','left:50%','transform:translateX(-50%)',
+        'z-index:99999','background:linear-gradient(135deg,#1e1b4b,#312e81)',
+        'border:1px solid rgba(167,139,250,0.4)','border-radius:16px',
+        'padding:14px 20px','display:flex','align-items:center','gap:12px',
+        'box-shadow:0 8px 32px rgba(0,0,0,0.5)','color:#e2e8f0',
+        'font-family:system-ui,sans-serif','font-size:13px','font-weight:500',
+        'animation:swSlideUp .3s ease','max-width:90vw'
+      ].join(';');
+
+      var style = document.createElement('style');
+      style.textContent = '@keyframes swSlideUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}';
+      document.head.appendChild(style);
+
+      var icon = document.createElement('span');
+      icon.style.fontSize = '18px';
+      icon.textContent = '🚀';
+
+      var msg = document.createElement('span');
+      msg.textContent = 'Nova versão disponível!';
+
+      var btnUpdate = document.createElement('button');
+      btnUpdate.textContent = 'Atualizar agora';
+      btnUpdate.style.cssText = 'background:linear-gradient(135deg,#a78bfa,#818cf8);color:white;border:none;border-radius:10px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;letter-spacing:.04em';
+      btnUpdate.onclick = function() {
+        toast.remove();
+        worker.postMessage({ type: 'SKIP_WAITING' });
+      };
+
+      var btnClose = document.createElement('button');
+      btnClose.textContent = '×';
+      btnClose.style.cssText = 'background:transparent;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:20px;line-height:1;padding:0 2px';
+      btnClose.onclick = function() { toast.remove(); };
+
+      toast.appendChild(icon);
+      toast.appendChild(msg);
+      toast.appendChild(btnUpdate);
+      toast.appendChild(btnClose);
+      document.body.appendChild(toast);
+
+      // Auto-remove após 15 segundos
+      setTimeout(function() { if (toast.parentNode) toast.remove(); }, 15000);
     }
   </script>
 
@@ -80,7 +215,7 @@
         "name": "LinkFlowAI Tech"
       }
     }
-    </script>
+  </script>
 
   <!-- JSON-LD BreadcrumbList -->
   <script type="application/ld+json">
@@ -94,11 +229,19 @@
         "item": "https://linkflowai.com.br/"
       }]
     }
-    </script>
+  </script>
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <!-- Skeleton inline — aparece instantaneamente antes do React carregar -->
+    <div id="app-skeleton">
+      <div class="sk-logo">🔗</div>
+      <div class="sk-bar" style="width:160px"><div class="sk-bar-fill"></div></div>
+      <div class="sk-bar" style="width:110px"><div class="sk-bar-fill" style="animation-delay:.25s"></div></div>
+      <p class="sk-label">Carregando LinkFlowAI...</p>
+    </div>
+  </div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

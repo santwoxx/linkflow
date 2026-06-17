@@ -9,7 +9,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Bump esta versão a CADA DEPLOY para forçar re-instalação e limpeza de cache.
-const CACHE_VERSION = 'linkflow-v6';
+const CACHE_VERSION = 'linkflow-v7';
 const STATIC_CACHE  = `${CACHE_VERSION}-static`;
 const HTML_CACHE    = `${CACHE_VERSION}-html`;
 
@@ -44,6 +44,14 @@ function hasValidMime(response, url) {
   return true; // para outros tipos (imagens, fontes etc.) não verificar
 }
 
+// ── Message Handler ───────────────────────────────────────────────────────────
+// Responde ao botão "Atualizar agora" do toast de atualização em index.html
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 // ── Install ───────────────────────────────────────────────────────────────────
 self.addEventListener('install', (event) => {
   // skipWaiting força o novo SW a ativar imediatamente,
@@ -54,6 +62,7 @@ self.addEventListener('install', (event) => {
     caches.open(STATIC_CACHE).then((cache) => cache.addAll(PRECACHE_URLS))
   );
 });
+
 
 // ── Activate ──────────────────────────────────────────────────────────────────
 self.addEventListener('activate', (event) => {
