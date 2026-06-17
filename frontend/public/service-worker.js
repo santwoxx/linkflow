@@ -9,7 +9,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Bump esta versão a CADA DEPLOY para forçar re-instalação e limpeza de cache.
-const CACHE_VERSION = 'linkflow-v5';
+const CACHE_VERSION = 'linkflow-v6';
 const STATIC_CACHE  = `${CACHE_VERSION}-static`;
 const HTML_CACHE    = `${CACHE_VERSION}-html`;
 
