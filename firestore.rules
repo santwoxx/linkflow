@@ -76,6 +76,7 @@ service cloud.firestore {
         && optionalString(request.resource.data.coverUrl, 2048)
         && optionalString(request.resource.data.coverColor, 100)
         && optionalString(request.resource.data.coverGradient, 500)
+        && optionalString(request.resource.data.phone, 30)
         && request.resource.data.theme is map
         && request.resource.data.uid == userId
         && request.resource.data.email is string;
@@ -232,6 +233,19 @@ service cloud.firestore {
         // O dono do perfil pode listar os currículos recebidos
         allow read: if isOwner(userId) || isAdmin();
         // Qualquer visitante pode enviar um currículo (sem necessidade de login)
+        allow create: if true;
+        // Apenas o dono ou admin pode deletar
+        allow delete: if isOwner(userId) || isAdmin();
+        allow update: if isAdmin();
+      }
+
+      // ======================================================================
+      // LEADS /{leadId}  (leads capturados de visitantes)
+      // ======================================================================
+      match /leads/{leadId} {
+        // O dono do perfil pode listar os leads recebidos
+        allow read: if isOwner(userId) || isAdmin();
+        // Qualquer visitante pode enviar um lead (sem necessidade de login)
         allow create: if true;
         // Apenas o dono ou admin pode deletar
         allow delete: if isOwner(userId) || isAdmin();

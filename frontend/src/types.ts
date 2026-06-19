@@ -111,6 +111,7 @@ export interface UserProfile {
   coverOverlay?: number;
   theme: UserTheme;
   email?: string;
+  phone?: string;
   role?: 'user' | 'admin';
   banned?: boolean;
   followersCount?: number;
@@ -121,6 +122,15 @@ export interface UserProfile {
   customDomain?: string;
   createdAt: any;
   updatedAt: any;
+}
+
+export interface Lead {
+  id: string;
+  visitorName: string;
+  visitorPhone: string;
+  profileOwnerId: string;
+  profileOwnerUsername: string;
+  createdAt: any;
 }
 
 export const ADMIN_EMAIL = 'brisasofc@gmail.com';

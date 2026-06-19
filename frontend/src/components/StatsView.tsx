@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { LinkItem, ClickLog, ViewLog } from '../types';
+import React, { useMemo, useState } from 'react';
+import { LinkItem, ClickLog, ViewLog, Lead } from '../types';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -20,16 +20,25 @@ import {
   Laptop,
   Activity,
   Languages,
-  ExternalLink
+  ExternalLink,
+  MessageSquare,
+  Send,
+  Edit3,
+  Phone,
+  User,
+  Sparkles
 } from 'lucide-react';
 
 interface StatsViewProps {
   links: LinkItem[];
   clicks: ClickLog[];
   views?: ViewLog[];
+  leads?: Lead[];
 }
 
-export default function StatsView({ links, clicks, views = [] }: StatsViewProps) {
+export default function StatsView({ links, clicks, views = [], leads = [] }: StatsViewProps) {
+  const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
+  const [editMessage, setEditMessage] = useState('');
   // Aggregate clicks by individual link
   const clickCountMap = useMemo(() => {
     const map: Record<string, number> = {};
@@ -927,6 +936,130 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
           </div>
         )}
       </div>
+
+      {/* LEADS SECTION */}
+      {leads.length > 0 && (
+        <div className="w-full bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 p-6 space-y-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white">Leads Capturados</h3>
+                <p className="text-[10px] text-zinc-400">{leads.length} visitante{leads.length !== 1 ? 's' : ''} autorizou{leads.length !== 1 ? 'ram' : ''} o compartilhamento</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="text-zinc-500 text-[10px] uppercase tracking-wider border-b border-white/5">
+                  <th className="pb-3 pr-3 font-semibold">Nome</th>
+                  <th className="pb-3 pr-3 font-semibold">Telefone</th>
+                  <th className="pb-3 pr-3 font-semibold">Data</th>
+                  <th className="pb-3 font-semibold text-right">Ação</th>
+                </tr>
+              </thead>
+              <tbody>
+                {leads.map((lead) => {
+                  const ts = lead.createdAt?.toDate ? lead.createdAt.toDate() : new Date();
+                  const formattedDate = ts.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                  const formattedTime = ts.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+                  const defaultMessage = `Olá ${lead.visitorName}! Tudo bem? 👋\n\nVi que você visitou meu perfil no LinkFlowAI e autorizou o compartilhamento de dados. Gostaria de saber se posso ajudar com mais informações sobre meus serviços!\n\nAgradeço o contato!`;
+
+                  const handleWhatsApp = () => {
+                    const phone = lead.visitorPhone.replace(/\D/g, '');
+                    const msg = editingLeadId === lead.id ? editMessage : defaultMessage;
+                    const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+                    window.open(url, '_blank');
+                  };
+
+                  return (
+                    <tr key={lead.id} className="border-b border-white/5">
+                      <td className="py-3 pr-3">
+                        <div className="flex items-center gap-2">
+                          <User className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+                          <span className="text-zinc-200 font-medium">{lead.visitorName}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 pr-3">
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+                          <span className="text-zinc-300">{lead.visitorPhone}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 pr-3">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+                          <span className="text-zinc-400 text-[10px]">{formattedDate} às {formattedTime}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (editingLeadId === lead.id) {
+                                setEditingLeadId(null);
+                              } else {
+                                setEditingLeadId(lead.id);
+                                setEditMessage(defaultMessage);
+                              }
+                            }}
+                            className="p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 text-zinc-400 hover:text-zinc-200 transition-all cursor-pointer"
+                            title="Editar mensagem"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleWhatsApp}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 hover:text-emerald-300 font-bold text-[10px] transition-all cursor-pointer"
+                            title="Enviar WhatsApp"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" />
+                            WhatsApp
+                          </button>
+                        </div>
+                        {editingLeadId === lead.id && (
+                          <div className="mt-2 text-left">
+                            <textarea
+                              value={editMessage}
+                              onChange={(e) => setEditMessage(e.target.value)}
+                              rows={4}
+                              className="w-full bg-zinc-900 text-[11px] text-zinc-200 p-3 rounded-xl border border-zinc-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 transition-all outline-none resize-none"
+                            />
+                            <div className="flex justify-end mt-1.5 gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setEditingLeadId(null)}
+                                className="px-3 py-1.5 text-[10px] text-zinc-400 hover:text-zinc-200 rounded-lg hover:bg-zinc-800 transition-all cursor-pointer"
+                              >
+                                Cancelar
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleWhatsApp}
+                                className="flex items-center gap-1 px-3 py-1.5 text-[10px] bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-all cursor-pointer"
+                              >
+                                <Send className="w-3 h-3" />
+                                Enviar
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
     </div>
   );

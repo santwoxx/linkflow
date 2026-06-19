@@ -128,6 +128,13 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
   const [isSendingResume, setIsSendingResume] = useState(false);
   const [resumeSent, setResumeSent] = useState(false);
 
+  // Lead Capture State
+  const [showLeadCapture, setShowLeadCapture] = useState(false);
+  const [leadName, setLeadName] = useState('');
+  const [leadPhone, setLeadPhone] = useState('');
+  const [isSendingLead, setIsSendingLead] = useState(false);
+  const [leadSent, setLeadSent] = useState(false);
+
   const handleOpenBooking = (svc: any, whatsappUrl: string) => {
     setSelectedService(svc);
     // Extract phone number from link.url or fallback to profile whatsapp or default
@@ -447,6 +454,50 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
     recordPageView();
   }, [profile.uid, previewMode]);
 
+  // Lead Capture: show modal for visitors (not the profile owner)
+  useEffect(() => {
+    if (previewMode) return;
+    if (sessionProfile && sessionProfile.uid === profile.uid) return;
+
+    const leadKey = `lf_lead_${profile.uid}`;
+    const alreadyCaptured = localStorage.getItem(leadKey);
+    if (alreadyCaptured) return;
+
+    // Delay showing the modal so the page loads first
+    const timer = setTimeout(() => {
+      setShowLeadCapture(true);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [profile.uid, previewMode, sessionProfile]);
+
+  const handleSubmitLead = async () => {
+    if (!leadName.trim() || !leadPhone.trim()) return;
+
+    setIsSendingLead(true);
+    try {
+      if (profile.uid && profile.uid !== 'demo-user-123') {
+        const leadsRef = collection(db, 'users', profile.uid, 'leads');
+        await addDoc(leadsRef, {
+          visitorName: leadName.trim(),
+          visitorPhone: leadPhone.trim(),
+          profileOwnerId: profile.uid,
+          profileOwnerUsername: profile.username,
+          createdAt: serverTimestamp(),
+        });
+      }
+      localStorage.setItem(`lf_lead_${profile.uid}`, 'captured');
+      setLeadSent(true);
+      setTimeout(() => {
+        setShowLeadCapture(false);
+        setLeadSent(false);
+      }, 2000);
+    } catch (err) {
+      console.error('Erro ao salvar lead:', err);
+    } finally {
+      setIsSendingLead(false);
+    }
+  };
 
   // Extract styling rules from config
   const theme = profile.theme;
@@ -1590,6 +1641,97 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
           </a>
         )}
       </div>
+      {/* Lead Capture Modal */}
+      {showLeadCapture && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white text-zinc-800 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-purple-100 flex flex-col animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="relative bg-gradient-to-r from-purple-50 to-violet-50 px-6 py-5 border-b border-purple-100">
+              <h3 className="text-base font-extrabold text-zinc-900 flex items-center gap-2 font-sans">
+                <Sparkles className="w-5 h-5 text-purple-500" />
+                {leadSent ? 'Obrigado!' : 'Receba Atualizações Completas'}
+              </h3>
+              <p className="text-xs text-zinc-500 mt-0.5">
+                {leadSent ? 'Seus dados foram enviados com sucesso!' : 'Autorize o compartilhamento de dados para receber novidades e ofertas exclusivas.'}
+              </p>
+              <button
+                onClick={() => setShowLeadCapture(false)}
+                className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-black/5 text-zinc-400 hover:text-zinc-600 transition-all cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {leadSent ? (
+              <div className="p-10 text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto">
+                  <Check className="w-8 h-8 text-emerald-600" />
+                </div>
+                <p className="text-sm text-zinc-600">Seus dados foram compartilhados com <strong>{profile.displayName}</strong>. Entraremos em contato em breve!</p>
+                <button
+                  onClick={() => { setShowLeadCapture(false); setLeadSent(false); }}
+                  className="px-6 py-2.5 text-xs bg-zinc-200 hover:bg-zinc-300 text-zinc-700 font-bold rounded-xl transition-all cursor-pointer"
+                >
+                  Fechar
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="p-6 space-y-4 overflow-y-auto max-h-[60vh] text-left">
+                  <div>
+                    <label className="block text-[10px] text-zinc-500 font-bold uppercase tracking-wide mb-1">Seu Nome *</label>
+                    <input
+                      type="text"
+                      required
+                      value={leadName}
+                      onChange={(e) => setLeadName(e.target.value)}
+                      placeholder="Digite seu nome completo"
+                      className="w-full bg-zinc-50 text-xs text-zinc-800 py-3 px-4 rounded-xl border border-zinc-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-zinc-500 font-bold uppercase tracking-wide mb-1">Seu Número de Telefone *</label>
+                    <input
+                      type="tel"
+                      required
+                      value={leadPhone}
+                      onChange={(e) => setLeadPhone(e.target.value)}
+                      placeholder="Ex: (11) 99999-9999"
+                      className="w-full bg-zinc-50 text-xs text-zinc-800 py-3 px-4 rounded-xl border border-zinc-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none"
+                    />
+                  </div>
+                  <p className="text-[10px] text-zinc-400 leading-relaxed">
+                    Ao autorizar, você permite que <strong>{profile.displayName}</strong> entre em contato com você futuramente sobre novidades, ofertas e atualizações.
+                  </p>
+                </div>
+
+                <div className="bg-zinc-50 px-6 py-4 border-t border-zinc-150 flex gap-2 justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setShowLeadCapture(false)}
+                    className="px-4 py-2.5 text-xs text-zinc-500 rounded-xl hover:bg-zinc-200 font-bold transition-all cursor-pointer"
+                  >
+                    Agora não
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSubmitLead}
+                    disabled={isSendingLead || !leadName.trim() || !leadPhone.trim()}
+                    className="px-5 py-2.5 text-xs bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white font-extrabold rounded-xl transition-all shadow-md shadow-purple-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer"
+                  >
+                    {isSendingLead ? (
+                      <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Enviando...</>
+                    ) : (
+                      <><Sparkles className="w-3.5 h-3.5" /> Autorizar Compartilhamento</>
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Resume Modal */}
       {isResumeModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">

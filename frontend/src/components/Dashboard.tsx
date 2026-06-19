@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserProfile, LinkItem, ClickLog, ViewLog } from '../types';
+import { UserProfile, LinkItem, ClickLog, ViewLog, Lead } from '../types';
 import { db, OperationType, handleFirestoreError, logoutUser } from '../firebase';
 import { collection, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, onSnapshot, query, orderBy, getDocs, where, limit } from 'firebase/firestore';
 import LinkEditor from './LinkEditor';
@@ -25,6 +25,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
   const [links, setLinks] = useState<LinkItem[]>([]);
   const [clicks, setClicks] = useState<ClickLog[]>([]);
   const [views, setViews] = useState<ViewLog[]>([]);
+  const [leads, setLeads] = useState<Lead[]>([]);
   // Per-link in-progress edit overrides from LinkEditor; merged into links
   // only for the live preview, never persisted until "Aplicar" is clicked.
   const [linkPreviewOverrides, setLinkPreviewOverrides] = useState<Record<string, Partial<LinkItem>>>({});
@@ -433,6 +434,39 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
         console.warn(`Firestore views listener está operando em modo offline.`);
       } else {
         handleFirestoreError(error, OperationType.LIST, viewsPath);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [userProfile.uid]);
+
+  // Leads listener
+  useEffect(() => {
+    if (userProfile.uid === 'demo-user-123') return;
+
+    const qL = query(collection(db, 'users', userProfile.uid, 'leads'), orderBy('createdAt', 'desc'));
+
+    const unsubscribe = onSnapshot(qL, { includeMetadataChanges: true }, (snapshot) => {
+      const logs: Lead[] = [];
+      snapshot.forEach((d) => {
+        const data = d.data();
+        logs.push({
+          id: d.id,
+          visitorName: data.visitorName || '',
+          visitorPhone: data.visitorPhone || '',
+          profileOwnerId: data.profileOwnerId || '',
+          profileOwnerUsername: data.profileOwnerUsername || '',
+          createdAt: data.createdAt,
+        });
+      });
+      setLeads(logs);
+    }, (error) => {
+      const errMsg = error?.message || String(error);
+      const isOfflineMsg = errMsg.toLowerCase().includes('offline') || errMsg.toLowerCase().includes('network');
+      if (isOfflineMsg) {
+        console.warn('Firestore leads listener em modo offline.');
+      } else {
+        handleFirestoreError(error, OperationType.LIST, `users/${userProfile.uid}/leads`);
       }
     });
 
@@ -1168,7 +1202,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                   </a>
                 </div>
               </div>
-              <StatsView links={links} clicks={clicks} views={views} />
+              <StatsView links={links} clicks={clicks} views={views} leads={leads} />
             </div>
           )}
 

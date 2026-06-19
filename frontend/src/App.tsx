@@ -27,6 +27,8 @@ export default function App() {
   const [usernameError, setUsernameError] = useState('');
   const [registering, setRegistering] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [registrationName, setRegistrationName] = useState('');
+  const [registrationPhone, setRegistrationPhone] = useState('');
 
   // Real-time (debounced) check for username availability against Firestore database
   useEffect(() => {
@@ -1169,10 +1171,13 @@ export default function App() {
 
       const isAdminEmail = currentUser.email === ADMIN_EMAIL;
 
+      const finalDisplayName = registrationName.trim() || currentUser.displayName || cleanedUsername;
+
       const newUserProfile: UserProfile = {
         uid: currentUser.uid,
         username: cleanedUsername,
-        displayName: currentUser.displayName || cleanedUsername,
+        displayName: finalDisplayName,
+        phone: registrationPhone.trim() || '',
           bio: isOfflineMode 
             ? 'Nota: Perfil criado em modo offline/local temporário.'
             : 'Olá! Confira meus links e serviços. Entre em contato pelo WhatsApp para orçamentos!',
@@ -1483,6 +1488,28 @@ export default function App() {
 
           <form onSubmit={handleRegisterProfile} className="space-y-4">
             <div>
+              <label className="block text-xs text-slate-400 font-semibold mb-1.5">Seu Nome</label>
+              <input
+                type="text"
+                placeholder="Seu nome completo"
+                value={registrationName}
+                onChange={(e) => setRegistrationName(e.target.value)}
+                required
+                className="w-full bg-black text-xs font-mono py-3.5 px-4 rounded-xl border border-slate-800 text-slate-200 focus:border-[#a78bfa] focus:outline-none transition-all placeholder-slate-700"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-slate-400 font-semibold mb-1.5">Seu WhatsApp / Telefone</label>
+              <input
+                type="tel"
+                placeholder="Ex: (11) 99999-9999"
+                value={registrationPhone}
+                onChange={(e) => setRegistrationPhone(e.target.value)}
+                required
+                className="w-full bg-black text-xs font-mono py-3.5 px-4 rounded-xl border border-slate-800 text-slate-200 focus:border-[#a78bfa] focus:outline-none transition-all placeholder-slate-700"
+              />
+            </div>
+            <div>
               <label className="block text-xs text-slate-400 font-semibold mb-1.5">Nome de Usuário (Slug URL)</label>
               <div className="relative flex items-center">
                 <span className="absolute left-3.5 text-xs text-slate-500 font-mono select-none">linkflowai.com.br/</span>
@@ -1552,7 +1579,7 @@ export default function App() {
             <button
               id="reserve-slug-btn"
               type="submit"
-              disabled={registering || usernameCheckLoading || usernameAvailable !== true || !chosenUsername.trim()}
+              disabled={registering || usernameCheckLoading || usernameAvailable !== true || !chosenUsername.trim() || !registrationName.trim() || !registrationPhone.trim()}
               className="w-full py-3.5 bg-[#a78bfa] hover:bg-[#c4b5fd] disabled:bg-slate-800 disabled:text-slate-500 disabled:shadow-none font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 tracking-wide font-sans cursor-pointer transition-all shadow-lg shadow-[#a78bfa]/20 hover:shadow-[#a78bfa]/30"
             >
               {registering ? (
