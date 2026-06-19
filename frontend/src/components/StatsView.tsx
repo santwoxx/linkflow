@@ -52,6 +52,21 @@ export default function StatsView({ links, clicks, views = [], leads = [], resum
   const [editMessage, setEditMessage] = useState('');
   const [period, setPeriod] = useState<'7d' | '30d' | '90d' | 'all'>('7d');
 
+  // Custom WhatsApp message template (persisted to localStorage)
+  const LS_KEY = 'linkflow_lead_msg_template';
+  const loadTemplate = (): string => {
+    try { return localStorage.getItem(LS_KEY) || ''; } catch { return ''; }
+  };
+  const [messageTemplate, setMessageTemplate] = useState(loadTemplate);
+  const [showTemplateEditor, setShowTemplateEditor] = useState(false);
+
+  React.useEffect(() => {
+    try {
+      if (messageTemplate) localStorage.setItem(LS_KEY, messageTemplate);
+      else localStorage.removeItem(LS_KEY);
+    } catch {}
+  }, [messageTemplate]);
+
   const getPeriodStart = () => {
     if (period === 'all') return new Date(0);
     const now = new Date();
@@ -1157,7 +1172,7 @@ export default function StatsView({ links, clicks, views = [], leads = [], resum
       )}
 
       {/* LEADS SECTION */}
-      {leads.length > 0 && (
+      {(leads.length > 0 || messageTemplate) && (
         <div className="w-full bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 p-6 space-y-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -1169,29 +1184,82 @@ export default function StatsView({ links, clicks, views = [], leads = [], resum
                 <p className="text-[10px] text-zinc-400">{leads.length} visitante{leads.length !== 1 ? 's' : ''} autorizou{leads.length !== 1 ? 'ram' : ''} o compartilhamento</p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                const csvRows = [['Nome', 'Telefone', 'Status', 'Data']];
-                leads.forEach(l => {
-                  const ts = l.createdAt?.toDate ? l.createdAt.toDate() : new Date();
-                  csvRows.push([l.visitorName, l.visitorPhone, l.status || 'new', ts.toLocaleDateString('pt-BR')]);
-                });
-                const csv = csvRows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
-                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `leads-linkflow-${new Date().toISOString().split('T')[0]}.csv`;
-                a.click();
-                URL.revokeObjectURL(url);
-              }}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 hover:text-indigo-300 font-bold text-[10px] transition-all cursor-pointer scale-on-click"
-            >
-              <Download className="w-3.5 h-3.5" />
-              Exportar CSV
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowTemplateEditor(!showTemplateEditor)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg font-bold text-[10px] transition-all cursor-pointer scale-on-click ${
+                  showTemplateEditor
+                    ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/20'
+                    : 'bg-zinc-800/50 hover:bg-zinc-700/50 text-zinc-400 hover:text-zinc-200'
+                }`}
+                title="Personalizar mensagem do WhatsApp"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                Mensagem
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const csvRows = [['Nome', 'Telefone', 'Status', 'Data']];
+                  leads.forEach(l => {
+                    const ts = l.createdAt?.toDate ? l.createdAt.toDate() : new Date();
+                    csvRows.push([l.visitorName, l.visitorPhone, l.status || 'new', ts.toLocaleDateString('pt-BR')]);
+                  });
+                  const csv = csvRows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+                  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `leads-linkflow-${new Date().toISOString().split('T')[0]}.csv`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 hover:text-indigo-300 font-bold text-[10px] transition-all cursor-pointer scale-on-click"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Exportar CSV
+              </button>
+            </div>
           </div>
+
+          {showTemplateEditor && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-zinc-900/60 border border-zinc-700/50 rounded-2xl p-5 space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                  Modelo de Mensagem WhatsApp
+                </h4>
+                <span className="text-[9px] text-zinc-600 font-mono">
+                  Use {'{nome}'} {'{telefone}'} como variáveis
+                </span>
+              </div>
+              <textarea
+                value={messageTemplate}
+                onChange={(e) => setMessageTemplate(e.target.value)}
+                placeholder="Olá {nome}! Vi que você visitou meu perfil...&#10;&#10;Pode me ajudar com mais informações?"
+                rows={4}
+                className="w-full bg-black/40 text-[11px] text-zinc-200 p-3 rounded-xl border border-zinc-700 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all outline-none resize-none placeholder-zinc-600"
+              />
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] text-zinc-600">
+                  {messageTemplate
+                    ? '✓ Mensagem personalizada salva automaticamente'
+                    : 'Deixe vazio para usar a mensagem padrão'}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { setMessageTemplate(''); setShowTemplateEditor(false); }}
+                  className="text-[10px] text-rose-400 hover:text-rose-300 px-2 py-1 rounded-lg hover:bg-rose-500/10 transition-all cursor-pointer scale-on-click"
+                >
+                  Restaurar padrão
+                </button>
+              </div>
+            </motion.div>
+          )}
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
@@ -1210,11 +1278,18 @@ export default function StatsView({ links, clicks, views = [], leads = [], resum
                   const formattedDate = ts.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
                   const formattedTime = ts.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-                  const defaultMessage = `Olá ${lead.visitorName}! Tudo bem? 👋\n\nVi que você visitou meu perfil no LinkFlowAI e autorizou o compartilhamento de dados. Gostaria de saber se posso ajudar com mais informações sobre meus serviços!\n\nAgradeço o contato!`;
+                  const composeMessage = (lead: Lead) => {
+                    if (messageTemplate) {
+                      return messageTemplate
+                        .replace(/\{nome\}/g, lead.visitorName)
+                        .replace(/\{telefone\}/g, lead.visitorPhone);
+                    }
+                    return `Olá ${lead.visitorName}! Tudo bem? 👋\n\nVi que você visitou meu perfil no LinkFlowAI e autorizou o compartilhamento de dados. Gostaria de saber se posso ajudar com mais informações sobre meus serviços!\n\nAgradeço o contato!`;
+                  };
 
                   const handleWhatsApp = () => {
                     const phone = lead.visitorPhone.replace(/\D/g, '');
-                    const msg = editingLeadId === lead.id ? editMessage : defaultMessage;
+                    const msg = editingLeadId === lead.id ? editMessage : composeMessage(lead);
                     const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
                     window.open(url, '_blank');
                   };
@@ -1300,7 +1375,7 @@ export default function StatsView({ links, clicks, views = [], leads = [], resum
                                 setEditingLeadId(null);
                               } else {
                                 setEditingLeadId(lead.id);
-                                setEditMessage(defaultMessage);
+                                setEditMessage(composeMessage(lead));
                               }
                             }}
                             className="p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 text-zinc-400 hover:text-zinc-200 transition-all cursor-pointer scale-on-click"
