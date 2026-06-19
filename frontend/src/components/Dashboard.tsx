@@ -10,6 +10,8 @@ import CommunityFeed from './CommunityFeed';
 import DiscoverProfiles from './DiscoverProfiles';
 const AdminPanel = React.lazy(() => import('./AdminPanel'));
 const ProfessionalDashboard = React.lazy(() => import('./ProfessionalDashboard'));
+import { motion } from 'motion/react';
+import LoadingSpinner from './LoadingSpinner';
 import { Link2, Sparkles, User, LogOut, Check, Copy, ExternalLink, RefreshCw, MessageSquare, Compass, ImageIcon, Crown, Layout, Smartphone, BarChart4, Briefcase, Upload, AtSign, X } from 'lucide-react';
 import { ADMIN_EMAIL } from '../types';
 import { compressImage } from '../utils/image';
@@ -930,7 +932,13 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
   }
 
   return (
-    <div id="full-dashboard-panel" className="min-h-screen bg-[#050b18] text-slate-100 flex selection:bg-[#a78bfa]/30">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      id="full-dashboard-panel"
+      className="min-h-screen bg-[#050b18] text-slate-100 flex selection:bg-[#a78bfa]/30"
+    >
       {/* PREMIUM SAAS LEFT SIDEBAR */}
       <aside className="hidden md:flex w-[80px] xl:w-[260px] border-r border-slate-800/40 bg-[#0f172a]/80 backdrop-blur-2xl flex-col items-center xl:items-start py-6 px-3 xl:px-5 gap-2 shrink-0 h-screen sticky top-0 overflow-y-auto shadow-2xl z-40">
         {/* Logo */}
@@ -1168,7 +1176,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
               </div>
               <React.Suspense fallback={
                 <div className="flex items-center justify-center py-16">
-                  <RefreshCw className="w-6 h-6 text-[#a78bfa] animate-spin" aria-hidden="true" />
+                  <LoadingSpinner size="sm" message="Carregando..." />
                 </div>
               }>
                 <ProfessionalDashboard userProfile={userProfile} onProfileUpdate={onProfileUpdate} />
@@ -1181,7 +1189,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
             <div id="tab-content-admin" className="pb-10">
               <React.Suspense fallback={
                 <div className="flex items-center justify-center py-16">
-                  <RefreshCw className="w-6 h-6 text-[#a78bfa] animate-spin" aria-hidden="true" />
+                  <LoadingSpinner size="sm" message="Carregando..." />
                 </div>
               }>
                 <AdminPanel />
@@ -1728,6 +1736,6 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
           {saveToast.message}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

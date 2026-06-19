@@ -7,6 +7,7 @@ import { ExternalLink, Copy, Check, Sparkles, MessageSquare, Link as LinkIcon, L
 import CommunityFeed from './CommunityFeed';
 import { isFollowing, followUser, unfollowUser } from '../utils/follow';
 import GoToNatanDevButton from './GoToNatanDevButton';
+import { motion } from 'motion/react';
 
 const TiktokIcon = ({ className }: { className?: string }) => (
   <svg
@@ -871,7 +872,10 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
   };
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
       id="public-profile-screen"
       style={getContainerStyle()}
       className={`${previewMode ? 'min-h-0' : 'min-h-[100dvh]'} w-full flex flex-col justify-between items-center py-8 px-4 sm:py-10 sm:px-5 md:py-12 md:px-6 relative transition-all duration-500 ${fontClass} ${letterSpacingClass} ${textAlignClass} ${
@@ -917,7 +921,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
               id="share-profile-btn"
               onClick={handleCopyLink}
               type="button"
-              className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/80 hover:bg-zinc-800/80 text-zinc-300 hover:text-zinc-100 p-2.5 rounded-full transition-all flex items-center justify-center cursor-pointer"
+              className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/80 hover:bg-zinc-800/80 text-zinc-300 hover:text-zinc-100 p-2.5 rounded-full transition-all flex items-center justify-center cursor-pointer scale-on-click"
               title="Copiar link para divulgar"
             >
               {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
@@ -1057,7 +1061,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
               <button
                 onClick={handleToggleFollow}
                 disabled={followLoading}
-                className={`flex items-center gap-1.5 py-2 px-4 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 py-2 px-4 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer scale-on-click ${
                   followingState
                     ? 'bg-white/10 text-white border border-white/20 hover:bg-white/15'
                     : 'bg-[#a78bfa] text-white hover:bg-[#c4b5fd] shadow-md shadow-[#a78bfa]/20'
@@ -1078,7 +1082,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
           <button
             type="button"
             onClick={() => setProfileTab('links')}
-            className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer scale-on-click ${
               profileTab === 'links'
                 ? 'bg-white/10 text-white shadow-sm ring-1 ring-white/10'
                 : 'text-white/50 hover:text-white/80'
@@ -1092,7 +1096,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
             <button
               type="button"
               onClick={() => setProfileTab('services')}
-              className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer scale-on-click ${
                 profileTab === 'services'
                   ? 'bg-white/10 text-white shadow-sm ring-1 ring-white/10'
                   : 'text-white/50 hover:text-white/80'
@@ -1106,7 +1110,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
           <button
             type="button"
             onClick={() => setProfileTab('social')}
-            className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer scale-on-click ${
               profileTab === 'social'
                 ? 'bg-white/10 text-white shadow-sm ring-1 ring-white/10'
                 : 'text-white/50 hover:text-white/80'
@@ -1126,7 +1130,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
               </div>
             ) : (
               <>
-              {activeLinks.map((link) => {
+              {activeLinks.map((link, index) => {
                 const animClass = link.animation === 'pulse' ? ' anim-pulse' :
                                   link.animation === 'wobble' ? ' anim-wobble' :
                                   link.animation === 'bounce' ? ' anim-bounce' :
@@ -1139,16 +1143,22 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                 // Promo Banner
                 if (link.type === 'promo_banner') {
                   return (
-                    <a
+                    <motion.div
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05, duration: 0.3 }}
                       key={link.id}
-                      href={link.url || '#'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => handleRegisterClick(link)}
-                      className={`w-full max-w-md rounded-2xl overflow-hidden block shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all border border-white/10 ${animClass}`}
                     >
-                      <img src={link.imageUrl} alt={link.title} className="w-full h-auto object-cover" />
-                    </a>
+                      <a
+                        href={link.url || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => handleRegisterClick(link)}
+                        className={`w-full max-w-md rounded-2xl overflow-hidden block shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all border border-white/10 ${animClass}`}
+                      >
+                        <img src={link.imageUrl} alt={link.title} className="w-full h-auto object-cover" />
+                      </a>
+                    </motion.div>
                   );
                 }
 
@@ -1157,7 +1167,13 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                   const products = link.content || [];
                   if (products.length === 0) return null;
                   return (
-                    <div key={link.id} className="w-full max-w-md space-y-3 relative">
+                    <motion.div
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05, duration: 0.3 }}
+                      key={link.id}
+                      className="w-full max-w-md space-y-3 relative"
+                    >
                       <h3 className="text-sm font-bold text-center uppercase tracking-widest">{link.title}</h3>
                       <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 w-[calc(100%+2rem)] sm:-mx-6 sm:px-6 sm:w-[calc(100%+3rem)] scroll-px-4 sm:scroll-px-6">
                         {products.map((prod: any, idx: number) => (
@@ -1181,7 +1197,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                           </a>
                         ))}
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 }
 
@@ -1190,7 +1206,13 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                   const images = link.content || [];
                   if (images.length === 0) return null;
                   return (
-                    <div key={link.id} className="w-full max-w-md space-y-3">
+                    <motion.div
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05, duration: 0.3 }}
+                      key={link.id}
+                      className="w-full max-w-md space-y-3"
+                    >
                       <h3 className="text-sm font-bold text-center uppercase tracking-widest">{link.title}</h3>
                       <div className="grid grid-cols-2 gap-2">
                         {images.map((imgUrl: string, idx: number) => (
@@ -1199,7 +1221,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                           </div>
                         ))}
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 }
 
@@ -1208,7 +1230,13 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                   const services = link.content || [];
                   if (services.length === 0) return null;
                   return (
-                    <div key={link.id} className="w-full max-w-md space-y-3">
+                    <motion.div
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05, duration: 0.3 }}
+                      key={link.id}
+                      className="w-full max-w-md space-y-3"
+                    >
                       <h3 className="text-sm font-bold text-center uppercase tracking-widest flex items-center justify-center gap-1.5">
                         <Briefcase className="w-4 h-4 text-emerald-400" /> {link.title}
                       </h3>
@@ -1269,7 +1297,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                         <ShieldCheck className="w-3 h-3" />
                         Transação direta entre você e o profissional
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 }
 
@@ -1278,7 +1306,13 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                   const tests = link.content || [];
                   if (tests.length === 0) return null;
                   return (
-                    <div key={link.id} className="w-full max-w-md space-y-3 relative">
+                    <motion.div
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05, duration: 0.3 }}
+                      key={link.id}
+                      className="w-full max-w-md space-y-3 relative"
+                    >
                       <h3 className="text-sm font-bold text-center uppercase tracking-widest flex items-center justify-center gap-1.5"><Sparkles className="w-4 h-4 text-amber-400"/> {link.title}</h3>
                       <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 w-[calc(100%+2rem)] sm:-mx-6 sm:px-6 sm:w-[calc(100%+3rem)] scroll-px-4 sm:scroll-px-6">
                         {tests.map((t: any, idx: number) => (
@@ -1298,17 +1332,23 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                           </div>
                         ))}
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 }
 
                 // Send Resume Block (Enviar Currículo)
                 if (link.type === 'send_resume') {
                   return (
-                    <div key={link.id} className="w-full max-w-md">
+                    <motion.div
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05, duration: 0.3 }}
+                      key={link.id}
+                      className="w-full max-w-md"
+                    >
                       <button
                         onClick={() => handleOpenResumeModal(link)}
-                        className={`${btnStyle.className} relative flex items-center justify-between group overflow-visible`}
+                        className={`${btnStyle.className} relative flex items-center justify-between group overflow-visible card-lift glow-border`}
                         style={btnStyle.style}
                       >
                         <span className="w-4"></span>
@@ -1329,7 +1369,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                           <ExternalLink className="w-4 h-4 shrink-0" />
                         </span>
                       </button>
-                    </div>
+                    </motion.div>
                   );
                 }
 
@@ -1338,7 +1378,13 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                   const services = link.content || [];
                   if (services.length === 0) return null;
                   return (
-                    <div key={link.id} className="w-full max-w-md space-y-3 relative text-left">
+                    <motion.div
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05, duration: 0.3 }}
+                      key={link.id}
+                      className="w-full max-w-md space-y-3 relative text-left"
+                    >
                       <h3 className="text-sm font-bold text-center uppercase tracking-widest flex items-center justify-center gap-1.5 font-sans" style={{ color: titleColor }}>
                         <Calendar className="w-4 h-4 text-pink-400" /> {link.title}
                       </h3>
@@ -1358,7 +1404,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                               </div>
                               <button
                                 onClick={() => handleOpenBooking(svc, link.url)}
-                                className="shrink-0 py-2 px-4 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-400 hover:to-rose-400 text-white text-[11px] font-bold rounded-xl flex items-center justify-center gap-1 transition-all cursor-pointer shadow-md shadow-pink-500/15 hover:scale-105 active:scale-95"
+                                className="shrink-0 py-2 px-4 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-400 hover:to-rose-400 text-white text-[11px] font-bold rounded-xl flex items-center justify-center gap-1 transition-all cursor-pointer shadow-md shadow-pink-500/15 hover:scale-105 active:scale-95 scale-on-click"
                               >
                                 Agendar
                               </button>
@@ -1366,7 +1412,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                           </div>
                         ))}
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 }
 
@@ -1462,14 +1508,19 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                 ) : null;
 
                 return (
-                  <a
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05, duration: 0.3 }}
                     key={link.id}
+                  >
+                  <a
                     id={`link-node-${link.id}`}
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => handleRegisterClick(link)}
-                    className={`${btnStyle.className}${animClass} relative flex items-center justify-between group overflow-visible ${customStyleClasses.join(' ')}`}
+                    className={`${btnStyle.className}${animClass} relative flex items-center justify-between group overflow-visible ${customStyleClasses.join(' ')} card-lift glow-border`}
                     style={specializedBtnStyle}
                   >
                     {link.badgeText && (
@@ -1501,6 +1552,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                       <ExternalLink className="w-4 h-4 shrink-0" />
                     </span>
                   </a>
+                  </motion.div>
                 );
               })}
               </>
@@ -1656,7 +1708,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
               </p>
               <button
                 onClick={() => setShowLeadCapture(false)}
-                className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-black/5 text-zinc-400 hover:text-zinc-600 transition-all cursor-pointer"
+                className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-black/5 text-zinc-400 hover:text-zinc-600 transition-all cursor-pointer scale-on-click"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1670,7 +1722,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                 <p className="text-sm text-zinc-600">Seus dados foram compartilhados com <strong>{profile.displayName}</strong>. Entraremos em contato em breve!</p>
                 <button
                   onClick={() => { setShowLeadCapture(false); setLeadSent(false); }}
-                  className="px-6 py-2.5 text-xs bg-zinc-200 hover:bg-zinc-300 text-zinc-700 font-bold rounded-xl transition-all cursor-pointer"
+                  className="px-6 py-2.5 text-xs bg-zinc-200 hover:bg-zinc-300 text-zinc-700 font-bold rounded-xl transition-all cursor-pointer scale-on-click"
                 >
                   Fechar
                 </button>
@@ -1709,7 +1761,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                   <button
                     type="button"
                     onClick={() => setShowLeadCapture(false)}
-                    className="px-4 py-2.5 text-xs text-zinc-500 rounded-xl hover:bg-zinc-200 font-bold transition-all cursor-pointer"
+                    className="px-4 py-2.5 text-xs text-zinc-500 rounded-xl hover:bg-zinc-200 font-bold transition-all cursor-pointer scale-on-click"
                   >
                     Agora não
                   </button>
@@ -1717,7 +1769,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                     type="button"
                     onClick={handleSubmitLead}
                     disabled={isSendingLead || !leadName.trim() || !leadPhone.trim()}
-                    className="px-5 py-2.5 text-xs bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white font-extrabold rounded-xl transition-all shadow-md shadow-purple-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer"
+                    className="px-5 py-2.5 text-xs bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white font-extrabold rounded-xl transition-all shadow-md shadow-purple-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer scale-on-click"
                   >
                     {isSendingLead ? (
                       <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Enviando...</>
@@ -1747,7 +1799,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
               </p>
               <button
                 onClick={() => setIsResumeModalOpen(false)}
-                className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-black/5 text-zinc-400 hover:text-zinc-600 transition-all cursor-pointer"
+                className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-black/5 text-zinc-400 hover:text-zinc-600 transition-all cursor-pointer scale-on-click"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1761,7 +1813,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                 <p className="text-sm text-zinc-600">Seu currículo foi enviado. Entraremos em contato em breve!</p>
                 <button
                   onClick={() => setIsResumeModalOpen(false)}
-                  className="px-6 py-2.5 text-xs bg-zinc-200 hover:bg-zinc-300 text-zinc-700 font-bold rounded-xl transition-all cursor-pointer"
+                  className="px-6 py-2.5 text-xs bg-zinc-200 hover:bg-zinc-300 text-zinc-700 font-bold rounded-xl transition-all cursor-pointer scale-on-click"
                 >
                   Fechar
                 </button>
@@ -1827,7 +1879,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                             e.stopPropagation();
                             setResumeFile(null);
                           }}
-                          className="p-1 rounded-full hover:bg-orange-200 text-orange-500 cursor-pointer"
+                          className="p-1 rounded-full hover:bg-orange-200 text-orange-500 cursor-pointer scale-on-click"
                         >
                           <X className="w-4 h-4" />
                         </button>
@@ -1846,7 +1898,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                   <button
                     type="button"
                     onClick={() => setIsResumeModalOpen(false)}
-                    className="px-4 py-2.5 text-xs text-zinc-500 rounded-xl hover:bg-zinc-200 font-bold transition-all cursor-pointer"
+                    className="px-4 py-2.5 text-xs text-zinc-500 rounded-xl hover:bg-zinc-200 font-bold transition-all cursor-pointer scale-on-click"
                   >
                     Cancelar
                   </button>
@@ -1854,7 +1906,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                     type="button"
                     onClick={handleSubmitResume}
                     disabled={isSendingResume || !resumeName.trim() || !resumeEmail.trim()}
-                    className="px-5 py-2.5 text-xs bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold rounded-xl transition-all shadow-md shadow-orange-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer"
+                    className="px-5 py-2.5 text-xs bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold rounded-xl transition-all shadow-md shadow-orange-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer scale-on-click"
                   >
                     {isSendingResume ? (
                       <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Enviando...</>
@@ -1882,7 +1934,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
               <p className="text-xs text-zinc-500 mt-0.5">Solicite o seu horário com praticidade</p>
               <button
                 onClick={() => setIsBookingOpen(false)}
-                className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-black/5 text-zinc-400 hover:text-zinc-600 transition-all cursor-pointer"
+                className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-black/5 text-zinc-400 hover:text-zinc-600 transition-all cursor-pointer scale-on-click"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1955,14 +2007,14 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
               <button
                 type="button"
                 onClick={() => setIsBookingOpen(false)}
-                className="px-4 py-2.5 text-xs text-zinc-500 rounded-xl hover:bg-zinc-200 font-bold transition-all cursor-pointer"
+                className="px-4 py-2.5 text-xs text-zinc-500 rounded-xl hover:bg-zinc-200 font-bold transition-all cursor-pointer scale-on-click"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleConfirmBooking}
-                className="px-5 py-2.5 text-xs bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-extrabold rounded-xl transition-all shadow-md shadow-pink-500/20 cursor-pointer"
+                className="px-5 py-2.5 text-xs bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-extrabold rounded-xl transition-all shadow-md shadow-pink-500/20 cursor-pointer scale-on-click"
               >
                 Confirmar no WhatsApp
               </button>
@@ -1970,6 +2022,6 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

@@ -105,13 +105,13 @@ function PostCarousel({ post, handleDoubleTap, heartBurstPostId }: PostCarouselP
       {images.length > 1 && (
         <>
           <button 
-            className={`absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white backdrop-blur-md opacity-0 group-hover/carousel:opacity-100 transition-opacity disabled:opacity-0 ${currentIndex === 0 ? 'hidden' : ''}`}
+            className={`absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white backdrop-blur-md opacity-0 group-hover/carousel:opacity-100 transition-opacity disabled:opacity-0 ${currentIndex === 0 ? 'hidden' : ''} scale-on-click`}
             onClick={(e) => { e.stopPropagation(); scrollTo(currentIndex - 1); }}
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button 
-            className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white backdrop-blur-md opacity-0 group-hover/carousel:opacity-100 transition-opacity disabled:opacity-0 ${currentIndex === images.length - 1 ? 'hidden' : ''}`}
+            className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white backdrop-blur-md opacity-0 group-hover/carousel:opacity-100 transition-opacity disabled:opacity-0 ${currentIndex === images.length - 1 ? 'hidden' : ''} scale-on-click`}
             onClick={(e) => { e.stopPropagation(); scrollTo(currentIndex + 1); }}
           >
             <ChevronRight className="w-5 h-5" />
@@ -627,7 +627,12 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
   };
 
   return (
-    <div className="w-full max-w-[620px] mx-auto space-y-4 md:space-y-6">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="w-full max-w-[620px] mx-auto space-y-4 md:space-y-6"
+    >
       
       {/* 1. PREMIUM POST WIDGET (LinkedIn Style) */}
       {!filterByUserId && (
@@ -647,7 +652,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
               )}
               <button
                 onClick={() => setIsSelectorOpen(true)}
-                className="flex-1 text-left bg-[#151515] hover:bg-[#1a1a1a] text-zinc-400 text-sm font-semibold py-3.5 px-5 rounded-full border border-white/5 transition-colors cursor-text"
+                className="flex-1 text-left bg-[#151515] hover:bg-[#1a1a1a] text-zinc-400 text-sm font-semibold py-3.5 px-5 rounded-full border border-white/5 transition-colors cursor-text scale-on-click"
               >
                 Começar uma publicação...
               </button>
@@ -680,7 +685,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                 <button
                   type="button"
                   onClick={() => setIsSelectorOpen(false)}
-                  className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-full transition-colors cursor-pointer"
+                  className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-full transition-colors cursor-pointer scale-on-click"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -704,7 +709,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                       <button
                         type="button"
                         onClick={() => setImageUrls(prev => prev.filter((_, i) => i !== idx))}
-                        className="absolute top-1 right-1 p-1 bg-black/70 hover:bg-black text-white rounded-full transition-colors cursor-pointer"
+                        className="absolute top-1 right-1 p-1 bg-black/70 hover:bg-black text-white rounded-full transition-colors cursor-pointer scale-on-click"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -752,7 +757,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                 <button
                   type="submit"
                   disabled={isPublishing || (!caption.trim() && imageUrls.length === 0)}
-                  className="py-2 px-5 rounded-full text-sm font-bold bg-[#a78bfa] hover:bg-[#9061f9] disabled:bg-zinc-800 disabled:text-zinc-500 text-white transition-all disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
+                  className="py-2 px-5 rounded-full text-sm font-bold bg-[#a78bfa] hover:bg-[#9061f9] disabled:bg-zinc-800 disabled:text-zinc-500 text-white transition-all disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer scale-on-click"
                 >
                   {isPublishing ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Publicar'}
                 </button>
@@ -774,14 +779,14 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
           <div className="flex bg-slate-900 border border-white/5 p-0.5 rounded-lg">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-1.5 rounded-md cursor-pointer transition-colors ${viewMode === 'grid' ? 'bg-[#151515] text-pink-500' : 'text-slate-450 hover:text-white'}`}
+              className={`p-1.5 rounded-md cursor-pointer transition-colors ${viewMode === 'grid' ? 'bg-[#151515] text-pink-500' : 'text-slate-450 hover:text-white'} scale-on-click`}
               title="Visualização em Grid (Instagram)"
             >
               <Grid className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-1.5 rounded-md cursor-pointer transition-colors ${viewMode === 'list' ? 'bg-[#151515] text-pink-500' : 'text-slate-450 hover:text-white'}`}
+              className={`p-1.5 rounded-md cursor-pointer transition-colors ${viewMode === 'list' ? 'bg-[#151515] text-pink-500' : 'text-slate-450 hover:text-white'} scale-on-click`}
               title="Visualização em Lista"
             >
               <List className="w-4 h-4" />
@@ -796,8 +801,12 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
 
       {loading ? (
         <div className="text-center py-16">
-          <RefreshCw className="w-8 h-8 text-pink-550 animate-spin mx-auto mb-2" />
-          <p className="text-sm font-semibold uppercase tracking-widest text-slate-450">Buscando do Banco...</p>
+          <motion.span
+            className="w-6 h-6 border-2 border-[#a78bfa]/30 border-t-[#a78bfa] rounded-full inline-block"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+          />
+          <p className="text-sm font-semibold uppercase tracking-widest text-slate-450 mt-3">Buscando do Banco...</p>
         </div>
       ) : posts.length === 0 ? (
         <div className="text-center py-12 rounded-2xl border border-dashed border-white/5 bg-[#0d1527]/20 p-6 animate-fadeIn">
@@ -841,15 +850,20 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
         
         /* 5. Standard Vertical Instagram Feed List */
         <div className="space-y-6">
-          {posts.map((post) => {
+          {posts.map((post, index) => {
             const isLikedByMe = post.likes?.includes(currentUserProfile.uid);
             const isMyPost = post.userId === currentUserProfile.uid;
             
             return (
-              <article 
-                key={post.id} 
-                className="bg-[#0a0a0a] backdrop-blur-xl rounded-2xl border border-white/5 overflow-hidden shadow-[0_4px_20px_rgb(0,0,0,0.4)] animate-fadeIn group/post relative"
+              <motion.div
+                key={post.id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.04 }}
               >
+                <article 
+                  className="card-lift glow-border bg-[#0a0a0a] backdrop-blur-xl rounded-2xl border border-white/5 overflow-hidden shadow-[0_4px_20px_rgb(0,0,0,0.4)] animate-fadeIn group/post relative"
+                >
                 {/* 5A. Post Header (LinkedIn Style) */}
                 <div className="px-4 py-3 flex items-start justify-between">
                   <div className="flex items-center gap-3">
@@ -883,20 +897,20 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                   {/* Actions dots/delete & Follow */}
                   <div className="flex items-center gap-2">
                     {(!isMyPost && !isAdmin) && (
-                      <button className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-[#a78bfa] hover:bg-[#a78bfa]/10 transition-colors cursor-pointer">
+                      <button className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-[#a78bfa] hover:bg-[#a78bfa]/10 transition-colors cursor-pointer scale-on-click">
                         <Plus className="w-3.5 h-3.5" /> Seguir
                       </button>
                     )}
                     {(isMyPost || isAdmin) && !previewMode && (
                       <button
                         onClick={() => handleDeletePost(post.id)}
-                        className="p-1.5 rounded-full text-zinc-500 hover:text-rose-400 hover:bg-white/5 transition-all cursor-pointer"
+                        className="p-1.5 rounded-full text-zinc-500 hover:text-rose-400 hover:bg-white/5 transition-all cursor-pointer scale-on-click"
                         title={isAdmin && !isMyPost ? "Remover (Admin)" : "Remover postagem"}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     )}
-                    <button className="p-1.5 text-zinc-500 hover:text-white rounded-full hover:bg-white/5 transition-all cursor-pointer" title="Opções">
+                    <button className="p-1.5 text-zinc-500 hover:text-white rounded-full hover:bg-white/5 transition-all cursor-pointer scale-on-click" title="Opções">
                       <MoreHorizontal className="w-4 h-4" />
                     </button>
                   </div>
@@ -930,7 +944,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                         isLikedByMe 
                           ? 'text-rose-500' 
                           : 'text-zinc-400 hover:text-white'
-                      }`}
+                      } scale-on-click`}
                       title={isLikedByMe ? "Descurtir" : "Curtir"}
                     >
                       <Heart className={`w-[26px] h-[26px] ${isLikedByMe ? 'fill-rose-500 animate-heartBeat' : 'stroke-[2]'}`} />
@@ -942,7 +956,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                       onClick={() => {
                         setActiveCommentsPostId(activeCommentsPostId === post.id ? null : post.id);
                       }}
-                      className="flex items-center gap-2 text-zinc-400 hover:text-white active:scale-95 transition-transform cursor-pointer"
+                      className="flex items-center gap-2 text-zinc-400 hover:text-white active:scale-95 transition-transform cursor-pointer scale-on-click"
                       title="Comentários"
                     >
                       <MessageSquare className="w-[24px] h-[24px] stroke-[2]" />
@@ -952,7 +966,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                     {/* Direct Sharing */}
                     <button
                       onClick={() => handleSharePost(post)}
-                      className="flex items-center gap-2 text-zinc-400 hover:text-white active:scale-95 transition-transform cursor-pointer relative"
+                      className="flex items-center gap-2 text-zinc-400 hover:text-white active:scale-95 transition-transform cursor-pointer relative scale-on-click"
                       title="Compartilhar"
                     >
                       <AnimatePresence>
@@ -974,7 +988,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                   {/* Bookmark */}
                   <button
                     onClick={() => handleBookmarkPost(post.id)}
-                    className="text-zinc-400 hover:text-white active:scale-90 transition-transform cursor-pointer"
+                    className="text-zinc-400 hover:text-white active:scale-90 transition-transform cursor-pointer scale-on-click"
                     title="Salvar postagem"
                   >
                     <Bookmark className={`w-[24px] h-[24px] ${bookmarkedPosts.includes(post.id) ? 'fill-white text-white' : 'stroke-[2]'}`} />
@@ -990,7 +1004,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                       onClick={() => {
                         setActiveCommentsPostId(post.id === activeCommentsPostId ? null : post.id);
                       }}
-                      className="text-[11px] text-zinc-500 font-semibold hover:text-zinc-400 cursor-pointer block border-none outline-none text-left mb-1"
+                      className="text-[11px] text-zinc-500 font-semibold hover:text-zinc-400 cursor-pointer block border-none outline-none text-left mb-1 scale-on-click"
                     >
                       Ver {post.commentsCount === 1 ? 'o único comentário' : `todos os ${post.commentsCount} comentários`}
                     </button>
@@ -1039,7 +1053,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                                     <button
                                       type="button"
                                       onClick={() => handleDeleteComment(post.id, comment.id)}
-                                      className="p-1 text-zinc-600 hover:text-red-400 cursor-pointer"
+                                      className="p-1 text-zinc-600 hover:text-red-400 cursor-pointer scale-on-click"
                                       title="Excluir"
                                     >
                                       <Trash2 className="w-3 h-3" />
@@ -1076,7 +1090,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                               [post.id]: (prev[post.id] || '') + emoji
                             }));
                           }}
-                          className="hover:scale-125 text-sm transition-transform cursor-pointer p-0.5 select-none"
+                          className="hover:scale-125 text-sm transition-transform cursor-pointer p-0.5 select-none scale-on-click"
                         >
                           {emoji}
                         </button>
@@ -1104,7 +1118,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                         type="button"
                         onClick={() => handleAddComment(post.id)}
                         disabled={!newCommentText[post.id]?.trim()}
-                        className="text-xs font-bold text-sky-400 hover:text-sky-350 disabled:text-slate-700 transition-colors cursor-pointer shrink-0"
+                        className="text-xs font-bold text-sky-400 hover:text-sky-350 disabled:text-slate-700 transition-colors cursor-pointer shrink-0 scale-on-click"
                       >
                         Publicar
                       </button>
@@ -1112,6 +1126,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                   </div>
                 )}
               </article>
+              </motion.div>
             );
           })}
         </div>
@@ -1140,7 +1155,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                   setSelectedPostLightbox(null);
                   setActiveCommentsPostId(null);
                 }}
-                className="absolute top-2.5 right-2.5 md:hidden z-30 p-1 bg-black/60 rounded-full text-white cursor-pointer"
+                className="absolute top-2.5 right-2.5 md:hidden z-30 p-1 bg-black/60 rounded-full text-white cursor-pointer scale-on-click"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1196,7 +1211,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                       setSelectedPostLightbox(null);
                       setActiveCommentsPostId(null);
                     }}
-                    className="hidden md:inline-flex text-zinc-400 hover:text-white p-1 rounded-full cursor-pointer"
+                    className="hidden md:inline-flex text-zinc-400 hover:text-white p-1 rounded-full cursor-pointer scale-on-click"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -1246,7 +1261,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                             {(isMyComment || selectedPostLightbox.userId === currentUserProfile.uid) && !previewMode && (
                               <button
                                 onClick={() => handleDeleteComment(selectedPostLightbox.id, comment.id)}
-                                className="text-zinc-600 hover:text-rose-400 p-0.5 cursor-pointer"
+                                className="text-zinc-600 hover:text-rose-400 p-0.5 cursor-pointer scale-on-click"
                               >
                                 <Trash2 className="w-3 h-3" />
                               </button>
@@ -1266,14 +1281,14 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                         onClick={() => handleLikePost(selectedPostLightbox)}
                         className={`text-xs font-bold transition-transform active:scale-75 cursor-pointer ${
                           selectedPostLightbox.likes?.includes(currentUserProfile.uid) ? 'text-rose-500' : 'text-slate-350 hover:text-white'
-                        }`}
+                        } scale-on-click`}
                       >
                         <Heart className={`w-5.5 h-5.5 ${selectedPostLightbox.likes?.includes(currentUserProfile.uid) ? 'fill-rose-500 text-rose-500' : ''}`} />
                       </button>
                       
                       <button 
                         onClick={() => handleSharePost(selectedPostLightbox)}
-                        className="text-slate-350 hover:text-white cursor-pointer active:scale-90"
+                        className="text-slate-350 hover:text-white cursor-pointer active:scale-90 scale-on-click"
                       >
                         <Send className="w-5.5 h-5.5" />
                       </button>
@@ -1281,7 +1296,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
 
                     <button 
                       onClick={() => handleBookmarkPost(selectedPostLightbox.id)}
-                      className="text-slate-350 hover:text-white cursor-pointer"
+                      className="text-slate-350 hover:text-white cursor-pointer scale-on-click"
                     >
                       <Bookmark className={`w-5.5 h-5.5 ${bookmarkedPosts.includes(selectedPostLightbox.id) ? 'fill-white text-white' : ''}`} />
                     </button>
@@ -1317,7 +1332,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                       type="button"
                       onClick={() => handleAddComment(selectedPostLightbox.id)}
                       disabled={!newCommentText[selectedPostLightbox.id]?.trim()}
-                      className="text-xs font-bold text-sky-400 hover:text-sky-350 disabled:text-slate-800 transition-colors cursor-pointer shrink-0"
+                      className="text-xs font-bold text-sky-400 hover:text-sky-350 disabled:text-slate-800 transition-colors cursor-pointer shrink-0 scale-on-click"
                     >
                       Publicar
                     </button>
@@ -1331,6 +1346,6 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
         )}
       </AnimatePresence>
 
-    </div>
+    </motion.div>
   );
 }

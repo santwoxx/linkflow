@@ -1,4 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { motion } from 'motion/react';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 
 interface Props {
@@ -40,7 +41,7 @@ export default class ErrorBoundary extends Component<Props, State> {
                            this.state.error?.message?.includes('Failed to fetch dynamically imported module');
 
       return (
-        <div className="min-h-screen bg-[#050b18] text-slate-200 flex flex-col items-center justify-center p-6 text-center font-sans relative overflow-hidden">
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }} className="min-h-screen bg-[#050b18] text-slate-200 flex flex-col items-center justify-center p-6 text-center font-sans relative overflow-hidden">
           {/* Ambient background glows */}
           <div className="absolute top-[-200px] left-[-200px] w-[500px] h-[500px] rounded-full bg-[#a78bfa]/10 blur-[120px] pointer-events-none"></div>
           <div className="absolute bottom-[-200px] right-[-200px] w-[500px] h-[500px] rounded-full bg-[#a78bfa]/10 blur-[120px] pointer-events-none"></div>
@@ -69,21 +70,21 @@ export default class ErrorBoundary extends Component<Props, State> {
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button
                 onClick={this.handleReload}
-                className="w-full py-3.5 px-6 bg-gradient-to-r from-[#a78bfa] to-[#c4b5fd] hover:from-[#c4b5fd] hover:to-[#ddd6fe] text-black font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-[#a78bfa]/20 hover:shadow-[#a78bfa]/30"
+                className="w-full py-3.5 px-6 bg-gradient-to-r from-[#a78bfa] to-[#c4b5fd] hover:from-[#c4b5fd] hover:to-[#ddd6fe] text-black font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-[#a78bfa]/20 hover:shadow-[#a78bfa]/30 scale-on-click"
               >
                 <RefreshCw className="w-4 h-4" />
                 Recarregar Página
               </button>
               <button
                 onClick={this.handleGoHome}
-                className="w-full py-3.5 px-6 bg-slate-950/40 border border-slate-800 hover:border-slate-700 text-slate-300 font-bold text-xs rounded-xl flex items-center justify-center gap-2 uppercase tracking-wider transition-all cursor-pointer"
+                className="w-full py-3.5 px-6 bg-slate-950/40 border border-slate-800 hover:border-slate-700 text-slate-300 font-bold text-xs rounded-xl flex items-center justify-center gap-2 uppercase tracking-wider transition-all cursor-pointer scale-on-click"
               >
                 <Home className="w-4 h-4" />
                 Ir para o Início
               </button>
             </div>
           </div>
-        </div>
+        </motion.div>
       );
     }
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import {
   Star, Zap, Shield, TrendingUp, MessageCircle, Globe, Search,
   CheckCircle, Briefcase, ChevronRight
@@ -33,7 +34,7 @@ const FAQ = [
 
 export default function ProSalesPage() {
   return (
-    <div className="min-h-screen bg-[#050b18] text-slate-100">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="min-h-screen bg-[#050b18] text-slate-100">
 
       {/* ─── HERO ─── */}
       <section className="relative overflow-hidden">
@@ -61,7 +62,7 @@ export default function ProSalesPage() {
               href={CHECKOUT_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 sm:px-8 py-4 bg-gradient-to-r from-[#a78bfa] to-indigo-500 hover:from-[#c4b5fd] hover:to-indigo-400 text-white font-black text-sm sm:text-base rounded-xl transition-all shadow-xl shadow-[#a78bfa]/25 cursor-pointer group whitespace-nowrap"
+              className="inline-flex items-center gap-2 px-6 sm:px-8 py-4 bg-gradient-to-r from-[#a78bfa] to-indigo-500 hover:from-[#c4b5fd] hover:to-indigo-400 text-white font-black text-sm sm:text-base rounded-xl transition-all shadow-xl shadow-[#a78bfa]/25 cursor-pointer group whitespace-nowrap scale-on-click"
             >
               <span className="sm:hidden">Assinar — R$ 19,90</span>
               <span className="hidden sm:inline">Assinar Agora — R$ 19,90/mês</span>
@@ -69,7 +70,7 @@ export default function ProSalesPage() {
             </a>
             <a
               href="?view=servicos"
-              className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition-colors cursor-pointer scale-on-click"
             >
               Ver profissionais <ChevronRight className="w-4 h-4" />
             </a>
@@ -92,7 +93,7 @@ export default function ProSalesPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {BENEFITS.map((b, i) => (
-            <div key={i} className="bg-[#0a1128] border border-slate-800/60 rounded-2xl p-5 hover:border-slate-700 transition-all">
+            <div key={i} className="bg-[#0a1128] border border-slate-800/60 rounded-2xl p-5 hover:border-slate-700 transition-all card-lift glow-border">
               <div className={`w-10 h-10 rounded-xl border flex items-center justify-center mb-4 ${b.color} ${b.bg}`}>
                 {b.icon}
               </div>
@@ -105,7 +106,7 @@ export default function ProSalesPage() {
 
       {/* ─── PRICING ─── */}
       <section className="max-w-md mx-auto px-4 py-8">
-        <div className="relative overflow-hidden bg-gradient-to-br from-[#a78bfa]/15 via-[#0a1128] to-indigo-950/30 border border-[#a78bfa]/30 rounded-2xl p-8 text-center shadow-2xl shadow-[#a78bfa]/10">
+        <div className="relative overflow-hidden bg-gradient-to-br from-[#a78bfa]/15 via-[#0a1128] to-indigo-950/30 border border-[#a78bfa]/30 rounded-2xl p-8 text-center shadow-2xl shadow-[#a78bfa]/10 card-lift glow-border">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(167,139,250,0.1)_0%,transparent_70%)] pointer-events-none" />
           <div className="relative">
             <p className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-widest mb-3">LinkFlowAI Profissional</p>
@@ -129,7 +130,7 @@ export default function ProSalesPage() {
               href={CHECKOUT_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="block w-full py-4 bg-[#a78bfa] hover:bg-[#c4b5fd] text-white font-black text-base rounded-xl transition-all shadow-lg shadow-[#a78bfa]/25 cursor-pointer"
+              className="block w-full py-4 bg-[#a78bfa] hover:bg-[#c4b5fd] text-white font-black text-base rounded-xl transition-all shadow-lg shadow-[#a78bfa]/25 cursor-pointer scale-on-click"
             >
               Assinar Agora
             </a>
@@ -147,7 +148,7 @@ export default function ProSalesPage() {
 
         <div className="space-y-4">
           {STEPS.map((step, i) => (
-            <div key={i} className="flex items-start gap-5 bg-[#0a1128] border border-slate-800/60 rounded-2xl p-5 hover:border-slate-700 transition-all">
+            <div key={i} className="flex items-start gap-5 bg-[#0a1128] border border-slate-800/60 rounded-2xl p-5 hover:border-slate-700 transition-all card-lift glow-border">
               <div className="shrink-0 w-10 h-10 rounded-xl bg-[#a78bfa]/10 border border-[#a78bfa]/20 flex items-center justify-center">
                 {step.icon}
               </div>
@@ -193,6 +194,6 @@ export default function ProSalesPage() {
           O LinkFlowAI atua exclusivamente como plataforma de divulgação. Toda negociação, contratação e pagamento é realizada diretamente entre as partes — o LinkFlowAI não intermedia transações.
         </p>
       </section>
-    </div>
+    </motion.div>
   );
 }

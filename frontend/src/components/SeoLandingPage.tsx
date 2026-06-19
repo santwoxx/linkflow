@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'motion/react';
 import { 
   ArrowLeft, Check, X, ChevronDown, ChevronUp, Link2, Sparkles, 
   HelpCircle, Zap, ShieldCheck, BarChart4, Palette, Users, Store, Heart, 
@@ -227,7 +228,7 @@ export default function SeoLandingPage({ slug, onBack, onNavigate }: SeoLandingP
   const content = getContent();
 
   return (
-    <div className="min-h-screen bg-[#050b18] text-slate-200 flex flex-col justify-between font-sans relative overflow-x-hidden">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="min-h-screen bg-[#050b18] text-slate-200 flex flex-col justify-between font-sans relative overflow-x-hidden">
       {/* Decorative ambient backgrounds lines */}
       <div className="absolute top-[-200px] left-[-200px] w-[500px] h-[500px] rounded-full bg-[#a78bfa]/10 blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-[-200px] right-[-200px] w-[500px] h-[500px] rounded-full bg-[#a78bfa]/10 blur-[120px] pointer-events-none"></div>
@@ -236,7 +237,7 @@ export default function SeoLandingPage({ slug, onBack, onNavigate }: SeoLandingP
       <header className="px-6 py-5 border-b border-slate-800/40 flex items-center justify-between sticky top-0 bg-[#050b18]/80 backdrop-blur-md z-40">
         <button 
           onClick={onBack}
-          className="flex items-center gap-2 py-1.5 px-3 hover:bg-[#a78bfa]/10 text-xs text-slate-300 hover:text-white font-semibold rounded-lg transition-all cursor-pointer"
+          className="flex items-center gap-2 py-1.5 px-3 hover:bg-[#a78bfa]/10 text-xs text-slate-300 hover:text-white font-semibold rounded-lg transition-all cursor-pointer scale-on-click"
           id="seo-back-btn"
         >
           <ArrowLeft className="w-4 h-4 text-[#a78bfa]" />
@@ -270,7 +271,7 @@ export default function SeoLandingPage({ slug, onBack, onNavigate }: SeoLandingP
             <a
               href={content.ctaHref || "/"}
               onClick={(e) => handleLinkClick(e, content.ctaHref || "/")}
-              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-[#a78bfa] to-[#c4b5fd] hover:from-[#c4b5fd] hover:to-[#ddd6fe] hover:scale-[1.02] active:scale-[0.98] text-black font-extrabold text-xs rounded-xl tracking-wide font-sans shadow-[0_0_35px_rgba(167,139,250,0.35)] transition-all flex items-center justify-center gap-2 uppercase"
+              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-[#a78bfa] to-[#c4b5fd] hover:from-[#c4b5fd] hover:to-[#ddd6fe] hover:scale-[1.02] active:scale-[0.98] text-black font-extrabold text-xs rounded-xl tracking-wide font-sans shadow-[0_0_35px_rgba(167,139,250,0.35)] transition-all flex items-center justify-center gap-2 uppercase scale-on-click"
               id="seo-hero-cta"
             >
               {content.ctaText || "Criar Meu Link Grátis"}
@@ -280,7 +281,7 @@ export default function SeoLandingPage({ slug, onBack, onNavigate }: SeoLandingP
               <a
                 href={content.ctaSecondaryHref || "/"}
                 onClick={(e) => handleLinkClick(e, content.ctaSecondaryHref || "/")}
-                className="w-full sm:w-auto px-8 py-4 bg-slate-900 border border-slate-800 hover:border-slate-700 hover:scale-[1.02] active:scale-[0.98] text-slate-300 font-bold text-xs rounded-xl tracking-wide transition-all flex items-center justify-center gap-2 uppercase"
+                className="w-full sm:w-auto px-8 py-4 bg-slate-900 border border-slate-800 hover:border-slate-700 hover:scale-[1.02] active:scale-[0.98] text-slate-300 font-bold text-xs rounded-xl tracking-wide transition-all flex items-center justify-center gap-2 uppercase scale-on-click"
               >
                 <Briefcase className="w-4 h-4 text-emerald-400" />
                 {content.ctaSecondaryText}
@@ -450,7 +451,7 @@ export default function SeoLandingPage({ slug, onBack, onNavigate }: SeoLandingP
               >
                 <button
                   onClick={() => toggleFaq(idx)}
-                  className="w-full px-5 py-4 flex items-center justify-between text-left text-xs font-bold text-slate-200 hover:text-white transition-colors cursor-pointer"
+                  className="w-full px-5 py-4 flex items-center justify-between text-left text-xs font-bold text-slate-200 hover:text-white transition-colors cursor-pointer scale-on-click"
                   aria-expanded={openFaq === idx}
                 >
                   <span className="flex items-center gap-2">
@@ -486,7 +487,7 @@ export default function SeoLandingPage({ slug, onBack, onNavigate }: SeoLandingP
             <a
               href={content.ctaHref || "/"}
               onClick={(e) => handleLinkClick(e, content.ctaHref || "/")}
-              className="px-8 py-4 bg-gradient-to-r from-[#a78bfa] to-[#c4b5fd] hover:from-[#c4b5fd] hover:to-[#ddd6fe] text-black font-extrabold text-xs rounded-xl tracking-wide uppercase shadow-[0_0_30px_rgba(167,139,250,0.25)] transition-all flex items-center justify-center"
+              className="px-8 py-4 bg-gradient-to-r from-[#a78bfa] to-[#c4b5fd] hover:from-[#c4b5fd] hover:to-[#ddd6fe] text-black font-extrabold text-xs rounded-xl tracking-wide uppercase shadow-[0_0_30px_rgba(167,139,250,0.25)] transition-all flex items-center justify-center scale-on-click"
               id="seo-footer-cta"
             >
               {content.ctaText || "Criar Meu Perfil Grátis"}
@@ -495,14 +496,14 @@ export default function SeoLandingPage({ slug, onBack, onNavigate }: SeoLandingP
               <a
                 href={content.ctaSecondaryHref || "/"}
                 onClick={(e) => handleLinkClick(e, content.ctaSecondaryHref || "/")}
-                className="px-6 py-4 bg-slate-950/40 border border-slate-800 hover:border-slate-700 text-slate-300 font-bold text-xs rounded-xl transition-all flex items-center justify-center uppercase"
+                className="px-6 py-4 bg-slate-950/40 border border-slate-800 hover:border-slate-700 text-slate-300 font-bold text-xs rounded-xl transition-all flex items-center justify-center uppercase scale-on-click"
               >
                 {content.ctaSecondaryText}
               </a>
             ) : (
               <button
                 onClick={onBack}
-                className="px-6 py-4 bg-slate-950/40 border border-slate-800 hover:border-slate-700 text-slate-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
+                className="px-6 py-4 bg-slate-950/40 border border-slate-800 hover:border-slate-700 text-slate-300 font-bold text-xs rounded-xl transition-all cursor-pointer scale-on-click"
               >
                 Voltar ao Início
               </button>
@@ -535,6 +536,6 @@ export default function SeoLandingPage({ slug, onBack, onNavigate }: SeoLandingP
           </span>
         </div>
       </footer>
-    </div>
+    </motion.div>
   );
 }

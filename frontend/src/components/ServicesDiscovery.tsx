@@ -747,13 +747,13 @@ export default function ServicesDiscovery({ onViewProfile, currentUserProfile }:
   }, [filtered, featuredPros]);
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-100 pb-32 font-sans selection:bg-[#a78bfa]/30 selection:text-white">
+    <motion.div className="min-h-screen bg-[#020617] text-slate-100 pb-32 font-sans selection:bg-[#a78bfa]/30 selection:text-white" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
       {/* Sticky top bar */}
       <div className="sticky top-0 z-50 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 transition-all">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
           <button
             onClick={() => history.back()}
-            className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-xl transition-all cursor-pointer shadow-sm"
+            className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-xl transition-all cursor-pointer shadow-sm scale-on-click"
           >
             <ChevronLeft className="w-4 h-4" /> Voltar
           </button>
@@ -803,13 +803,13 @@ export default function ServicesDiscovery({ onViewProfile, currentUserProfile }:
                 className="w-full bg-transparent border-none py-3 px-4 text-base sm:text-lg text-white placeholder:text-slate-500 focus:outline-none focus:ring-0"
               />
               {searchInput && (
-                <button onClick={() => setSearchInput('')} className="p-2 text-slate-500 hover:text-white transition-colors">
+                <button onClick={() => setSearchInput('')} className="p-2 text-slate-500 hover:text-white transition-colors scale-on-click">
                   <X className="w-5 h-5" />
                 </button>
               )}
               <button 
                 onClick={() => setShowFilters(!showFilters)}
-                className={`shrink-0 ml-2 px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 ${
+                className={`shrink-0 ml-2 px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 scale-on-click ${
                   showFilters || selectedCity 
                   ? 'bg-[#a78bfa] text-white shadow-[0_0_15px_rgba(167,139,250,0.4)]' 
                   : 'bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white border border-white/5'
@@ -894,7 +894,7 @@ export default function ServicesDiscovery({ onViewProfile, currentUserProfile }:
                 </div>
                 {hasFilters && (
                   <div className="mt-6 pt-6 border-t border-white/5 flex justify-end">
-                    <button onClick={clearFilters} className="px-5 py-2.5 rounded-xl text-xs font-bold text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all flex items-center gap-2 cursor-pointer">
+                    <button onClick={clearFilters} className="px-5 py-2.5 rounded-xl text-xs font-bold text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all flex items-center gap-2 cursor-pointer scale-on-click">
                       <X className="w-4 h-4" /> Limpar Filtros
                     </button>
                   </div>
@@ -909,7 +909,7 @@ export default function ServicesDiscovery({ onViewProfile, currentUserProfile }:
           <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x">
             <button
               onClick={() => setSelectedCategory('')}
-              className={`snap-start shrink-0 px-6 py-3.5 rounded-2xl text-sm font-bold border transition-all duration-300 cursor-pointer flex items-center gap-2 ${
+              className={`snap-start shrink-0 px-6 py-3.5 rounded-2xl text-sm font-bold border transition-all duration-300 cursor-pointer flex items-center gap-2 scale-on-click ${
                 !selectedCategory 
                 ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
                 : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:border-white/20 hover:text-white'
@@ -921,7 +921,7 @@ export default function ServicesDiscovery({ onViewProfile, currentUserProfile }:
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat === selectedCategory ? '' : cat)}
-                className={`snap-start shrink-0 px-6 py-3.5 rounded-2xl text-sm font-bold border transition-all duration-300 cursor-pointer flex items-center gap-2 relative overflow-hidden group ${
+                className={`snap-start shrink-0 px-6 py-3.5 rounded-2xl text-sm font-bold border transition-all duration-300 cursor-pointer flex items-center gap-2 relative overflow-hidden group scale-on-click ${
                   selectedCategory === cat 
                   ? 'bg-gradient-to-r from-[#a78bfa] to-indigo-500 text-white border-transparent shadow-[0_0_25px_rgba(167,139,250,0.4)]' 
                   : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:border-white/20 hover:text-white'
@@ -954,7 +954,7 @@ export default function ServicesDiscovery({ onViewProfile, currentUserProfile }:
             </div>
             <h3 className="text-3xl font-extrabold text-white mb-4">Algo deu errado</h3>
             <p className="text-slate-400 text-lg max-w-lg leading-relaxed mb-10">{error}</p>
-            <button onClick={() => window.location.reload()} className="px-8 py-4 bg-white text-black font-bold rounded-2xl transition-all hover:bg-slate-200 hover:scale-105 active:scale-95 flex items-center gap-2 shadow-xl">
+            <button onClick={() => window.location.reload()} className="px-8 py-4 bg-white text-black font-bold rounded-2xl transition-all hover:bg-slate-200 hover:scale-105 active:scale-95 flex items-center gap-2 shadow-xl scale-on-click">
               <RefreshCw className="w-5 h-5" /> Tentar novamente
             </button>
           </motion.div>
@@ -974,7 +974,7 @@ export default function ServicesDiscovery({ onViewProfile, currentUserProfile }:
               {hasFilters ? 'Tente ajustar seus filtros de busca para encontrar o profissional ideal.' : 'Ainda não há profissionais verificados cadastrados nesta seção.'}
             </p>
             {hasFilters && (
-              <button onClick={clearFilters} className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl transition-all flex items-center gap-2 hover:scale-105">
+              <button onClick={clearFilters} className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl transition-all flex items-center gap-2 hover:scale-105 scale-on-click">
                 <X className="w-5 h-5" /> Limpar todos os filtros
               </button>
             )}
@@ -993,9 +993,9 @@ export default function ServicesDiscovery({ onViewProfile, currentUserProfile }:
                   {featuredPros.map((pro, index) => (
                     <motion.div 
                       key={pro.uid}
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
+                      transition={{ delay: index * 0.04, duration: 0.3 }}
                     >
                       <ProCard pro={pro} onViewProfile={onViewProfile} isFeatured />
                     </motion.div>
@@ -1021,9 +1021,9 @@ export default function ServicesDiscovery({ onViewProfile, currentUserProfile }:
                       <ConversionBanner />
                     )}
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: (index % 6) * 0.05 }}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.04, duration: 0.3 }}
                     >
                       <ProCard pro={pro} onViewProfile={onViewProfile} />
                     </motion.div>
@@ -1044,7 +1044,7 @@ export default function ServicesDiscovery({ onViewProfile, currentUserProfile }:
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -1060,7 +1060,7 @@ function ProCard({ pro, onViewProfile, isFeatured }: { pro: ProfessionalProfile,
   return (
     <article 
       onClick={() => onViewProfile(pro.username)}
-      className="group relative bg-[#0a0f25]/80 backdrop-blur-3xl border border-white/5 hover:border-[#a78bfa]/50 rounded-3xl overflow-hidden hover:shadow-[0_20px_40px_-15px_rgba(167,139,250,0.3)] hover:-translate-y-1.5 transition-all duration-500 cursor-pointer flex flex-col h-full"
+      className="group relative bg-[#0a0f25]/80 backdrop-blur-3xl border border-white/5 hover:border-[#a78bfa]/50 rounded-3xl overflow-hidden hover:shadow-[0_20px_40px_-15px_rgba(167,139,250,0.3)] hover:-translate-y-1.5 transition-all duration-500 cursor-pointer flex flex-col h-full card-lift glow-border"
     >
       {/* Decorative top glow */}
       <div className={`absolute top-0 inset-x-0 h-40 bg-gradient-to-b ${isFeatured ? 'from-amber-500/20' : 'from-[#a78bfa]/20'} to-transparent opacity-40 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none`} />
@@ -1149,7 +1149,7 @@ function ProCard({ pro, onViewProfile, isFeatured }: { pro: ProfessionalProfile,
           )}
           
           <button
-            className={`flex items-center justify-center gap-1.5 py-3.5 text-xs font-bold rounded-xl transition-all text-center hover:scale-[1.02] active:scale-[0.98] ${
+            className={`flex items-center justify-center gap-1.5 py-3.5 text-xs font-bold rounded-xl transition-all text-center hover:scale-[1.02] active:scale-[0.98] scale-on-click ${
               waLink 
               ? 'bg-white/5 hover:bg-white/10 text-white border border-white/10' 
               : 'col-span-2 bg-[#a78bfa]/10 hover:bg-[#a78bfa]/20 text-[#a78bfa] border border-[#a78bfa]/20 group-hover:bg-[#a78bfa] group-hover:text-white'

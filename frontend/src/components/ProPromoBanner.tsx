@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import { Briefcase, MessageCircle, Shield, TrendingUp, Zap } from 'lucide-react';
 import { getProCheckoutUrl, type CheckoutSource } from '../utils/proCheckout';
 
@@ -70,7 +71,7 @@ export default function ProPromoBanner({
             href={checkoutUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="shrink-0 inline-flex items-center gap-1.5 px-4 sm:px-5 py-2.5 bg-[#a78bfa] hover:bg-[#c4b5fd] text-white font-bold text-xs sm:text-sm rounded-xl transition-all shadow-lg shadow-[#a78bfa]/25 cursor-pointer"
+             className="shrink-0 inline-flex items-center gap-1.5 px-4 sm:px-5 py-2.5 bg-[#a78bfa] hover:bg-[#c4b5fd] text-white font-bold text-xs sm:text-sm rounded-xl transition-all shadow-lg shadow-[#a78bfa]/25 cursor-pointer scale-on-click"
             aria-label="Assinar LinkFlowAI Profissional a partir de R$ 19,90 por mês"
           >
             <Briefcase className="w-3.5 h-3.5 sm:w-4 sm:h-4" aria-hidden="true" /> Assinar

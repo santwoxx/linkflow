@@ -9,6 +9,8 @@ const ServicesDiscovery = React.lazy(() => import('./components/ServicesDiscover
 const ProfessionalProfilePage = React.lazy(() => import('./components/ProfessionalProfilePage'));
 const ProSalesPage = React.lazy(() => import('./components/ProSalesPage'));
 const SeoLandingPage = React.lazy(() => import('./components/SeoLandingPage'));
+import { motion, AnimatePresence } from 'motion/react';
+import LoadingSpinner from './components/LoadingSpinner';
 import { Link2, Sparkles, LogIn, Lock, CheckCircle, RefreshCw, BarChart4, Palette, Heart, AlertTriangle, ExternalLink, Ban, FileText, X, Briefcase, Users, ShieldCheck, TrendingUp, Smartphone, Store } from 'lucide-react';
 
 export default function App() {
@@ -1319,8 +1321,8 @@ export default function App() {
     if (publicProProfile) {
       return (
         <React.Suspense fallback={
-          <div className="min-h-screen bg-[#050b18] flex items-center justify-center text-slate-400">
-            <RefreshCw className="w-8 h-8 text-[#a78bfa] animate-spin" />
+          <div className="min-h-screen bg-[#050b18] flex items-center justify-center">
+            <LoadingSpinner message="Carregando perfil profissional..." />
           </div>
         }>
           <ProfessionalProfilePage 
@@ -1338,8 +1340,8 @@ export default function App() {
     }
     return (
       <React.Suspense fallback={
-        <div className="min-h-screen bg-[#050b18] flex items-center justify-center text-slate-400">
-          <RefreshCw className="w-8 h-8 text-[#a78bfa] animate-spin" />
+        <div className="min-h-screen bg-[#050b18] flex items-center justify-center">
+          <LoadingSpinner message="Descobrindo serviços..." />
         </div>
       }>
         <ServicesDiscovery 
@@ -1358,8 +1360,8 @@ export default function App() {
   if (publicView === 'profissional') {
     return (
       <React.Suspense fallback={
-        <div className="min-h-screen bg-[#050b18] flex items-center justify-center text-slate-400">
-          <RefreshCw className="w-8 h-8 text-[#a78bfa] animate-spin" />
+        <div className="min-h-screen bg-[#050b18] flex items-center justify-center">
+          <LoadingSpinner message="Carregando..." />
         </div>
       }>
         <ProSalesPage />
@@ -1371,8 +1373,8 @@ export default function App() {
   if (publicView && seoPaths.includes(publicView)) {
     return (
       <React.Suspense fallback={
-        <div className="min-h-screen bg-[#050b18] flex items-center justify-center text-slate-400">
-          <RefreshCw className="w-8 h-8 text-[#a78bfa] animate-spin" />
+        <div className="min-h-screen bg-[#050b18] flex items-center justify-center">
+          <LoadingSpinner message="Carregando..." />
         </div>
       }>
         <SeoLandingPage 
@@ -1397,9 +1399,8 @@ export default function App() {
   if (publicSlug || publicError) {
     if (publicLoading) {
       return (
-        <div className="min-h-screen bg-[#050b18] flex flex-col items-center justify-center text-slate-400 gap-3">
-          <RefreshCw className="w-8 h-8 text-[#a78bfa] animate-spin" />
-          <span className="text-xs font-semibold uppercase tracking-widest text-slate-500">Carregando links...</span>
+        <div className="min-h-screen bg-[#050b18] flex flex-col items-center justify-center">
+          <LoadingSpinner message="Carregando links..." />
         </div>
       );
     }
@@ -1464,9 +1465,8 @@ export default function App() {
   // ----- RENDER LOADER SCREEN -----
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050b18] flex flex-col items-center justify-center text-slate-400 gap-3">
-        <RefreshCw className="w-8 h-8 text-[#a78bfa] animate-spin" />
-        <span className="text-xs font-semibold uppercase tracking-widest text-[#a78bfa]/80 font-mono">Verificando sessão...</span>
+      <div className="min-h-screen bg-[#050b18] flex flex-col items-center justify-center">
+        <LoadingSpinner message="Verificando sessão..." />
       </div>
     );
   }
@@ -1474,9 +1474,19 @@ export default function App() {
   // ----- RENDER REGISTRATION WIZARD (CHOOSE USERNAME SLUG) -----
   if (registrationRequired) {
     return (
-      <div className="min-h-screen bg-[#050b18] flex items-center justify-center p-6">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="min-h-screen bg-[#050b18] flex items-center justify-center p-6"
+      >
         <div className="w-full max-w-sm sm:max-w-md bg-[#0f172a] p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6">
-          <div className="text-center space-y-2">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.1, duration: 0.3 }}
+            className="text-center space-y-2"
+          >
             <div className="w-12 h-12 bg-[#a78bfa]/10 text-[#a78bfa] flex items-center justify-center rounded-2xl mx-auto mb-2">
               <Sparkles className="w-6 h-6" />
             </div>
@@ -1484,7 +1494,7 @@ export default function App() {
             <p className="text-xs text-slate-400">
               Olá, <span className="font-semibold text-slate-200">{currentUser?.displayName}</span>! Escolha o nome da sua página de divulgação.
             </p>
-          </div>
+          </motion.div>
 
           <form onSubmit={handleRegisterProfile} className="space-y-4">
             <div>
@@ -1583,17 +1593,21 @@ export default function App() {
               className="w-full py-3.5 bg-[#a78bfa] hover:bg-[#c4b5fd] disabled:bg-slate-800 disabled:text-slate-500 disabled:shadow-none font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 tracking-wide font-sans cursor-pointer transition-all shadow-lg shadow-[#a78bfa]/20 hover:shadow-[#a78bfa]/30"
             >
               {registering ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Configurando Sua Conta...</span>
-                </>
+                <span className="flex items-center gap-2">
+                  <motion.span
+                    className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full inline-block"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                  />
+                  Configurando Sua Conta...
+                </span>
               ) : (
                 'Criar Minha Página'
               )}
             </button>
           </form>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
@@ -1638,7 +1652,12 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050b18] text-slate-200 flex flex-col justify-between font-sans relative overflow-hidden">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="min-h-screen bg-[#050b18] text-slate-200 flex flex-col justify-between font-sans relative overflow-hidden"
+    >
       {/* Decorative ambient backgrounds lines */}
       <div className="absolute top-[-200px] left-[-200px] w-[500px] h-[500px] rounded-full bg-[#a78bfa]/10 blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-[-200px] right-[-200px] w-[500px] h-[500px] rounded-full bg-[#a78bfa]/10 blur-[120px] pointer-events-none"></div>
@@ -1952,6 +1971,6 @@ export default function App() {
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

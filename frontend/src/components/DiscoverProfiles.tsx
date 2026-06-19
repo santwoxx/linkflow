@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore';
 import { UserProfile, LinkItem } from '../types';
+import { motion } from 'motion/react';
 import { Search, Compass, Flame, Users, X, Loader2, Sparkles, User as UserIcon, Users as UsersIcon } from 'lucide-react';
 import PublicProfile from './PublicProfile';
 
@@ -94,7 +95,7 @@ export default function DiscoverProfiles() {
   };
 
   return (
-    <div className="space-y-6 pb-12 relative h-full">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="space-y-6 pb-12 relative h-full">
       
       {/* Header section */}
       <div className="bg-[#0f172a] p-6 rounded-2xl border border-slate-800/50 shadow-lg">
@@ -132,7 +133,7 @@ export default function DiscoverProfiles() {
         <div className="flex gap-2 mt-6 border-b border-slate-800/60 pb-1">
           <button
             onClick={() => { setActiveTab('trending'); setSearchQuery(''); }}
-            className={`pb-2 px-3 font-semibold text-[11px] uppercase tracking-widest border-b-2 transition-all flex items-center gap-1.5 ${
+            className={`pb-2 px-3 font-semibold text-[11px] uppercase tracking-widest border-b-2 transition-all flex items-center gap-1.5 scale-on-click ${
               activeTab === 'trending' ? 'border-[#a78bfa] text-[#a78bfa]' : 'border-transparent text-slate-500 hover:text-slate-300'
             }`}
           >
@@ -141,7 +142,7 @@ export default function DiscoverProfiles() {
           </button>
           <button
             onClick={() => { setActiveTab('new'); setSearchQuery(''); }}
-            className={`pb-2 px-3 font-semibold text-[11px] uppercase tracking-widest border-b-2 transition-all flex items-center gap-1.5 ${
+            className={`pb-2 px-3 font-semibold text-[11px] uppercase tracking-widest border-b-2 transition-all flex items-center gap-1.5 scale-on-click ${
               activeTab === 'new' ? 'border-[#a78bfa] text-[#a78bfa]' : 'border-transparent text-slate-500 hover:text-slate-300'
             }`}
           >
@@ -150,7 +151,7 @@ export default function DiscoverProfiles() {
           </button>
           {activeTab === 'search' && (
             <button
-              className="pb-2 px-3 font-semibold text-[11px] uppercase tracking-widest border-b-2 border-[#a78bfa] text-[#a78bfa] transition-all flex items-center gap-1.5"
+              className="pb-2 px-3 font-semibold text-[11px] uppercase tracking-widest border-b-2 border-[#a78bfa] text-[#a78bfa] transition-all flex items-center gap-1.5 scale-on-click"
             >
               <Users className="w-3.5 h-3.5" />
               Resultados
@@ -162,7 +163,7 @@ export default function DiscoverProfiles() {
       {/* Grid of Profiles */}
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 text-[#a78bfa] gap-3">
-          <Loader2 className="w-8 h-8 animate-spin" />
+          <motion.span className="w-6 h-6 border-2 border-[#a78bfa]/30 border-t-[#a78bfa] rounded-full inline-block" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} />
           <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Buscando perfis...</p>
         </div>
       ) : profiles.length === 0 ? (
@@ -175,10 +176,13 @@ export default function DiscoverProfiles() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {profiles.map((profile) => (
-            <div 
+          {profiles.map((profile, index) => (
+            <motion.div
               key={profile.uid}
-              className="group bg-[#0a101f] border border-slate-800/60 rounded-2xl overflow-hidden hover:border-[#a78bfa]/40 hover:shadow-[0_0_20px_rgba(167,139,250,0.15)] transition-all cursor-pointer flex flex-col"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.04, duration: 0.3 }}
+              className="group card-lift glow-border bg-[#0a101f] border border-slate-800/60 rounded-2xl overflow-hidden hover:border-[#a78bfa]/40 hover:shadow-[0_0_20px_rgba(167,139,250,0.15)] transition-all cursor-pointer flex flex-col"
               onClick={() => handleOpenProfile(profile)}
             >
               {/* Cover Header */}
@@ -226,7 +230,7 @@ export default function DiscoverProfiles() {
                   </span>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       )}
@@ -245,7 +249,7 @@ export default function DiscoverProfiles() {
             <div className="absolute top-4 right-4 z-50">
               <button 
                 onClick={closeProfileModal}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-black/60 text-white hover:bg-rose-500/80 transition-colors backdrop-blur-md"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-black/60 text-white hover:bg-rose-500/80 transition-colors backdrop-blur-md scale-on-click"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -254,7 +258,7 @@ export default function DiscoverProfiles() {
             <div className="flex-1 overflow-y-auto overflow-x-hidden w-full bg-zinc-950">
               {isLoadingLinks ? (
                 <div className="h-full w-full flex flex-col items-center justify-center text-[#a78bfa] gap-3">
-                  <Loader2 className="w-8 h-8 animate-spin" />
+                  <motion.span className="w-6 h-6 border-2 border-[#a78bfa]/30 border-t-[#a78bfa] rounded-full inline-block" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} />
                   <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Montando Página...</p>
                 </div>
               ) : (
@@ -268,6 +272,6 @@ export default function DiscoverProfiles() {
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

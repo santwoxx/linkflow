@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { motion } from 'motion/react';
 import { CURATED_THEMES, AVAILABLE_THEMES, FONTS_LIST, STICKER_LIST, UserTheme, StickerItem } from '../types';
 import { Palette, Image as ImageIcon, Sparkles, Droplet, Square, AlignLeft, Maximize, Minimize, Sun, Type, Layout, Smile, Trash2, Video, Blend } from 'lucide-react';
 
@@ -121,8 +122,8 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
   const sidebarBtnClass = (id: string) =>
     `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
       activeSection === id
-        ? 'bg-[#a78bfa]/10 text-[#a78bfa] border border-[#a78bfa]/20'
-        : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/5 border border-transparent'
+        ? 'bg-[#a78bfa]/10 text-[#a78bfa] border border-[#a78bfa]/20 scale-on-click'
+        : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/5 border border-transparent scale-on-click'
     }`;
 
   const activeBtnClass = (cond: boolean) =>
@@ -156,7 +157,7 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
   };
 
   return (
-    <div className="flex gap-0 rounded-2xl overflow-hidden border border-white/10 bg-[#0a0a0f] min-h-[500px]">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="flex gap-0 rounded-2xl overflow-hidden border border-white/10 bg-[#0a0a0f] min-h-[500px]">
       {/* Sidebar */}
       <aside className="w-44 shrink-0 border-r border-white/10 bg-black/40 p-2 flex flex-col gap-0.5">
         <div className="px-3 py-2.5 text-[9px] font-bold uppercase tracking-widest text-zinc-500 border-b border-white/5 mb-1">Design</div>
@@ -182,33 +183,33 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
                     <button
                       key={theme.id}
                       onClick={() => handleSelectPreset(theme.id)}
-                      className={`relative overflow-hidden p-2 rounded-xl border text-left transition-all ${
-                        isSelected ? 'border-[#a78bfa] bg-[#1a1a1a] ring-1 ring-[#a78bfa]/30' : 'border-white/5 bg-black/40 hover:bg-[#1f1f1f]/50 hover:border-white/20'
-                      }`}
-                    >
-                      <div className={`h-10 w-full rounded-lg mb-1.5 flex flex-col justify-center gap-1 p-1.5 ${theme.backgroundClass}`}>
-                        <div className="h-0.5 w-1/2 rounded bg-current opacity-20"></div>
-                        <div className="h-1.5 w-full rounded-sm" style={{ backgroundColor: theme.buttonColor }}></div>
-                        <div className="h-0.5 w-1/3 rounded bg-current opacity-20"></div>
-                      </div>
-                      <span className="text-[9px] font-medium text-zinc-300 truncate block">{theme.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+                       className={`relative overflow-hidden p-2 rounded-xl border text-left transition-all card-lift glow-border scale-on-click ${
+                         isSelected ? 'border-[#a78bfa] bg-[#1a1a1a] ring-1 ring-[#a78bfa]/30' : 'border-white/5 bg-black/40 hover:bg-[#1f1f1f]/50 hover:border-white/20'
+                       }`}
+                     >
+                       <div className={`h-10 w-full rounded-lg mb-1.5 flex flex-col justify-center gap-1 p-1.5 ${theme.backgroundClass}`}>
+                         <div className="h-0.5 w-1/2 rounded bg-current opacity-20"></div>
+                         <div className="h-1.5 w-full rounded-sm" style={{ backgroundColor: theme.buttonColor }}></div>
+                         <div className="h-0.5 w-1/3 rounded bg-current opacity-20"></div>
+                       </div>
+                       <span className="text-[9px] font-medium text-zinc-300 truncate block">{theme.name}</span>
+                     </button>
+                   );
+                 })}
+               </div>
+             </div>
 
-            <div>
-              <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-3">Premium</h3>
-              <div className="grid grid-cols-3 gap-2">
-                {AVAILABLE_THEMES.map((theme) => {
-                  const isSelected = currentTheme.themeId === theme.id;
-                  return (
-                    <button
-                      key={theme.id}
-                      onClick={() => handleSelectPreset(theme.id)}
-                      className={`relative overflow-hidden p-2 rounded-xl border text-left transition-all ${
-                        isSelected ? 'border-[#a78bfa] bg-[#1a1a1a] ring-1 ring-[#a78bfa]/30' : 'border-white/5 bg-black/40 hover:bg-[#1f1f1f]/50 hover:border-white/20'
+             <div>
+               <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-3">Premium</h3>
+               <div className="grid grid-cols-3 gap-2">
+                 {AVAILABLE_THEMES.map((theme) => {
+                   const isSelected = currentTheme.themeId === theme.id;
+                   return (
+                     <button
+                       key={theme.id}
+                       onClick={() => handleSelectPreset(theme.id)}
+                       className={`relative overflow-hidden p-2 rounded-xl border text-left transition-all card-lift glow-border scale-on-click ${
+                         isSelected ? 'border-[#a78bfa] bg-[#1a1a1a] ring-1 ring-[#a78bfa]/30' : 'border-white/5 bg-black/40 hover:bg-[#1f1f1f]/50 hover:border-white/20'
                       }`}
                     >
                       <div className={`h-10 w-full rounded-lg mb-1.5 flex flex-col justify-center gap-1 p-1.5 ${theme.backgroundClass}`}>
@@ -235,7 +236,7 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
                   <button
                     key={layout}
                     onClick={() => updateField('headerStyle', layout)}
-                    className={`py-3 px-3 text-[11px] font-bold rounded-xl border transition-all flex flex-col items-center gap-1.5 ${(currentTheme.headerStyle || 'classic') === layout ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]' : 'border-white/10 bg-black text-zinc-500 hover:bg-white/5'}`}
+                    className={`py-3 px-3 text-[11px] font-bold rounded-xl border transition-all flex flex-col items-center gap-1.5 scale-on-click ${(currentTheme.headerStyle || 'classic') === layout ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]' : 'border-white/10 bg-black text-zinc-500 hover:bg-white/5'}`}
                   >
                     {layout === 'classic' ? (
                       <>
@@ -266,7 +267,7 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
                   <button
                     key={style}
                     onClick={() => updateField('titleStyle', style)}
-                    className={`py-3 text-[11px] font-bold rounded-xl border transition-all ${(currentTheme.titleStyle || 'text') === style ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]' : 'border-white/10 bg-black text-zinc-500 hover:bg-white/5'}`}
+                    className={`py-3 text-[11px] font-bold rounded-xl border transition-all scale-on-click ${(currentTheme.titleStyle || 'text') === style ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]' : 'border-white/10 bg-black text-zinc-500 hover:bg-white/5'}`}
                   >
                     {style === 'text' ? 'Text' : 'Logo'}
                   </button>
@@ -339,7 +340,7 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
                   <button
                     key={style}
                     onClick={() => updateField('wallpaperStyle', style)}
-                    className={`py-2.5 text-[10px] font-bold uppercase rounded-xl border transition-all flex flex-col items-center justify-center gap-1 ${(currentTheme.wallpaperStyle || 'fill') === style ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]' : 'border-white/10 bg-black text-zinc-500 hover:bg-white/5'}`}
+                    className={`py-2.5 text-[10px] font-bold uppercase rounded-xl border transition-all flex flex-col items-center justify-center gap-1 scale-on-click ${(currentTheme.wallpaperStyle || 'fill') === style ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]' : 'border-white/10 bg-black text-zinc-500 hover:bg-white/5'}`}
                   >
                     {style === 'fill' && <Droplet className="w-3.5 h-3.5" />}
                     {style === 'gradient' && <Palette className="w-3.5 h-3.5" />}
@@ -507,7 +508,7 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
                             backgroundType: 'gradient',
                           });
                         }}
-                        className={`py-2 text-[9px] font-bold rounded-lg border transition-all ${
+                        className={`py-2 text-[9px] font-bold rounded-lg border transition-all scale-on-click ${
                           (currentTheme.gradientDirection || 'linear-down') === dir.id
                             ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]'
                             : 'border-white/10 bg-black text-zinc-500 hover:bg-white/5'
@@ -520,7 +521,7 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
                 </div>
 
                 <div>
-                  <button type="button" onClick={() => setExpandedGradients(!expandedGradients)} className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-wider flex items-center gap-1 hover:underline">
+                  <button type="button" onClick={() => setExpandedGradients(!expandedGradients)} className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-wider flex items-center gap-1 hover:underline scale-on-click">
                     <Palette className="w-3 h-3" /> {expandedGradients ? 'Ocultar' : 'Mostrar'} Presets
                   </button>
                   {expandedGradients && (
@@ -544,7 +545,7 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
                             });
                             setExpandedGradients(false);
                           }}
-                          className={`h-10 rounded-lg border transition-all hover:scale-105 ${currentTheme.backgroundGradient === g.value ? 'border-[#a78bfa] ring-1 ring-[#a78bfa]/30' : 'border-white/10'}`}
+                          className={`h-10 rounded-lg border transition-all hover:scale-105 scale-on-click ${currentTheme.backgroundGradient === g.value ? 'border-[#a78bfa] ring-1 ring-[#a78bfa]/30' : 'border-white/10'}`}
                           style={{ background: g.value }}
                           title={g.name}
                         />
@@ -575,7 +576,7 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">Pattern Overlay</label>
                 <div className="grid grid-cols-5 gap-2">
                   {PATTERN_OPTIONS.map((p) => (
-                    <button key={p.id} onClick={() => updateField('patternOverlay', p.id as any)} className={`py-2 text-[9px] font-bold rounded-lg border transition-all ${(currentTheme.patternOverlay || 'none') === p.id ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]' : 'border-white/10 bg-black text-zinc-500 hover:bg-white/5'}`}>
+                    <button key={p.id} onClick={() => updateField('patternOverlay', p.id as any)} className={`py-2 text-[9px] font-bold rounded-lg border transition-all scale-on-click ${(currentTheme.patternOverlay || 'none') === p.id ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]' : 'border-white/10 bg-black text-zinc-500 hover:bg-white/5'}`}>
                       {p.label}
                     </button>
                   ))}
@@ -596,7 +597,7 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
                       reader.readAsDataURL(file);
                     }
                   }} />
-                  <button type="button" onClick={() => backgroundFileInputRef.current?.click()} className="bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 text-[10px] font-bold px-3 rounded-xl border border-blue-500/20 transition-all cursor-pointer shrink-0 flex items-center gap-1">
+                  <button type="button" onClick={() => backgroundFileInputRef.current?.click()} className="bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 text-[10px] font-bold px-3 rounded-xl border border-blue-500/20 transition-all cursor-pointer shrink-0 flex items-center gap-1 scale-on-click">
                     <ImageIcon className="w-3 h-3" />
                   </button>
                 </div>
@@ -631,7 +632,7 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
             <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-2">Font Family</h3>
             <div className="grid grid-cols-2 gap-2 max-h-[260px] overflow-y-auto pr-1">
               {FONTS_LIST.map((font) => (
-                <button key={font.id} onClick={() => updateField('fontFamily', font.id)} className={`py-3 px-3 text-xs rounded-xl border text-left flex flex-col justify-between transition-all ${currentTheme.fontFamily === font.id ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa] ring-1 ring-[#a78bfa]/20' : 'border-white/5 bg-black/40 text-zinc-300 hover:bg-[#1f1f1f]/50'}`}>
+                <button key={font.id} onClick={() => updateField('fontFamily', font.id)} className={`py-3 px-3 text-xs rounded-xl border text-left flex flex-col justify-between transition-all scale-on-click ${currentTheme.fontFamily === font.id ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa] ring-1 ring-[#a78bfa]/20' : 'border-white/5 bg-black/40 text-zinc-300 hover:bg-[#1f1f1f]/50'}`}>
                   <span className={`text-[14px] ${font.class}`}>{font.name}</span>
                   <span className={`text-[11px] text-zinc-500 mt-1 ${font.class}`}>The quick brown fox</span>
                 </button>
@@ -642,7 +643,7 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">Letter Spacing</label>
               <div className="grid grid-cols-4 gap-2">
                 {(['tight', 'normal', 'wide', 'wider'] as const).map((s) => (
-                  <button key={s} onClick={() => updateField('letterSpacing', s)} className={`py-2 text-[10px] font-bold rounded-lg border transition-all flex flex-col items-center gap-1 ${(currentTheme.letterSpacing || 'normal') === s ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]' : 'border-white/10 bg-black text-zinc-500 hover:bg-white/5'}`}>
+                  <button key={s} onClick={() => updateField('letterSpacing', s)} className={`py-2 text-[10px] font-bold rounded-lg border transition-all flex flex-col items-center gap-1 scale-on-click ${(currentTheme.letterSpacing || 'normal') === s ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]' : 'border-white/10 bg-black text-zinc-500 hover:bg-white/5'}`}>
                     <AlignLeft className="w-3 h-3" />
                     {s === 'tight' ? 'Tight' : s === 'normal' ? 'Normal' : s === 'wide' ? 'Wide' : 'Extra'}
                   </button>
@@ -654,7 +655,7 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">Alignment</label>
               <div className="grid grid-cols-2 gap-2">
                 {(['center', 'left'] as const).map((a) => (
-                  <button key={a} onClick={() => updateField('textAlign', a)} className={`py-2 text-[10px] font-bold rounded-lg border transition-all ${(currentTheme.textAlign || 'center') === a ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]' : 'border-white/10 bg-black text-zinc-500 hover:bg-white/5'}`}>
+                  <button key={a} onClick={() => updateField('textAlign', a)} className={`py-2 text-[10px] font-bold rounded-lg border transition-all scale-on-click ${(currentTheme.textAlign || 'center') === a ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]' : 'border-white/10 bg-black text-zinc-500 hover:bg-white/5'}`}>
                     {a === 'center' ? 'Center' : 'Left'}
                   </button>
                 ))}
@@ -670,7 +671,7 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">Card Style</label>
               <div className="grid grid-cols-3 gap-2">
                 {CARD_STYLE_OPTIONS.map((style) => (
-                  <button key={style.id} onClick={() => updateField('cardStyle', style.id as any)} className={`py-2 px-1 text-[10px] font-bold rounded-lg border transition-all ${currentTheme.cardStyle === style.id ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]' : 'border-white/5 bg-black/40 text-zinc-400 hover:bg-[#1a1a1a]'}`}>
+                  <button key={style.id} onClick={() => updateField('cardStyle', style.id as any)} className={`py-2 px-1 text-[10px] font-bold rounded-lg border transition-all scale-on-click ${currentTheme.cardStyle === style.id ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]' : 'border-white/5 bg-black/40 text-zinc-400 hover:bg-[#1a1a1a]'}`}>
                     {style.label}
                   </button>
                 ))}
@@ -681,7 +682,7 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">Border Radius</label>
               <div className="grid grid-cols-4 gap-2">
                 {BORDER_RADIUS_OPTIONS.map((r) => (
-                  <button key={r.id} onClick={() => updateField('borderRadius', r.id as any)} className={`py-2 text-[10px] font-bold rounded-lg border transition-all flex flex-col items-center gap-1 ${(currentTheme.borderRadius || 'medium') === r.id ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]' : 'border-white/10 bg-black text-zinc-500 hover:bg-white/5'}`}>
+                  <button key={r.id} onClick={() => updateField('borderRadius', r.id as any)} className={`py-2 text-[10px] font-bold rounded-lg border transition-all flex flex-col items-center gap-1 scale-on-click ${(currentTheme.borderRadius || 'medium') === r.id ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]' : 'border-white/10 bg-black text-zinc-500 hover:bg-white/5'}`}>
                     {r.icon}
                     {r.label}
                   </button>
@@ -693,7 +694,7 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">Button Size</label>
               <div className="grid grid-cols-3 gap-2">
                 {(['small', 'medium', 'large'] as const).map((s) => (
-                  <button key={s} onClick={() => updateField('buttonSize', s)} className={`py-2 text-[10px] font-bold rounded-lg border transition-all ${(currentTheme.buttonSize || 'medium') === s ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]' : 'border-white/10 bg-black text-zinc-500 hover:bg-white/5'}`}>
+                  <button key={s} onClick={() => updateField('buttonSize', s)} className={`py-2 text-[10px] font-bold rounded-lg border transition-all scale-on-click ${(currentTheme.buttonSize || 'medium') === s ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]' : 'border-white/10 bg-black text-zinc-500 hover:bg-white/5'}`}>
                     {s === 'small' ? 'Small' : s === 'medium' ? 'Medium' : 'Large'}
                   </button>
                 ))}
@@ -785,7 +786,7 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
               <div className="flex flex-wrap gap-2">
                 {['#0f172a','#1e1b4b','#1a1a2e','#0d1117','#111827','#1c1917','#171717','#1f2937','#020617','#000000','#2d1b69','#1a3a5c','#3b0764','#164e63','#0b3d0b','#3d0c0c','#7c2d12','#4c1d95','#0f0f0f','#262626','#ffffff','#f8fafc','#f0fdf4','#fef2f2','#fefce8','#f5f3ff','#ecfeff','#fff7ed','#fdf2f8'].map((c) => (
                   <button key={c} type="button" onClick={() => { updateField('backgroundColor', c); updateField('backgroundType', 'color'); }}
-                    className={`w-7 h-7 rounded-full border-2 transition-all cursor-pointer hover:scale-110 ${
+                    className={`w-7 h-7 rounded-full border-2 transition-all cursor-pointer hover:scale-110 scale-on-click ${
                       currentTheme.backgroundColor === c ? 'border-[#a78bfa] scale-110 ring-2 ring-[#a78bfa]/30' : 'border-transparent hover:border-zinc-500'
                     }`}
                     style={{ backgroundColor: c }} title={c} />
@@ -830,7 +831,7 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
                   <button
                     key={sticker.emoji}
                     onClick={() => addSticker(sticker.emoji)}
-                    className="w-full aspect-square bg-black/40 hover:bg-white/10 border border-white/10 rounded-xl flex items-center justify-center text-2xl transition-all hover:scale-110 cursor-pointer"
+                    className="w-full aspect-square bg-black/40 hover:bg-white/10 border border-white/10 rounded-xl flex items-center justify-center text-2xl transition-all hover:scale-110 cursor-pointer scale-on-click"
                     title={sticker.label}
                   >
                     {sticker.emoji}
@@ -908,6 +909,6 @@ export default function ThemeSelector({ currentTheme, onChange }: ThemeSelectorP
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

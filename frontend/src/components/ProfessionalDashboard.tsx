@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { db } from '../firebase';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { UserProfile, ProfessionalProfile, PRO_CATEGORIES, MP_CHECKOUT_URL } from '../types';
@@ -168,7 +169,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-6 h-6 text-[#a78bfa] animate-spin" />
+        <motion.span className="w-6 h-6 border-2 border-[#a78bfa]/30 border-t-[#a78bfa] rounded-full" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} />
       </div>
     );
   }
@@ -176,9 +177,9 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
   // Not approved and no profile yet → show sales/info screen
   if (!isApproved && !proProfile) {
     return (
-      <div className="space-y-6 max-w-2xl">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="space-y-6 max-w-2xl">
         {/* Upsell Card */}
-        <div className="relative overflow-hidden bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl group">
+        <div className="relative overflow-hidden bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl group card-lift glow-border">
           <div className="absolute inset-0 bg-gradient-to-br from-[#a78bfa]/10 via-transparent to-indigo-900/10 pointer-events-none" />
           <div className="absolute -right-20 -top-20 w-64 h-64 bg-indigo-500/20 blur-[80px] rounded-full pointer-events-none group-hover:bg-indigo-500/30 transition-colors duration-500" />
           <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-[#a78bfa]/20 blur-[80px] rounded-full pointer-events-none group-hover:bg-[#a78bfa]/30 transition-colors duration-500" />
@@ -208,7 +209,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
                 { icon: <MessageCircle className="w-4 h-4 text-[#a78bfa]" />, label: 'WhatsApp Direto' },
                 { icon: <Zap className="w-4 h-4 text-[#a78bfa]" />, label: 'Destaque na busca' },
               ].map((b, i) => (
-                <div key={i} className="flex items-center gap-2.5 text-xs text-slate-200 bg-black/20 p-2.5 rounded-xl border border-white/5">
+                <div key={i}                 className="flex items-center gap-2.5 text-xs text-slate-200 bg-black/20 p-2.5 rounded-xl border border-white/5 card-lift glow-border">
                   <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
                   {b.label}
                 </div>
@@ -223,7 +224,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
                 href={MP_CHECKOUT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="relative overflow-hidden flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-[#a78bfa] to-indigo-600 hover:from-[#9061f9] hover:to-indigo-500 text-white font-bold text-sm rounded-2xl transition-all shadow-[0_0_20px_rgba(167,139,250,0.3)] cursor-pointer group/btn"
+                className="relative overflow-hidden flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-[#a78bfa] to-indigo-600 hover:from-[#9061f9] hover:to-indigo-500 text-white font-bold text-sm rounded-2xl transition-all shadow-[0_0_20px_rgba(167,139,250,0.3)] cursor-pointer group/btn scale-on-click"
               >
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300 ease-out" />
                 <span className="relative flex items-center gap-2">
@@ -235,7 +236,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
         </div>
 
         {/* Instructions */}
-        <div className="bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-2xl p-5 shadow-inner">
+        <div className="bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-2xl p-5 shadow-inner card-lift glow-border">
           <h4 className="text-xs font-bold text-slate-200 mb-4 flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-[#a78bfa]" /> Como funciona após a assinatura
           </h4>
@@ -257,7 +258,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
         <p className="text-[10px] text-slate-600 text-center leading-relaxed">
           O LinkFlowAI atua exclusivamente como plataforma de divulgação. Toda negociação e contratação acontece diretamente entre você e o cliente.
         </p>
-      </div>
+      </motion.div>
     );
   }
 
@@ -265,11 +266,11 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
   const showPendingBanner = isPending;
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="space-y-6 max-w-2xl">
 
       {/* Status Banner */}
       {showPendingBanner && (
-        <div className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/25 rounded-xl">
+        <div className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/25 rounded-xl card-lift glow-border">
           <Clock className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-bold text-amber-300">Aguardando aprovação</p>
@@ -281,7 +282,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
       )}
 
       {isApproved && (
-        <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/25 rounded-xl">
+        <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/25 rounded-xl card-lift glow-border">
           <Star className="w-5 h-5 text-amber-400 fill-amber-400 shrink-0" />
           <div>
             <p className="text-sm font-bold text-emerald-300">Perfil Verificado ativo!</p>
@@ -291,7 +292,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
       )}
 
       {/* Form Card */}
-      <div className="relative overflow-hidden bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
+      <div className="relative overflow-hidden bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl card-lift glow-border">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-[#a78bfa]/10 blur-[60px] pointer-events-none" />
         
         <h2 className="relative text-base sm:text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 flex items-center gap-2 mb-2">
@@ -349,7 +350,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
                 />
                 <label 
                   htmlFor="file-upload-pro-avatar" 
-                  className="bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold px-5 py-3.5 rounded-xl border border-white/5 hover:border-white/10 transition-all cursor-pointer flex-1 sm:flex-none flex items-center justify-center gap-2 shadow-sm uppercase tracking-wider"
+                  className="bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold px-5 py-3.5 rounded-xl border border-white/5 hover:border-white/10 transition-all cursor-pointer flex-1 sm:flex-none flex items-center justify-center gap-2 shadow-sm uppercase tracking-wider scale-on-click"
                 >
                   <Upload className="w-3.5 h-3.5 text-emerald-400" /> Subir
                 </label>
@@ -357,7 +358,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
                   <button 
                     type="button" 
                     onClick={() => setProfilePicUrl('')} 
-                    className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold px-4 py-3.5 rounded-xl border border-rose-500/20 transition-all cursor-pointer flex-1 sm:flex-none uppercase tracking-wider"
+                    className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-bold px-4 py-3.5 rounded-xl border border-rose-500/20 transition-all cursor-pointer flex-1 sm:flex-none uppercase tracking-wider scale-on-click"
                   >
                     Limpar
                   </button>
@@ -378,7 +379,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
                     key={idx} 
                     type="button" 
                     onClick={() => setProfilePicUrl(url)}
-                    className={`w-9 h-9 rounded-full overflow-hidden border-2 transition-all cursor-pointer hover:scale-105 shrink-0 ${
+                    className={`w-9 h-9 rounded-full overflow-hidden border-2 transition-all cursor-pointer hover:scale-105 shrink-0 scale-on-click ${
                       profilePicUrl === url ? 'border-[#a78bfa] scale-110 shadow-[0_0_10px_rgba(167,139,250,0.3)]' : 'border-white/5 hover:border-white/20'
                     }`}
                   >
@@ -485,7 +486,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
             <button
               onClick={handleAddSkill}
               disabled={!skillInput.trim() || skills.length >= 10}
-              className="px-5 py-3 bg-[#a78bfa]/20 hover:bg-[#a78bfa]/30 text-[#a78bfa] rounded-xl border border-[#a78bfa]/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-inner"
+              className="px-5 py-3 bg-[#a78bfa]/20 hover:bg-[#a78bfa]/30 text-[#a78bfa] rounded-xl border border-[#a78bfa]/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-inner scale-on-click"
             >
               <Plus className="w-5 h-5" />
             </button>
@@ -495,7 +496,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
               {skills.map((skill, i) => (
                 <span key={i} className="flex items-center gap-1.5 text-xs font-semibold bg-gradient-to-r from-[#a78bfa]/10 to-indigo-500/10 text-slate-200 border border-[#a78bfa]/20 px-3 py-1.5 rounded-full shadow-sm hover:border-[#a78bfa]/40 transition-colors">
                   {skill}
-                  <button onClick={() => handleRemoveSkill(skill)} className="text-[#a78bfa]/60 hover:text-rose-400 transition-colors cursor-pointer">
+                  <button onClick={() => handleRemoveSkill(skill)} className="text-[#a78bfa]/60 hover:text-rose-400 transition-colors cursor-pointer scale-on-click">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </span>
@@ -570,7 +571,7 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
         <button
           onClick={handleSave}
           disabled={isSaving}
-          className="relative z-10 w-full group overflow-hidden flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-[#a78bfa] to-indigo-600 hover:from-[#9061f9] hover:to-indigo-500 disabled:opacity-60 text-white font-bold text-sm rounded-2xl transition-all shadow-[0_0_20px_rgba(167,139,250,0.2)] cursor-pointer disabled:cursor-not-allowed mt-4"
+          className="relative z-10 w-full group overflow-hidden flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-[#a78bfa] to-indigo-600 hover:from-[#9061f9] hover:to-indigo-500 disabled:opacity-60 text-white font-bold text-sm rounded-2xl transition-all shadow-[0_0_20px_rgba(167,139,250,0.2)] cursor-pointer disabled:cursor-not-allowed mt-4 scale-on-click"
         >
           <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
           <span className="relative flex items-center gap-2">
@@ -595,6 +596,6 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
       <p className="text-[10px] text-slate-600 text-center leading-relaxed">
         O LinkFlowAI atua exclusivamente como plataforma de divulgação. Toda negociação, contratação, pagamento e execução dos serviços são realizados diretamente entre contratante e contratado.
       </p>
-    </div>
+    </motion.div>
   );
 }

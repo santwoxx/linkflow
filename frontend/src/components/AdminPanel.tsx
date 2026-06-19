@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebase';
 import { collection, query, orderBy, limit, getDocs, doc, updateDoc, deleteDoc, setDoc, serverTimestamp, where } from 'firebase/firestore';
 import { UserProfile, LinkItem, ProfessionalProfile } from '../types';
+import { motion } from 'motion/react';
 import { Crown, Users, Link2, BarChart2, Sparkles, RefreshCw, ExternalLink, ChevronDown, ChevronRight, Ban, CheckCircle, Calendar, MousePointerClick, Hash, ShieldBan, Edit3, Check, X, Briefcase, MapPin, Star, MessageCircle, Trash2, UserPlus, ShieldPlus } from 'lucide-react';
 
 export default function AdminPanel() {
@@ -296,7 +297,7 @@ export default function AdminPanel() {
   };
 
   return (
-    <div className="space-y-6">
+    <motion.div className="space-y-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
       <div className="bg-gradient-to-br from-amber-500/10 via-rose-500/5 to-amber-500/10 border border-amber-500/20 p-6 rounded-2xl">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 flex items-center justify-center">
@@ -339,7 +340,7 @@ export default function AdminPanel() {
         </div>
       </div>
 
-      <div className="bg-black/40 border border-white/5 rounded-xl overflow-hidden">
+      <div className="bg-black/40 border border-white/5 rounded-xl overflow-hidden card-lift glow-border">
         <div className="flex items-center justify-between p-4 border-b border-white/5">
           <h4 className="text-xs font-bold text-zinc-300 flex items-center gap-2">
             <Users className="w-4 h-4 text-[#a78bfa]" />
@@ -348,7 +349,7 @@ export default function AdminPanel() {
           </h4>
           <div className="flex items-center gap-2">
             <span className="text-[9px] text-zinc-600">Clique no usuário para ver métricas</span>
-            <button onClick={fetchAllUsers} className="text-[10px] font-bold text-zinc-400 hover:text-white transition-colors flex items-center gap-1">
+            <button onClick={fetchAllUsers} className="text-[10px] font-bold text-zinc-400 hover:text-white transition-colors flex items-center gap-1 scale-on-click">
               <RefreshCw className="w-3 h-3" /> Atualizar
             </button>
           </div>
@@ -416,10 +417,10 @@ export default function AdminPanel() {
                           autoFocus
                           onKeyDown={(e) => { if (e.key === 'Enter') handleSaveUsername(p.uid); if (e.key === 'Escape') handleCancelEditUsername(); }}
                         />
-                        <button onClick={() => handleSaveUsername(p.uid)} disabled={savingUsername} className="text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer">
+                        <button onClick={() => handleSaveUsername(p.uid)} disabled={savingUsername} className="text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer scale-on-click">
                           <Check className="w-3 h-3" />
                         </button>
-                        <button onClick={handleCancelEditUsername} className="text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer">
+                        <button onClick={handleCancelEditUsername} className="text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer scale-on-click">
                           <X className="w-3 h-3" />
                         </button>
                       </div>
@@ -432,11 +433,11 @@ export default function AdminPanel() {
                       <button
                         onClick={(e) => { e.stopPropagation(); handleConvertToPro(p); }}
                         disabled={convertingUid === p.uid}
-                        className="text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50"
+                        className="text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50 scale-on-click"
                         title="Criar cadastro de prestador (vai para Pendentes)"
                       >
                         {convertingUid === p.uid ? (
-                          <RefreshCw className="w-3 h-3 animate-spin" />
+                          <motion.span className="w-6 h-6 border-2 border-[#a78bfa]/30 border-t-[#a78bfa] rounded-full inline-block" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} />
                         ) : (
                           <UserPlus className="w-3 h-3" />
                         )}
@@ -447,11 +448,11 @@ export default function AdminPanel() {
                       <button
                         onClick={(e) => { e.stopPropagation(); handleToggleAdmin(p); }}
                         disabled={promotingUid === p.uid}
-                        className="text-[10px] font-bold px-2 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50"
+                        className="text-[10px] font-bold px-2 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50 scale-on-click"
                         title="Promover a administrador (poder total)"
                       >
                         {promotingUid === p.uid ? (
-                          <RefreshCw className="w-3 h-3 animate-spin" />
+                          <motion.span className="w-6 h-6 border-2 border-[#a78bfa]/30 border-t-[#a78bfa] rounded-full inline-block" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} />
                         ) : (
                           <ShieldPlus className="w-3 h-3" />
                         )}
@@ -462,11 +463,11 @@ export default function AdminPanel() {
                       <button
                         onClick={(e) => { e.stopPropagation(); handleToggleAdmin(p); }}
                         disabled={promotingUid === p.uid}
-                        className="text-[10px] font-bold px-2 py-1 rounded-lg bg-zinc-700/30 hover:bg-zinc-700/50 text-zinc-300 border border-zinc-600/30 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50"
+                        className="text-[10px] font-bold px-2 py-1 rounded-lg bg-zinc-700/30 hover:bg-zinc-700/50 text-zinc-300 border border-zinc-600/30 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50 scale-on-click"
                         title="Remover cargo de administrador"
                       >
                         {promotingUid === p.uid ? (
-                          <RefreshCw className="w-3 h-3 animate-spin" />
+                          <motion.span className="w-6 h-6 border-2 border-[#a78bfa]/30 border-t-[#a78bfa] rounded-full inline-block" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} />
                         ) : (
                           <ShieldPlus className="w-3 h-3" />
                         )}
@@ -479,7 +480,7 @@ export default function AdminPanel() {
                     </div>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleStartEditUsername(p); }}
-                      className="text-zinc-500 hover:text-[#a78bfa] transition-colors cursor-pointer"
+                      className="text-zinc-500 hover:text-[#a78bfa] transition-colors cursor-pointer scale-on-click"
                       title="Editar username"
                     >
                       <Edit3 className="w-3 h-3" />
@@ -487,14 +488,14 @@ export default function AdminPanel() {
                     <button
                       onClick={(e) => { e.stopPropagation(); toggleBan(p); }}
                       disabled={banningUser === p.uid || p.uid === 'demo-user-123'}
-                      className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1 ${
+                      className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1 scale-on-click ${
                         p.banned
                           ? 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/20'
                           : 'bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20'
                       } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                       {banningUser === p.uid ? (
-                        <RefreshCw className="w-3 h-3 animate-spin" />
+                        <motion.span className="w-6 h-6 border-2 border-[#a78bfa]/30 border-t-[#a78bfa] rounded-full inline-block" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} />
                       ) : p.banned ? (
                         <CheckCircle className="w-3 h-3" />
                       ) : (
@@ -522,7 +523,7 @@ export default function AdminPanel() {
                   <div className="bg-black/30 px-3 py-4 border-t border-white/5 space-y-3">
                     {loadingMetrics[p.uid] ? (
                       <div className="flex items-center justify-center py-4">
-                        <RefreshCw className="w-4 h-4 text-[#a78bfa] animate-spin" />
+                        <motion.span className="w-6 h-6 border-2 border-[#a78bfa]/30 border-t-[#a78bfa] rounded-full inline-block" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} />
                         <span className="text-[10px] text-zinc-500 ml-2">Carregando métricas...</span>
                       </div>
                     ) : (
@@ -588,7 +589,7 @@ export default function AdminPanel() {
       {/* ============================================================ */}
       {/* PROFESSIONAL APPROVALS (LinkFlowAI Profissional)               */}
       {/* ============================================================ */}
-      <div className="bg-black/40 border border-white/5 rounded-xl overflow-hidden">
+      <div className="bg-black/40 border border-white/5 rounded-xl overflow-hidden card-lift glow-border">
         <div className="flex items-center justify-between p-4 border-b border-white/5 flex-wrap gap-2">
           <h4 className="text-xs font-bold text-zinc-300 flex items-center gap-2">
             <Briefcase className="w-4 h-4 text-emerald-400" />
@@ -605,7 +606,7 @@ export default function AdminPanel() {
                 <button
                   key={tab.id}
                   onClick={() => setProFilter(tab.id)}
-                  className={`text-[10px] font-bold px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1 ${
+                  className={`text-[10px] font-bold px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1 scale-on-click ${
                     proFilter === tab.id
                       ? 'bg-white/10 text-white'
                       : 'text-zinc-500 hover:text-zinc-300'
@@ -616,7 +617,7 @@ export default function AdminPanel() {
                 </button>
               ))}
             </div>
-            <button onClick={fetchAllPros} className="text-[10px] font-bold text-zinc-400 hover:text-white transition-colors flex items-center gap-1 cursor-pointer">
+            <button onClick={fetchAllPros} className="text-[10px] font-bold text-zinc-400 hover:text-white transition-colors flex items-center gap-1 cursor-pointer scale-on-click">
               <RefreshCw className="w-3 h-3" /> Atualizar
             </button>
           </div>
@@ -624,7 +625,7 @@ export default function AdminPanel() {
 
         {prosLoading ? (
           <div className="p-8 text-center text-zinc-500 text-xs flex items-center justify-center gap-2">
-            <RefreshCw className="w-3 h-3 animate-spin" /> Carregando prestadores...
+            <motion.span className="w-6 h-6 border-2 border-[#a78bfa]/30 border-t-[#a78bfa] rounded-full inline-block" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} /> Carregando prestadores...
           </div>
         ) : prosError ? (
           <div className="p-8 text-center text-rose-400 text-xs">{prosError}</div>
@@ -722,10 +723,10 @@ export default function AdminPanel() {
                           <button
                             onClick={() => handleApprovePro(pro)}
                             disabled={approvingUid === pro.uid || rejectingUid === pro.uid}
-                            className="text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/20 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50"
+                            className="text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/20 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50 scale-on-click"
                           >
                             {approvingUid === pro.uid ? (
-                              <RefreshCw className="w-3 h-3 animate-spin" />
+                              <motion.span className="w-6 h-6 border-2 border-[#a78bfa]/30 border-t-[#a78bfa] rounded-full inline-block" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} />
                             ) : (
                               <Check className="w-3 h-3" />
                             )}
@@ -734,10 +735,10 @@ export default function AdminPanel() {
                           <button
                             onClick={() => handleRejectPro(pro)}
                             disabled={approvingUid === pro.uid || rejectingUid === pro.uid}
-                            className="text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50"
+                            className="text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50 scale-on-click"
                           >
                             {rejectingUid === pro.uid ? (
-                              <RefreshCw className="w-3 h-3 animate-spin" />
+                              <motion.span className="w-6 h-6 border-2 border-[#a78bfa]/30 border-t-[#a78bfa] rounded-full inline-block" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} />
                             ) : (
                               <Trash2 className="w-3 h-3" />
                             )}
@@ -749,11 +750,11 @@ export default function AdminPanel() {
                         <button
                           onClick={() => handleUnverifyPro(pro)}
                           disabled={approvingUid === pro.uid}
-                          className="text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50"
-                          title="Revogar verificação e marcar como pendente"
+className="text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50 scale-on-click"
+                            title="Revogar verificação e marcar como pendente"
                         >
                           {approvingUid === pro.uid ? (
-                            <RefreshCw className="w-3 h-3 animate-spin" />
+                            <motion.span className="w-6 h-6 border-2 border-[#a78bfa]/30 border-t-[#a78bfa] rounded-full inline-block" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} />
                           ) : (
                             <Ban className="w-3 h-3" />
                           )}
@@ -768,6 +769,6 @@ export default function AdminPanel() {
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { db } from '../firebase';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { ProfessionalProfile, UserProfile } from '../types';
@@ -105,7 +106,7 @@ export default function ProfessionalProfilePage({ username, onBack, currentUserP
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#050b18] flex flex-col items-center justify-center gap-3">
-        <Loader2 className="w-8 h-8 text-[#a78bfa] animate-spin" />
+        <motion.span className="w-8 h-8 border-2 border-[#a78bfa]/30 border-t-[#a78bfa] rounded-full" animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} />
         <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">Carregando perfil...</p>
       </div>
     );
@@ -119,7 +120,7 @@ export default function ProfessionalProfilePage({ username, onBack, currentUserP
         </div>
         <h2 className="text-slate-300 font-bold">Perfil não encontrado</h2>
         <p className="text-slate-500 text-sm max-w-xs">Este profissional não está disponível ou ainda não foi verificado.</p>
-        <button onClick={onBack} className="mt-2 flex items-center gap-1.5 text-[#a78bfa] hover:text-[#c4b5fd] font-semibold text-sm transition-colors cursor-pointer">
+        <button onClick={onBack} className="mt-2 flex items-center gap-1.5 text-[#a78bfa] hover:text-[#c4b5fd] font-semibold text-sm transition-colors cursor-pointer scale-on-click">
           <ArrowLeft className="w-4 h-4" /> Voltar à busca
         </button>
       </div>
@@ -129,7 +130,7 @@ export default function ProfessionalProfilePage({ username, onBack, currentUserP
   const waLink = `https://wa.me/${pro.whatsapp.replace(/\D/g, '')}?text=Olá! Vi seu perfil no LinkFlowAI e gostaria de saber mais sobre seus serviços.`;
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-100 pb-24 font-sans selection:bg-[#a78bfa]/30 selection:text-white">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="min-h-screen bg-[#020617] text-slate-100 pb-24 font-sans selection:bg-[#a78bfa]/30 selection:text-white">
       {/* 1. Hero Cover Premium */}
       <div className="relative h-[250px] sm:h-[300px] w-full bg-[#0a0f25] overflow-hidden">
         {/* Dynamic mesh gradient background */}
@@ -144,7 +145,7 @@ export default function ProfessionalProfilePage({ username, onBack, currentUserP
         <div className="absolute top-0 inset-x-0 p-4 sm:p-6 flex items-center justify-between z-20">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-xs font-bold text-white bg-black/30 hover:bg-black/50 border border-white/10 px-4 py-2.5 rounded-xl backdrop-blur-md transition-all cursor-pointer shadow-lg hover:-translate-x-1"
+            className="flex items-center gap-2 text-xs font-bold text-white bg-black/30 hover:bg-black/50 border border-white/10 px-4 py-2.5 rounded-xl backdrop-blur-md transition-all cursor-pointer shadow-lg hover:-translate-x-1 scale-on-click"
           >
             <ArrowLeft className="w-4 h-4" /> Voltar
           </button>
@@ -154,7 +155,7 @@ export default function ProfessionalProfilePage({ username, onBack, currentUserP
       {/* 2. Main Profile Content */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 relative z-10 -mt-24 sm:-mt-32">
         {/* Profile Card Main */}
-        <div className="bg-[#0f172a]/80 backdrop-blur-3xl border border-white/10 rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] p-6 sm:p-10 mb-8 relative">
+        <div className="bg-[#0f172a]/80 backdrop-blur-3xl border border-white/10 rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] p-6 sm:p-10 mb-8 relative card-lift glow-border">
           
           <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-start text-center sm:text-left">
             
@@ -255,7 +256,7 @@ export default function ProfessionalProfilePage({ username, onBack, currentUserP
                     href={pro.portfolio.startsWith('http') ? pro.portfolio : `https://${pro.portfolio}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all group"
+                    className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all group card-lift glow-border"
                   >
                     <div className="p-2.5 bg-slate-800 rounded-xl group-hover:bg-indigo-500/20 transition-colors">
                       <Globe className="w-5 h-5 text-slate-400 group-hover:text-indigo-400" />
@@ -273,7 +274,7 @@ export default function ProfessionalProfilePage({ username, onBack, currentUserP
                     href={`https://instagram.com/${pro.instagram.replace('@', '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all group"
+                    className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all group card-lift glow-border"
                   >
                     <div className="p-2.5 bg-slate-800 rounded-xl group-hover:bg-rose-500/20 transition-colors">
                       <Instagram className="w-5 h-5 text-slate-400 group-hover:text-rose-400" />
@@ -296,7 +297,7 @@ export default function ProfessionalProfilePage({ username, onBack, currentUserP
             href={waLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full flex items-center justify-center gap-3 py-4 sm:py-5 bg-[#10b981] hover:bg-[#059669] text-white font-extrabold text-base sm:text-lg rounded-xl transition-all shadow-xl shadow-emerald-900/40 cursor-pointer group overflow-hidden relative"
+            className="w-full flex items-center justify-center gap-3 py-4 sm:py-5 bg-[#10b981] hover:bg-[#059669] text-white font-extrabold text-base sm:text-lg rounded-xl transition-all shadow-xl shadow-emerald-900/40 cursor-pointer group overflow-hidden relative scale-on-click"
           >
             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
             <MessageCircle className="w-6 h-6 relative z-10" />
@@ -312,6 +313,6 @@ export default function ProfessionalProfilePage({ username, onBack, currentUserP
         </div>
 
       </div>
-    </div>
+    </motion.div>
   );
 }
