@@ -224,6 +224,19 @@ service cloud.firestore {
         allow create: if true;  // qualquer visitante pode registrar uma visualização
         allow update, delete: if isAdmin();
       }
+
+      // ======================================================================
+      // RESUMES /{resumeId}  (currículos enviados para o perfil)
+      // ======================================================================
+      match /resumes/{resumeId} {
+        // O dono do perfil pode listar os currículos recebidos
+        allow read: if isOwner(userId) || isAdmin();
+        // Qualquer visitante pode enviar um currículo (sem necessidade de login)
+        allow create: if true;
+        // Apenas o dono ou admin pode deletar
+        allow delete: if isOwner(userId) || isAdmin();
+        allow update: if isAdmin();
+      }
     }
 
     // ==========================================================================

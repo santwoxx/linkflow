@@ -1470,7 +1470,7 @@ export default function App() {
   if (registrationRequired) {
     return (
       <div className="min-h-screen bg-[#050b18] flex items-center justify-center p-6">
-        <div className="w-full max-w-md bg-[#0f172a] p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6">
+        <div className="w-full max-w-sm sm:max-w-md bg-[#0f172a] p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6">
           <div className="text-center space-y-2">
             <div className="w-12 h-12 bg-[#a78bfa]/10 text-[#a78bfa] flex items-center justify-center rounded-2xl mx-auto mb-2">
               <Sparkles className="w-6 h-6" />
@@ -1690,7 +1690,7 @@ export default function App() {
             <button
               id="register-cta-btn"
               onClick={handleLogin}
-              className="px-8 py-4 bg-gradient-to-r from-[#a78bfa] to-[#c4b5fd] hover:from-[#c4b5fd] hover:to-[#ddd6fe] hover:scale-[1.02] active:scale-[0.98] text-black font-extrabold text-xs rounded-xl tracking-wide font-sans shadow-[0_0_30px_rgba(167,139,250,0.35)] transition-all cursor-pointer flex items-center justify-center gap-2 uppercase shrink-0"
+              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-[#a78bfa] to-[#c4b5fd] hover:from-[#c4b5fd] hover:to-[#ddd6fe] hover:scale-[1.02] active:scale-[0.98] text-black font-extrabold text-xs rounded-xl tracking-wide font-sans shadow-[0_0_30px_rgba(167,139,250,0.35)] transition-all cursor-pointer flex items-center justify-center gap-2 uppercase shrink-0"
               aria-label="Criar minha página no LinkFlowAI gratuitamente"
             >
               <LogIn className="w-4 h-4 text-white" aria-hidden="true" />
@@ -1698,7 +1698,7 @@ export default function App() {
             </button>
             <a
               href="?view=servicos"
-              className="px-6 py-4 bg-[#0a1128] hover:bg-[#0f1635] border border-slate-800 hover:border-emerald-500/40 text-slate-200 hover:text-white font-bold text-xs rounded-xl tracking-wide font-sans transition-all cursor-pointer flex items-center justify-center gap-2 uppercase shrink-0"
+              className="w-full sm:w-auto px-6 py-4 bg-[#0a1128] hover:bg-[#0f1635] border border-slate-800 hover:border-emerald-500/40 text-slate-200 hover:text-white font-bold text-xs rounded-xl tracking-wide font-sans transition-all cursor-pointer flex items-center justify-center gap-2 uppercase shrink-0"
               aria-label="Encontrar profissionais e serviços"
             >
               <Briefcase className="w-4 h-4 text-emerald-400" aria-hidden="true" />

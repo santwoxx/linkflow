@@ -429,7 +429,7 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
             <span className="text-[9px] text-zinc-500 font-mono tracking-wider uppercase border border-white/5 bg-white/5 px-2.5 py-1 rounded-md">Construtor</span>
           </div>
           
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {BLOCKS_MENU.map((item) => (
               <button
                 key={item.type}
@@ -507,17 +507,17 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                       </div>
 
                       {/* TABS SELECTOR */}
-                      <div className="flex bg-black/30 border border-white/5 p-1 rounded-xl w-full gap-1">
+                      <div className="flex bg-black/30 border border-white/5 p-1 rounded-xl w-full gap-1 min-w-0 overflow-hidden">
                         {[
                           { id: 'content', label: '📝 Conteúdo' },
-                          { id: 'style', label: '🎨 Estilo & Badge' },
+                          { id: 'style', label: '🎨 Estilo' },
                           { id: 'schedule', label: '⏰ Programação' }
                         ].map((t) => (
                           <button
                             key={t.id}
                             type="button"
                             onClick={() => setEditTab(t.id as any)}
-                            className={`flex-1 py-2 text-[10px] sm:text-xs font-bold rounded-lg transition-all cursor-pointer uppercase tracking-wider ${
+                            className={`flex-1 py-2 text-[9px] sm:text-[10px] font-bold rounded-lg transition-all cursor-pointer uppercase tracking-wider whitespace-nowrap ${
                               editTab === t.id
                                 ? 'bg-white/10 text-white shadow'
                                 : 'text-zinc-500 hover:text-zinc-350 hover:bg-white/5'
@@ -1100,9 +1100,9 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                     <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
                                       <Palette className="w-3 h-3 text-[#a78bfa]" /> Cor de Fundo
                                     </label>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 min-w-0 flex-1">
                                       <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(editCustomColor) ? editCustomColor : '#111a36'} onChange={(e) => setEditCustomColor(e.target.value)} className="w-9 h-9 rounded border border-white/5 bg-transparent cursor-pointer shrink-0" title="Cor de fundo" />
-                                      <input type="text" placeholder="#111a36" value={editCustomColor} onChange={(e) => setEditCustomColor(e.target.value)} className="flex-1 bg-[#0a0a0a] text-[10px] text-white py-3 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none font-mono" />
+                                      <input type="text" placeholder="#111a36" value={editCustomColor} onChange={(e) => setEditCustomColor(e.target.value)} className="flex-1 min-w-0 bg-[#0a0a0a] text-[10px] text-white py-3 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none font-mono" />
                                       {editCustomColor && <button type="button" onClick={() => setEditCustomColor('')} className="bg-rose-500/10 text-rose-400 text-[10px] font-bold px-2 rounded-lg border border-rose-500/20 cursor-pointer">Limpar</button>}
                                     </div>
                                     <div className="flex flex-wrap gap-1 mt-1.5">
@@ -1117,9 +1117,9 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                 <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
                                   <Type className="w-3 h-3 text-emerald-400" /> Cor do Texto
                                 </label>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 min-w-0 flex-1">
                                   <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(editCustomTextColor) ? editCustomTextColor : '#ffffff'} onChange={(e) => setEditCustomTextColor(e.target.value)} className="w-9 h-9 rounded border border-white/5 bg-transparent cursor-pointer shrink-0" title="Cor do texto" />
-                                  <input type="text" placeholder="#ffffff" value={editCustomTextColor} onChange={(e) => setEditCustomTextColor(e.target.value)} className="flex-1 bg-[#0a0a0a] text-[10px] text-white py-3 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none font-mono" />
+                                  <input type="text" placeholder="#ffffff" value={editCustomTextColor} onChange={(e) => setEditCustomTextColor(e.target.value)} className="flex-1 min-w-0 bg-[#0a0a0a] text-[10px] text-white py-3 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none font-mono" />
                                   {editCustomTextColor && <button type="button" onClick={() => setEditCustomTextColor('')} className="bg-rose-500/10 text-rose-400 text-[10px] font-bold px-2 rounded-lg border border-rose-500/20 cursor-pointer">Limpar</button>}
                                 </div>
                                 <div className="flex flex-wrap gap-1 mt-1.5">
@@ -1134,9 +1134,9 @@ export default function LinkEditor({ links, onAdd, onUpdate, onDelete, onPreview
                                 <label className="block text-[10px] text-zinc-500 font-mono uppercase tracking-wide mb-2 flex items-center gap-1">
                                   <Square className="w-3 h-3 text-amber-400" /> Borda
                                 </label>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 min-w-0 flex-1">
                                   <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(editCustomBorderColor) ? editCustomBorderColor : '#a78bfa'} onChange={(e) => setEditCustomBorderColor(e.target.value)} className="w-9 h-9 rounded border border-white/5 bg-transparent cursor-pointer shrink-0" />
-                                  <input type="text" placeholder="#a78bfa" value={editCustomBorderColor} onChange={(e) => setEditCustomBorderColor(e.target.value)} className="flex-1 bg-[#0a0a0a] text-[10px] text-white py-3 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none font-mono" />
+                                  <input type="text" placeholder="#a78bfa" value={editCustomBorderColor} onChange={(e) => setEditCustomBorderColor(e.target.value)} className="flex-1 min-w-0 bg-[#0a0a0a] text-[10px] text-white py-3 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all outline-none font-mono" />
                                   <div className="flex items-center gap-1.5 bg-black border border-white/5 rounded-xl px-2 shrink-0">
                                     <span className="text-[9px] text-zinc-500">Esp:</span>
                                     <input type="number" min="0" max="8" value={editCustomBorderWidth} onChange={(e) => setEditCustomBorderWidth(Math.max(0, Math.min(8, Number(e.target.value))))} className="w-10 bg-transparent text-[10px] text-zinc-300 py-2 focus:outline-none text-center font-mono" />

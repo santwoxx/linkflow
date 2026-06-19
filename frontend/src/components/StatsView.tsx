@@ -350,7 +350,7 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
       {/* 1. Header Overview Cards (Premium Glassmorphic Theme) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Views Card */}
-        <div className="bg-[#090d16]/70 backdrop-blur-md p-5 rounded-3xl border border-white/[0.06] shadow-xl relative overflow-hidden group hover:border-indigo-500/30 transition-all duration-300">
+        <div className="bg-[#090d16]/70 backdrop-blur-md p-3 sm:p-5 rounded-3xl border border-white/[0.06] shadow-xl relative overflow-hidden group hover:border-indigo-500/30 transition-all duration-300">
           <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all duration-500 pointer-events-none" />
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.03] via-transparent to-transparent opacity-50 pointer-events-none" />
           <div className="relative flex justify-between items-start">
@@ -372,7 +372,7 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
         </div>
 
         {/* Total Clicks Card */}
-        <div className="bg-[#090d16]/70 backdrop-blur-md p-5 rounded-3xl border border-white/[0.06] shadow-xl relative overflow-hidden group hover:border-violet-500/30 transition-all duration-300">
+        <div className="bg-[#090d16]/70 backdrop-blur-md p-3 sm:p-5 rounded-3xl border border-white/[0.06] shadow-xl relative overflow-hidden group hover:border-violet-500/30 transition-all duration-300">
           <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-violet-500/10 rounded-full blur-2xl group-hover:bg-violet-500/20 transition-all duration-500 pointer-events-none" />
           <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.03] via-transparent to-transparent opacity-50 pointer-events-none" />
           <div className="relative flex justify-between items-start">
@@ -394,7 +394,7 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
         </div>
 
         {/* Unique Visitors Card */}
-        <div className="bg-[#090d16]/70 backdrop-blur-md p-5 rounded-3xl border border-white/[0.06] shadow-xl relative overflow-hidden group hover:border-blue-500/30 transition-all duration-300">
+        <div className="bg-[#090d16]/70 backdrop-blur-md p-3 sm:p-5 rounded-3xl border border-white/[0.06] shadow-xl relative overflow-hidden group hover:border-blue-500/30 transition-all duration-300">
           <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all duration-500 pointer-events-none" />
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/[0.03] via-transparent to-transparent opacity-50 pointer-events-none" />
           <div className="relative flex justify-between items-start">
@@ -416,7 +416,7 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
         </div>
 
         {/* Conversion Rate Card */}
-        <div className="bg-[#090d16]/70 backdrop-blur-md p-5 rounded-3xl border border-white/[0.06] shadow-xl relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-300">
+        <div className="bg-[#090d16]/70 backdrop-blur-md p-3 sm:p-5 rounded-3xl border border-white/[0.06] shadow-xl relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-300">
           <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-500 pointer-events-none" />
           <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.03] via-transparent to-transparent opacity-50 pointer-events-none" />
           <div className="relative flex justify-between items-start">
@@ -476,7 +476,7 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
       </div>
 
       {/* 3. Graphic Chart View (Views vs Clicks comparison) */}
-      <div className="bg-[#090d16]/70 backdrop-blur-md p-6 rounded-3xl border border-white/[0.06] shadow-xl space-y-6 relative overflow-hidden">
+      <div className="bg-[#090d16]/70 backdrop-blur-md p-6 rounded-3xl border border-white/[0.06] shadow-xl space-y-6 relative overflow-x-auto">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-widest flex items-center gap-1.5">
@@ -518,7 +518,7 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
           </div>
 
           {/* Graph Columns */}
-          <div className="flex-1 h-full flex items-end justify-between gap-3 sm:gap-4 z-10 relative">
+          <div className="flex-1 h-full flex items-end justify-between gap-3 sm:gap-4 z-10 relative min-w-[280px]">
             {last7DaysData.map((day, idx) => {
               const viewsPct = maxValOnChart > 0 ? (day.views / maxValOnChart) * 100 : 0;
               const clicksPct = maxValOnChart > 0 ? (day.clicks / maxValOnChart) * 100 : 0;
@@ -581,7 +581,7 @@ export default function StatsView({ links, clicks, views = [] }: StatsViewProps)
       </div>
 
       {/* 4. Details Breakdown Grids */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
         {/* Left: Button performance list (2/3 width) */}
         <div className="lg:col-span-2 bg-[#090d16]/70 backdrop-blur-md p-6 rounded-3xl border border-white/[0.06] shadow-xl space-y-6">
