@@ -48,6 +48,8 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
   const [copiedNotification, setCopiedNotification] = useState(false);
   const [saveToast, setSaveToast] = useState<{ kind: 'success' | 'error' | 'theme'; message: string } | null>(null);
   const [colorTab, setColorTab] = useState<'dark' | 'light' | 'gradient'>('dark');
+  const [measurementId, setMeasurementId] = useState(userProfile.measurementId || '');
+  const [analyticsEnabled, setAnalyticsEnabled] = useState(userProfile.analyticsEnabled ?? false);
 
   // Sync state with parent userProfile changes
   useEffect(() => {
@@ -60,6 +62,8 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
     setCoverPosition(userProfile.coverPosition || 'center');
     setCoverOverlay(typeof userProfile.coverOverlay === 'number' ? userProfile.coverOverlay : 0);
     setUsername(userProfile.username || '');
+    if (userProfile.measurementId !== undefined) setMeasurementId(userProfile.measurementId);
+    if (userProfile.analyticsEnabled !== undefined) setAnalyticsEnabled(userProfile.analyticsEnabled);
     setTheme(userProfile.theme);
   }, [userProfile]);
 
@@ -732,7 +736,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
   //      refreshes immediately.
   // ============================================================================
   const persistProfile = async (
-    overrides: { theme?: any; username?: string } = {}
+    overrides: { theme?: any; username?: string; measurementId?: string; analyticsEnabled?: boolean } = {}
   ): Promise<boolean> => {
     const path = `users/${userProfile.uid}`;
 
@@ -792,6 +796,9 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
       // Single atomic write with the FULL set of updatable fields.
       // Firestore's updateDoc replaces only the listed fields; immutable
       // fields (uid/email/role/banned/counters) are protected by rules.
+      const gaMeasurementId = overrides.measurementId !== undefined ? overrides.measurementId : measurementId;
+      const gaAnalyticsEnabled = overrides.analyticsEnabled !== undefined ? overrides.analyticsEnabled : analyticsEnabled;
+
       await updateDoc(docRef, {
         displayName: updatedProfile.displayName,
         bio: updatedProfile.bio,
@@ -803,6 +810,8 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
         coverOverlay: updatedProfile.coverOverlay,
         username: updatedProfile.username,
         theme: nextTheme,
+        measurementId: gaMeasurementId,
+        analyticsEnabled: gaAnalyticsEnabled,
         updatedAt: updatedProfile.updatedAt,
       });
 
@@ -1683,6 +1692,81 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                     </button>
                   </div>
                 </form>
+
+                {/* Google Analytics 4 */}
+                <div className="relative bg-[#0a0a0a] border border-white/5 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden">
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                  <div className="relative z-10 space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-[13px] font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                        <BarChart4 className="w-4 h-4 text-emerald-400" />
+                        Google Analytics
+                      </h3>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={analyticsEnabled}
+                          onChange={(e) => setAnalyticsEnabled(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-10 h-6 bg-zinc-800 rounded-full peer peer-checked:bg-emerald-600 after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-4" />
+                        <span className="ml-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                          {analyticsEnabled ? 'Ativo' : 'Inativo'}
+                        </span>
+                      </label>
+                    </div>
+                    <p className="text-[11px] text-zinc-500 leading-relaxed">
+                      Conecte sua própria propriedade do Google Analytics 4 para rastrear visitas e cliques na sua página pública.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                      <div className="relative flex-1 w-full">
+                        <input
+                          type="text"
+                          placeholder="G-XXXXXXXXXX"
+                          value={measurementId}
+                          onChange={(e) => setMeasurementId(e.target.value.toUpperCase().trim())}
+                          className="w-full bg-[#111111] text-xs font-mono text-zinc-300 py-3 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all placeholder-zinc-600 outline-none"
+                          disabled={!analyticsEnabled}
+                        />
+                        {measurementId && analyticsEnabled && /^G-[A-Z0-9]{8,12}$/i.test(measurementId) && (
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-400">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const gaId = measurementId.trim();
+                          if (gaId && !/^G-[A-Z0-9]{8,12}$/i.test(gaId)) {
+                            setSaveToast({ kind: 'error', message: 'Formato inválido. Use G-XXXXXXXXXX' });
+                            setTimeout(() => setSaveToast(null), 3500);
+                            return;
+                          }
+                          const ok = await persistProfile({
+                            measurementId: gaId || '',
+                            analyticsEnabled,
+                          });
+                          if (ok) {
+                            setSaveToast({ kind: 'success', message: 'Configuração do GA salva!' });
+                            setTimeout(() => setSaveToast(null), 2500);
+                          }
+                        }}
+                        className="px-5 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-800 disabled:text-zinc-600 text-white text-xs font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap"
+                        disabled={!analyticsEnabled}
+                      >
+                        Salvar GA
+                      </button>
+                    </div>
+                    {measurementId && analyticsEnabled && (
+                      <div className="bg-emerald-950/10 border border-emerald-900/20 rounded-xl p-3">
+                        <p className="text-[10px] text-emerald-400/80 font-mono">
+                          ✓ GA4 ativo — Measurement ID: <strong className="text-emerald-300">{measurementId}</strong>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 <div className="relative bg-[#0a0a0a] border border-white/5 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden">
                   <ThemeSelector currentTheme={theme} onChange={handleThemeChange} />

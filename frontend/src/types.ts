@@ -116,6 +116,9 @@ export interface UserProfile {
   banned?: boolean;
   followersCount?: number;
   followingCount?: number;
+  // Google Analytics 4
+  measurementId?: string;
+  analyticsEnabled?: boolean;
   // LinkFlowAI Profissional
   verifiedProfessional?: boolean;
   serviceEnabled?: boolean;

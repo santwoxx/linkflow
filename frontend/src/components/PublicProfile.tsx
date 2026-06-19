@@ -7,6 +7,7 @@ import { ExternalLink, Copy, Check, Sparkles, MessageSquare, Link as LinkIcon, L
 import CommunityFeed from './CommunityFeed';
 import { isFollowing, followUser, unfollowUser } from '../utils/follow';
 import GoToNatanDevButton from './GoToNatanDevButton';
+import { useAnalytics } from '../hooks/useAnalytics';
 import { motion } from 'motion/react';
 
 const TiktokIcon = ({ className }: { className?: string }) => (
@@ -135,6 +136,12 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
   const [leadPhone, setLeadPhone] = useState('');
   const [isSendingLead, setIsSendingLead] = useState(false);
   const [leadSent, setLeadSent] = useState(false);
+
+  // Google Analytics 4
+  const { trackPageView, trackLinkClick } = useAnalytics(
+    profile.measurementId,
+    profile.analyticsEnabled && !previewMode
+  );
 
   const handleOpenBooking = (svc: any, whatsappUrl: string) => {
     setSelectedService(svc);
@@ -453,7 +460,8 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
     };
 
     recordPageView();
-  }, [profile.uid, previewMode]);
+    trackPageView(window.location.pathname);
+  }, [profile.uid, previewMode, trackPageView]);
 
   // Lead Capture: show modal for visitors (not the profile owner)
   useEffect(() => {
@@ -652,6 +660,10 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
         visitorId,
         ...meta
       });
+
+      // GA4 tracking
+      trackLinkClick(link.type || 'link', link.id, link.title, link.url);
+
       console.log(`Clique gravado com sucesso!`);
     } catch (error) {
       // Silent logging, fallback to handler but don't disrupt user navigation
