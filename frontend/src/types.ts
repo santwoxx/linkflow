@@ -131,6 +131,19 @@ export interface Lead {
   profileOwnerId: string;
   profileOwnerUsername: string;
   createdAt: any;
+  status?: 'new' | 'contacted' | 'converted';
+}
+
+export interface ResumeData {
+  id: string;
+  candidateName: string;
+  candidateEmail: string;
+  candidatePhone?: string;
+  message?: string;
+  resumeFile?: string;
+  resumeFileName?: string;
+  destinationEmail?: string;
+  createdAt: any;
 }
 
 export const ADMIN_EMAIL = 'brisasofc@gmail.com';

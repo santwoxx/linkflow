@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { LinkItem, ClickLog, ViewLog, Lead } from '../types';
+import { LinkItem, ClickLog, ViewLog, Lead, ResumeData } from '../types';
+import { db } from '../firebase';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -17,6 +19,8 @@ import {
   Globe,
   Compass,
   ArrowUpRight,
+  ArrowUp,
+  ArrowDown,
   Laptop,
   Activity,
   Languages,
@@ -26,7 +30,12 @@ import {
   Edit3,
   Phone,
   User,
-  Sparkles
+  Sparkles,
+  Download,
+  CheckCircle,
+  XCircle,
+  FileText,
+  Filter
 } from 'lucide-react';
 
 interface StatsViewProps {
@@ -34,21 +43,83 @@ interface StatsViewProps {
   clicks: ClickLog[];
   views?: ViewLog[];
   leads?: Lead[];
+  resumes?: ResumeData[];
 }
 
-export default function StatsView({ links, clicks, views = [], leads = [] }: StatsViewProps) {
+export default function StatsView({ links, clicks, views = [], leads = [], resumes = [] }: StatsViewProps) {
   const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
   const [editMessage, setEditMessage] = useState('');
+  const [period, setPeriod] = useState<'7d' | '30d' | '90d' | 'all'>('7d');
+
+  const getPeriodStart = () => {
+    if (period === 'all') return new Date(0);
+    const now = new Date();
+    const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
+    return new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+  };
+
+  const getPrevPeriodStart = () => {
+    if (period === 'all') return new Date(0);
+    const now = new Date();
+    const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
+    return new Date(now.getTime() - 2 * days * 24 * 60 * 60 * 1000);
+  };
+
+  const inRange = (ts: any, start: Date, end: Date) => {
+    if (!ts) return false;
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    return d >= start && d <= end;
+  };
+
+  const periodEnd = new Date();
+
+  const filteredClicks = useMemo(() => {
+    const start = getPeriodStart();
+    return clicks.filter(c => inRange(c.timestamp, start, periodEnd));
+  }, [clicks, period]);
+
+  const filteredViews = useMemo(() => {
+    const start = getPeriodStart();
+    return views.filter(v => inRange(v.timestamp, start, periodEnd));
+  }, [views, period]);
+
+  const filteredLeads = useMemo(() => {
+    const start = getPeriodStart();
+    return leads.filter(l => inRange(l.createdAt, start, periodEnd));
+  }, [leads, period]);
+
+  // Trend calc: compare current period vs previous equivalent period
+  const trend = useMemo(() => {
+    const currentStart = getPeriodStart();
+    const prevStart = getPrevPeriodStart();
+    const prevEnd = currentStart;
+
+    const curViews = views.filter(v => inRange(v.timestamp, currentStart, periodEnd)).length;
+    const prevViews = views.filter(v => inRange(v.timestamp, prevStart, prevEnd)).length;
+    const curClicks = clicks.filter(c => inRange(c.timestamp, currentStart, periodEnd)).length;
+    const prevClicks = clicks.filter(c => inRange(c.timestamp, prevStart, prevEnd)).length;
+    const curLeads = leads.filter(l => inRange(l.createdAt, currentStart, periodEnd)).length;
+    const prevLeads = leads.filter(l => inRange(l.createdAt, prevStart, prevEnd)).length;
+
+    const viewsChange = prevViews > 0 ? ((curViews - prevViews) / prevViews) * 100 : curViews > 0 ? 100 : 0;
+    const clicksChange = prevClicks > 0 ? ((curClicks - prevClicks) / prevClicks) * 100 : curClicks > 0 ? 100 : 0;
+    const leadsChange = prevLeads > 0 ? ((curLeads - prevLeads) / prevLeads) * 100 : curLeads > 0 ? 100 : 0;
+
+    return { viewsChange, clicksChange, leadsChange };
+  }, [views, clicks, leads, period]);
+
+  const [editingStatusLeadId, setEditingStatusLeadId] = useState<string | null>(null);
+
   // Aggregate clicks by individual link
   const clickCountMap = useMemo(() => {
     const map: Record<string, number> = {};
-    clicks.forEach((click) => {
+    filteredClicks.forEach((click) => {
       if (click.linkId) {
         map[click.linkId] = (map[click.linkId] || 0) + 1;
       }
     });
     return map;
-  }, [clicks]);
+  }, [filteredClicks]);
 
   // Map clicks nicely to links
   const linkStats = useMemo(() => {
@@ -62,26 +133,34 @@ export default function StatsView({ links, clicks, views = [], leads = [] }: Sta
   }, [links, clickCountMap]);
 
   // Basic stats
-  const totalViews = views.length;
-  const totalClicks = clicks.length;
+  const totalViews = filteredViews.length;
+  const totalClicks = filteredClicks.length;
   const activeLinksCount = links.filter(l => l.active).length;
 
   // Unique Visitors calculation
   const uniqueVisitors = useMemo(() => {
     const visitorIds = new Set<string>();
-    views.forEach((v) => {
+    filteredViews.forEach((v) => {
       if (v.visitorId) {
         visitorIds.add(v.visitorId);
       }
     });
-    return visitorIds.size || Math.max(views.length ? 1 : 0, Math.floor(views.length * 0.85));
-  }, [views]);
+    return visitorIds.size || Math.max(filteredViews.length ? 1 : 0, Math.floor(filteredViews.length * 0.85));
+  }, [filteredViews]);
 
   // Click-Through Rate (CTR)
   const ctr = useMemo(() => {
     if (totalViews === 0) return 0;
     return (totalClicks / totalViews) * 100;
   }, [totalClicks, totalViews]);
+
+  // Conversion funnel
+  const funnel = useMemo(() => {
+    const totalLeads = filteredLeads.length;
+    const viewsToLeads = totalViews > 0 ? (totalLeads / totalViews) * 100 : 0;
+    const clicksToLeads = totalClicks > 0 ? (totalLeads / totalClicks) * 100 : 0;
+    return { totalLeads, viewsToLeads, clicksToLeads };
+  }, [totalViews, totalClicks, filteredLeads]);
 
   // CTR Level styling and feedback (High Premium Design)
   const ctrConfig = useMemo(() => {
@@ -142,12 +221,12 @@ export default function StatsView({ links, clicks, views = [], leads = [] }: Sta
 
   // Calculate Peak Hours and Top Day based on views
   const { peakHour, topDayLabel } = useMemo(() => {
-    if (views.length === 0) return { peakHour: '--:--', topDayLabel: '--' };
+    if (filteredViews.length === 0) return { peakHour: '--:--', topDayLabel: '--' };
 
     const hourCounts: Record<number, number> = {};
     const dayCounts: Record<number, number> = {};
 
-    views.forEach(view => {
+    filteredViews.forEach(view => {
       if (!view.timestamp) return;
       const d = view.timestamp.toDate ? view.timestamp.toDate() : new Date(view.timestamp);
       hourCounts[d.getHours()] = (hourCounts[d.getHours()] || 0) + 1;
@@ -178,12 +257,12 @@ export default function StatsView({ links, clicks, views = [], leads = [] }: Sta
       peakHour: `${bestHour.toString().padStart(2, '0')}:00`,
       topDayLabel: daysOfWeek[bestDay]
     };
-  }, [views]);
+  }, [filteredViews]);
 
   // Traffic Sources (Referrers) Distribution
   const referrersDist = useMemo(() => {
     const counts: Record<string, number> = {};
-    views.forEach((v) => {
+    filteredViews.forEach((v) => {
       const ref = v.referrer || 'Direto';
       counts[ref] = (counts[ref] || 0) + 1;
     });
@@ -192,15 +271,15 @@ export default function StatsView({ links, clicks, views = [], leads = [] }: Sta
       .map(([name, count]) => ({
         name,
         count,
-        percentage: views.length > 0 ? (count / views.length) * 100 : 0
+        percentage: filteredViews.length > 0 ? (count / filteredViews.length) * 100 : 0
       }))
       .sort((a, b) => b.count - a.count);
-  }, [views]);
+  }, [filteredViews]);
 
   // Devices Distribution
   const devicesDist = useMemo(() => {
     const counts: Record<string, number> = {};
-    views.forEach((v) => {
+    filteredViews.forEach((v) => {
       const dev = v.device || 'Desktop';
       counts[dev] = (counts[dev] || 0) + 1;
     });
@@ -209,15 +288,15 @@ export default function StatsView({ links, clicks, views = [], leads = [] }: Sta
       .map(([name, count]) => ({
         name,
         count,
-        percentage: views.length > 0 ? (count / views.length) * 100 : 0
+        percentage: filteredViews.length > 0 ? (count / filteredViews.length) * 100 : 0
       }))
       .sort((a, b) => b.count - a.count);
-  }, [views]);
+  }, [filteredViews]);
 
   // Browser Distribution
   const browsersDist = useMemo(() => {
     const counts: Record<string, number> = {};
-    views.forEach((v) => {
+    filteredViews.forEach((v) => {
       const b = v.browser || 'Outro';
       counts[b] = (counts[b] || 0) + 1;
     });
@@ -226,15 +305,15 @@ export default function StatsView({ links, clicks, views = [], leads = [] }: Sta
       .map(([name, count]) => ({
         name,
         count,
-        percentage: views.length > 0 ? (count / views.length) * 100 : 0
+        percentage: filteredViews.length > 0 ? (count / filteredViews.length) * 100 : 0
       }))
       .sort((a, b) => b.count - a.count);
-  }, [views]);
+  }, [filteredViews]);
 
   // Operating System Distribution
   const osDist = useMemo(() => {
     const counts: Record<string, number> = {};
-    views.forEach((v) => {
+    filteredViews.forEach((v) => {
       const osName = v.os || 'Outro';
       counts[osName] = (counts[osName] || 0) + 1;
     });
@@ -243,15 +322,15 @@ export default function StatsView({ links, clicks, views = [], leads = [] }: Sta
       .map(([name, count]) => ({
         name,
         count,
-        percentage: views.length > 0 ? (count / views.length) * 100 : 0
+        percentage: filteredViews.length > 0 ? (count / filteredViews.length) * 100 : 0
       }))
       .sort((a, b) => b.count - a.count);
-  }, [views]);
+  }, [filteredViews]);
 
   // Language Distribution
   const languagesDist = useMemo(() => {
     const counts: Record<string, number> = {};
-    views.forEach((v) => {
+    filteredViews.forEach((v) => {
       let lang = v.language || 'pt-BR';
       lang = lang.split('-')[0].toUpperCase();
       counts[lang] = (counts[lang] || 0) + 1;
@@ -261,11 +340,11 @@ export default function StatsView({ links, clicks, views = [], leads = [] }: Sta
       .map(([name, count]) => ({
         name,
         count,
-        percentage: views.length > 0 ? (count / views.length) * 100 : 0
+        percentage: filteredViews.length > 0 ? (count / filteredViews.length) * 100 : 0
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 4);
-  }, [views]);
+  }, [filteredViews]);
 
   // Merged timeline event feed
   const liveEvents = useMemo(() => {
@@ -282,7 +361,7 @@ export default function StatsView({ links, clicks, views = [], leads = [] }: Sta
       language: string;
     }[] = [];
 
-    clicks.forEach((c) => {
+    filteredClicks.forEach((c) => {
       const t = c.timestamp?.toDate ? c.timestamp.toDate() : new Date(c.timestamp);
       const clickedLink = links.find(l => l.id === c.linkId);
       events.push({
@@ -299,7 +378,7 @@ export default function StatsView({ links, clicks, views = [], leads = [] }: Sta
       });
     });
 
-    views.forEach((v) => {
+    filteredViews.forEach((v) => {
       const t = v.timestamp?.toDate ? v.timestamp.toDate() : new Date(v.timestamp);
       events.push({
         id: v.id,
@@ -356,6 +435,28 @@ export default function StatsView({ links, clicks, views = [], leads = [] }: Sta
   return (
     <div id="statistics-manager" className="space-y-6 pb-20">
       
+      {/* Period Selector */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-2 bg-[#090d16]/50 border border-white/[0.06] rounded-2xl p-1">
+          {(['7d', '30d', '90d', 'all'] as const).map(p => (
+            <button
+              key={p}
+              onClick={() => setPeriod(p)}
+              className={`px-4 py-2 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
+                period === p
+                  ? 'bg-[#a78bfa]/20 text-[#a78bfa] border border-[#a78bfa]/30 shadow-sm'
+                  : 'text-zinc-500 hover:text-zinc-300 border border-transparent'
+              }`}
+            >
+              {p === '7d' ? '7 dias' : p === '30d' ? '30 dias' : p === '90d' ? '90 dias' : 'Todo período'}
+            </button>
+          ))}
+        </div>
+        <div className="text-[10px] text-zinc-500 font-mono bg-white/[0.02] border border-white/[0.05] px-3 py-1.5 rounded-xl">
+          {filteredViews.length + filteredClicks.length} eventos no período
+        </div>
+      </div>
+      
       {/* 1. Header Overview Cards (Premium Glassmorphic Theme) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Views Card */}
@@ -374,8 +475,16 @@ export default function StatsView({ links, clicks, views = [], leads = [] }: Sta
                 <p className="text-[10px] text-zinc-500 mt-1">Visitas gerais ao perfil</p>
               </div>
             </div>
-            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-500/25 group-hover:border-indigo-500/40 transition-all duration-300 shadow-inner">
-              <Eye className="w-4.5 h-4.5" />
+            <div className="flex flex-col items-end gap-1">
+              {period !== 'all' && (
+                <span className={`flex items-center gap-0.5 text-[10px] font-bold ${trend.viewsChange >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {trend.viewsChange >= 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+                  {Math.abs(trend.viewsChange).toFixed(0)}%
+                </span>
+              )}
+              <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-500/25 group-hover:border-indigo-500/40 transition-all duration-300 shadow-inner">
+                <Eye className="w-4.5 h-4.5" />
+              </div>
             </div>
           </div>
         </div>
@@ -396,8 +505,16 @@ export default function StatsView({ links, clicks, views = [], leads = [] }: Sta
                 <p className="text-[10px] text-zinc-500 mt-1">Cliques em botões</p>
               </div>
             </div>
-            <div className="w-9 h-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 group-hover:scale-110 group-hover:bg-violet-500/25 group-hover:border-violet-500/40 transition-all duration-300 shadow-inner">
-              <MousePointerClick className="w-4.5 h-4.5" />
+            <div className="flex flex-col items-end gap-1">
+              {period !== 'all' && (
+                <span className={`flex items-center gap-0.5 text-[10px] font-bold ${trend.clicksChange >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {trend.clicksChange >= 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+                  {Math.abs(trend.clicksChange).toFixed(0)}%
+                </span>
+              )}
+              <div className="w-9 h-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 group-hover:scale-110 group-hover:bg-violet-500/25 group-hover:border-violet-500/40 transition-all duration-300 shadow-inner">
+                <MousePointerClick className="w-4.5 h-4.5" />
+              </div>
             </div>
           </div>
         </div>
@@ -937,6 +1054,107 @@ export default function StatsView({ links, clicks, views = [], leads = [] }: Sta
         )}
       </div>
 
+      {/* CONVERSION FUNNEL */}
+      {(totalViews > 0 || funnel.totalLeads > 0) && (
+        <div className="bg-[#090d16]/70 backdrop-blur-md p-6 rounded-3xl border border-white/[0.06] shadow-xl space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+              <TrendingUp className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-widest">Funil de Conversão</h3>
+              <p className="text-[10px] text-zinc-500 mt-0.5">Da visita ao lead — acompanhe suas taxas</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Views stage */}
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 text-center space-y-2">
+              <Eye className="w-6 h-6 text-indigo-400 mx-auto" />
+              <p className="text-2xl font-extrabold text-white font-mono">{totalViews}</p>
+              <p className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">Visitas</p>
+              <div className="w-full bg-white/[0.05] rounded-full h-1.5">
+                <div className="bg-indigo-500 h-1.5 rounded-full" style={{ width: '100%' }} />
+              </div>
+            </div>
+
+            {/* Clicks stage */}
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 text-center space-y-2">
+              <MousePointerClick className="w-6 h-6 text-violet-400 mx-auto" />
+              <p className="text-2xl font-extrabold text-white font-mono">{totalClicks}</p>
+              <p className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">Cliques</p>
+              <div className="w-full bg-white/[0.05] rounded-full h-1.5">
+                <div className="bg-violet-500 h-1.5 rounded-full" style={{ width: `${totalViews > 0 ? (totalClicks / totalViews) * 100 : 0}%` }} />
+              </div>
+              <span className="text-[9px] text-zinc-500">{totalViews > 0 ? ((totalClicks / totalViews) * 100).toFixed(1) : 0}% de conversão</span>
+            </div>
+
+            {/* Leads stage */}
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 text-center space-y-2">
+              <Sparkles className="w-6 h-6 text-emerald-400 mx-auto" />
+              <p className="text-2xl font-extrabold text-white font-mono">{funnel.totalLeads}</p>
+              <p className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">Leads</p>
+              <div className="w-full bg-white/[0.05] rounded-full h-1.5">
+                <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: `${totalViews > 0 ? (funnel.totalLeads / totalViews) * 100 : 0}%` }} />
+              </div>
+              <span className="text-[9px] text-zinc-500">{funnel.viewsToLeads.toFixed(1)}% visita→lead</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* RESUMES SECTION */}
+      {resumes.length > 0 && (
+        <div className="bg-[#090d16]/70 backdrop-blur-md p-6 rounded-3xl border border-white/[0.06] shadow-xl space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-orange-500/10 text-orange-400 flex items-center justify-center">
+              <FileText className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-widest">Currículos Recebidos</h3>
+              <p className="text-[10px] text-zinc-500 mt-0.5">{resumes.length} candidato{resumes.length !== 1 ? 's' : ''} se candidatou{resumes.length !== 1 ? 'ram' : ''}</p>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="text-zinc-500 text-[10px] uppercase tracking-wider border-b border-white/5">
+                  <th className="pb-3 pr-3 font-semibold">Nome</th>
+                  <th className="pb-3 pr-3 font-semibold">Email</th>
+                  <th className="pb-3 pr-3 font-semibold">Telefone</th>
+                  <th className="pb-3 pr-3 font-semibold">Data</th>
+                  <th className="pb-3 font-semibold">Arquivo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {resumes.map((r) => {
+                  const ts = r.createdAt?.toDate ? r.createdAt.toDate() : new Date();
+                  const formattedDate = ts.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                  return (
+                    <tr key={r.id} className="border-b border-white/5">
+                      <td className="py-3 pr-3 text-zinc-200 font-medium">{r.candidateName}</td>
+                      <td className="py-3 pr-3 text-zinc-300">{r.candidateEmail}</td>
+                      <td className="py-3 pr-3 text-zinc-300">{r.candidatePhone || '--'}</td>
+                      <td className="py-3 pr-3 text-zinc-400 text-[10px]">{formattedDate}</td>
+                      <td className="py-3">
+                        {r.resumeFileName ? (
+                          <span className="text-[10px] text-indigo-400 flex items-center gap-1">
+                            <FileText className="w-3 h-3" />
+                            {r.resumeFileName}
+                          </span>
+                        ) : (
+                          <span className="text-zinc-500 text-[10px]">--</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* LEADS SECTION */}
       {leads.length > 0 && (
         <div className="w-full bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 p-6 space-y-5">
@@ -950,6 +1168,28 @@ export default function StatsView({ links, clicks, views = [], leads = [] }: Sta
                 <p className="text-[10px] text-zinc-400">{leads.length} visitante{leads.length !== 1 ? 's' : ''} autorizou{leads.length !== 1 ? 'ram' : ''} o compartilhamento</p>
               </div>
             </div>
+            <button
+              type="button"
+              onClick={() => {
+                const csvRows = [['Nome', 'Telefone', 'Status', 'Data']];
+                leads.forEach(l => {
+                  const ts = l.createdAt?.toDate ? l.createdAt.toDate() : new Date();
+                  csvRows.push([l.visitorName, l.visitorPhone, l.status || 'new', ts.toLocaleDateString('pt-BR')]);
+                });
+                const csv = csvRows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `leads-linkflow-${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 hover:text-indigo-300 font-bold text-[10px] transition-all cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Exportar CSV
+            </button>
           </div>
 
           <div className="overflow-x-auto">
@@ -958,6 +1198,7 @@ export default function StatsView({ links, clicks, views = [], leads = [] }: Sta
                 <tr className="text-zinc-500 text-[10px] uppercase tracking-wider border-b border-white/5">
                   <th className="pb-3 pr-3 font-semibold">Nome</th>
                   <th className="pb-3 pr-3 font-semibold">Telefone</th>
+                  <th className="pb-3 pr-3 font-semibold">Status</th>
                   <th className="pb-3 pr-3 font-semibold">Data</th>
                   <th className="pb-3 font-semibold text-right">Ação</th>
                 </tr>
@@ -977,6 +1218,28 @@ export default function StatsView({ links, clicks, views = [], leads = [] }: Sta
                     window.open(url, '_blank');
                   };
 
+                  const handleStatusChange = async (newStatus: 'new' | 'contacted' | 'converted') => {
+                    if (lead.profileOwnerId) {
+                      try {
+                        await updateDoc(doc(db, 'users', lead.profileOwnerId, 'leads', lead.id), { status: newStatus, updatedAt: serverTimestamp() });
+                      } catch (err) {
+                        console.error('Erro ao atualizar status do lead:', err);
+                      }
+                    }
+                  };
+
+                  const statusColors: Record<string, string> = {
+                    new: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+                    contacted: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+                    converted: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+                  };
+
+                  const statusLabels: Record<string, string> = {
+                    new: 'Novo',
+                    contacted: 'Contatado',
+                    converted: 'Convertido',
+                  };
+
                   return (
                     <tr key={lead.id} className="border-b border-white/5">
                       <td className="py-3 pr-3">
@@ -989,6 +1252,36 @@ export default function StatsView({ links, clicks, views = [], leads = [] }: Sta
                         <div className="flex items-center gap-2">
                           <Phone className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
                           <span className="text-zinc-300">{lead.visitorPhone}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 pr-3">
+                        <div className="relative">
+                          <button
+                            type="button"
+                            onClick={() => setEditingStatusLeadId(editingStatusLeadId === lead.id ? null : lead.id)}
+                            className={`text-[9px] font-bold px-2 py-0.5 rounded-md border uppercase tracking-wider cursor-pointer ${statusColors[lead.status || 'new'] || statusColors.new}`}
+                          >
+                            {statusLabels[lead.status || 'new']}
+                          </button>
+                          {editingStatusLeadId === lead.id && (
+                            <div className="absolute top-full left-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-xl p-1 shadow-2xl z-30 min-w-[130px]">
+                              {(['new', 'contacted', 'converted'] as const).map(s => (
+                                <button
+                                  key={s}
+                                  type="button"
+                                  onClick={() => { handleStatusChange(s); setEditingStatusLeadId(null); }}
+                                  className={`w-full text-left px-3 py-1.5 text-[10px] font-bold rounded-lg hover:bg-white/10 transition-all cursor-pointer flex items-center gap-2 ${
+                                    (lead.status || 'new') === s ? 'text-white bg-white/10' : 'text-zinc-400'
+                                  }`}
+                                >
+                                  {s === 'new' && <XCircle className="w-3 h-3 text-blue-400" />}
+                                  {s === 'contacted' && <Send className="w-3 h-3 text-amber-400" />}
+                                  {s === 'converted' && <CheckCircle className="w-3 h-3 text-emerald-400" />}
+                                  {statusLabels[s]}
+                                </button>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </td>
                       <td className="py-3 pr-3">
