@@ -817,7 +817,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
       ) : filterByUserId && viewMode === 'grid' ? (
         
         /* 4. Instagram Profile 3-Column Grid View */
-        <div className="grid grid-cols-3 gap-1 md:gap-2.5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-0.5 sm:gap-1 md:gap-2.5">
           {posts.map((post) => (
             <div 
               key={post.id}
@@ -1139,14 +1139,14 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 md:p-6"
+            className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-3 md:p-6"
           >
             {/* Main Instagram Box */}
             <motion.div
               initial={{ scale: 0.95, y: 15 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 15 }}
-              className="bg-[#0f172a] border border-white/5 w-full max-w-[920px] rounded-2xl md:rounded-3xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] md:h-[620px] relative shadow-2xl"
+              className="bg-[#0f172a] border border-white/5 w-full max-w-[920px] rounded-t-2xl sm:rounded-2xl md:rounded-3xl overflow-hidden flex flex-col md:flex-row max-h-[92dvh] sm:max-h-[90vh] md:h-[620px] relative shadow-2xl"
             >
               
               {/* Close Button top-right */}
@@ -1155,7 +1155,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
                   setSelectedPostLightbox(null);
                   setActiveCommentsPostId(null);
                 }}
-                className="absolute top-2.5 right-2.5 md:hidden z-30 p-1 bg-black/60 rounded-full text-white cursor-pointer scale-on-click"
+                className="absolute top-2.5 right-2.5 z-30 p-1.5 bg-black/60 hover:bg-black/80 rounded-full text-white cursor-pointer scale-on-click"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1163,7 +1163,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
               {/* Left Side: Post picture */}
               <div 
                 onDoubleClick={() => handleDoubleTap(selectedPostLightbox)}
-                className="w-full md:w-[55%] bg-black flex justify-center items-center overflow-hidden h-[300px] md:h-full relative group"
+                className="w-full md:w-[55%] bg-black flex justify-center items-center overflow-hidden h-[45dvh] sm:h-[50vh] md:h-full relative group"
               >
                 <img
                   src={selectedPostLightbox.imageUrl}
@@ -1190,7 +1190,7 @@ export default function CommunityFeed({ currentUserProfile, filterByUserId, prev
               </div>
 
               {/* Right Side: Header metadata + scrolling comments + commentary actions */}
-              <div className="w-full md:w-[45%] flex flex-col h-[350px] md:h-full border-t md:border-t-0 md:border-l border-slate-850/60">
+              <div className="w-full md:w-[45%] flex flex-col flex-1 md:flex-none border-t md:border-t-0 md:border-l border-slate-850/60 overflow-hidden">
                 
                 {/* Frame Author */}
                 <div className="p-3.5 border-b border-slate-850/40 flex items-center justify-between shrink-0">

@@ -1663,43 +1663,43 @@ export default function App() {
       <div className="absolute bottom-[-200px] right-[-200px] w-[500px] h-[500px] rounded-full bg-[#a78bfa]/10 blur-[120px] pointer-events-none"></div>
 
       {/* Header Landing */}
-      <header className="px-6 py-5 border-b border-slate-800/40 flex items-center justify-between sticky top-0 bg-[#050b18]/80 backdrop-blur-md z-40" role="banner">
+      <header className="px-4 sm:px-6 py-4 sm:py-5 border-b border-slate-800/40 flex items-center justify-between sticky top-0 bg-[#050b18]/80 backdrop-blur-md z-40" role="banner">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#a78bfa] flex items-center justify-center text-white font-bold shadow-[0_0_15px_rgba(167,139,250,0.3)]" aria-hidden="true">
-            <Link2 className="w-4 h-4 rotate-45 text-white" />
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#a78bfa] flex items-center justify-center text-white font-bold shadow-[0_0_15px_rgba(167,139,250,0.3)]" aria-hidden="true">
+            <Link2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 rotate-45 text-white" />
           </div>
-          <span className="font-sans font-extrabold text-sm tracking-wide text-white select-none">LinkFlowAI</span>
+          <span className="font-sans font-extrabold text-xs sm:text-sm tracking-wide text-white select-none">LinkFlowAI</span>
         </div>
-        <nav aria-label="Navegação principal" className="flex items-center gap-2">
+        <nav aria-label="Navegação principal" className="flex items-center gap-1.5 sm:gap-2">
           <a
             href="?view=servicos"
-            className="py-1.5 px-3 hover:bg-[#a78bfa]/10 text-xs text-slate-300 hover:text-white font-semibold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer"
+            className="py-1.5 px-2 sm:px-3 hover:bg-[#a78bfa]/10 text-[10px] sm:text-xs text-slate-300 hover:text-white font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer"
             aria-label="Encontrar profissionais e serviços"
           >
-            <Briefcase className="w-3.5 h-3.5 text-[#a78bfa]" aria-hidden="true" /> Serviços
+            <Briefcase className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#a78bfa]" aria-hidden="true" /> <span className="hidden xs:inline">Serviços</span>
           </a>
           <button
             onClick={handleLogin}
-            className="py-1.5 px-3.5 border border-slate-800 hover:border-[#a78bfa]/40 hover:bg-[#a78bfa]/10 text-xs text-slate-300 hover:text-white font-semibold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer"
+            className="py-1.5 px-2.5 sm:px-3.5 border border-slate-800 hover:border-[#a78bfa]/40 hover:bg-[#a78bfa]/10 text-[10px] sm:text-xs text-slate-300 hover:text-white font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer"
             aria-label="Entrar no LinkFlowAI com Google"
           >
-            <LogIn className="w-3.5 h-3.5 text-[#a78bfa]" aria-hidden="true" /> Entrar
+            <LogIn className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#a78bfa]" aria-hidden="true" /> Entrar
           </button>
         </nav>
       </header>
 
       {/* Main heroic splash section */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-12 max-w-4xl mx-auto text-center space-y-10 z-10" role="main">
+      <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-8 sm:py-12 max-w-4xl mx-auto text-center space-y-8 sm:space-y-10 z-10" role="main">
         
         {/* Highlight Pill */}
-        <div className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full bg-gradient-to-r from-[#a78bfa]/20 to-[#c4b5fd]/20 border border-[#a78bfa]/30 text-[#a78bfa] text-[10px] font-bold uppercase tracking-wider select-none animate-bounce shadow-lg shadow-[#a78bfa]/10">
+        <div className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full bg-gradient-to-r from-[#a78bfa]/20 to-[#c4b5fd]/20 border border-[#a78bfa]/30 text-[#a78bfa] text-[9px] sm:text-[10px] font-bold uppercase tracking-wider select-none animate-bounce shadow-lg shadow-[#a78bfa]/10">
           <Sparkles className="w-3 h-3" />
           +1000 Usuários | Plataforma 100% Gratuita
         </div>
 
         {/* Catchy headline */}
-        <div className="space-y-4">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white max-w-3xl leading-tight font-sans">
+        <div className="space-y-3 sm:space-y-4">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white max-w-3xl leading-tight font-sans">
             Sua página de links (Link na Bio), seus serviços e <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#a78bfa] via-[#c4b5fd] to-white">sua rede social</span> em um só lugar
           </h1>
           <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto leading-relaxed font-light">
@@ -1710,7 +1710,7 @@ export default function App() {
         {/* CTA Login Button with Auth Errors and Manual Debug Guides */}
         <div className="pt-2 flex flex-col items-center gap-4 w-full max-w-lg mx-auto">
           {authError && (
-            <div className="text-left w-full bg-red-950/20 border border-red-900/30 rounded-2xl p-4 sm:p-5 space-y-2">
+            <div className="text-left w-full bg-red-950/20 border border-red-900/30 rounded-2xl p-3 sm:p-5 space-y-2">
               <div className="flex items-start gap-2 text-red-400 font-bold text-xs sm:text-sm">
                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{authError}</span>
@@ -1761,12 +1761,12 @@ export default function App() {
 
         {/* How it works - Service Marketplace */}
         <section className="w-full pt-4" aria-label="Como funciona o marketplace">
-          <div className="bg-gradient-to-r from-emerald-500/5 via-[#a78bfa]/10 to-purple-500/5 border border-slate-800/50 rounded-3xl p-6 md:p-8 shadow-xl">
+          <div className="bg-gradient-to-r from-emerald-500/5 via-[#a78bfa]/10 to-purple-500/5 border border-slate-800/50 rounded-3xl p-5 md:p-8 shadow-xl">
             <div className="flex items-center gap-2 mb-4 justify-center">
               <Store className="w-4 h-4 text-emerald-400" aria-hidden="true" />
               <h2 className="text-xs font-bold text-slate-300 uppercase tracking-widest">Como funciona o marketplace de serviços</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 text-left">
               <div className="flex gap-3">
                 <div className="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xs font-black shrink-0" aria-hidden="true">1</div>
                 <div>
@@ -1793,7 +1793,7 @@ export default function App() {
         </section>
 
         {/* Feature grid */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full pt-8 text-left" aria-label="Recursos da plataforma">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full pt-6 sm:pt-8 text-left" aria-label="Recursos da plataforma">
           
           <article className="bg-[#0f172a] p-5 rounded-2xl border border-slate-900/50 space-y-2 shadow-md hover:border-emerald-500/20 hover:shadow-emerald-500/5 transition-all">
             <div className="w-8 h-8 rounded-lg bg-emerald-600/10 text-emerald-400 flex items-center justify-center mb-2" aria-hidden="true">

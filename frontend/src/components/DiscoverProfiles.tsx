@@ -244,7 +244,7 @@ export default function DiscoverProfiles() {
             title="Fechar (ou clique fora)"
           />
           
-          <div className="relative w-full max-w-sm sm:max-w-md h-[95dvh] sm:h-[85vh] bg-zinc-950 rounded-[40px] border-[6px] border-zinc-900 shadow-2xl overflow-hidden flex flex-col scale-in-center">
+          <div className="relative w-full max-w-sm sm:max-w-md h-[95dvh] sm:h-[85vh] bg-zinc-950 rounded-[24px] sm:rounded-[40px] border-[4px] sm:border-[6px] border-zinc-900 shadow-2xl overflow-hidden flex flex-col scale-in-center">
             {/* Modal Controls overlay */}
             <div className="absolute top-4 right-4 z-50">
               <button 

@@ -1040,22 +1040,22 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
         </div>
       </aside>
 
-      {/* Mobile bottom nav — scrollable so ALL tabs are reachable */}
+      {/* Mobile bottom nav — 2 rows of 3 on small phones, 1 row of 6 on larger */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0f172a]/95 backdrop-blur-xl border-t border-slate-800/60 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-        <div className="flex items-center overflow-x-auto scrollbar-none px-2 py-2 gap-1">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-0.5 px-1.5 py-1.5">
           {navItems.map((item: any) => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className="relative flex flex-col items-center gap-0.5 py-1.5 px-2.5 rounded-xl transition-all cursor-pointer group shrink-0 min-w-[52px]"
+              className="relative flex flex-col items-center justify-center gap-0.5 py-2.5 px-1 rounded-xl transition-all cursor-pointer min-h-[48px]"
             >
               {activeTab === item.id && (
                 <div className="absolute inset-0 bg-[#a78bfa]/10 rounded-xl" />
               )}
-              <span className={`relative z-10 transition-transform duration-200 ${activeTab === item.id ? 'text-[#a78bfa] scale-110' : 'text-slate-500 group-hover:text-slate-300'}`}>
-                {item.icon}
+              <span className={`relative z-10 transition-transform duration-200 ${activeTab === item.id ? 'text-[#a78bfa] scale-110' : 'text-slate-500'}`}>
+                {React.cloneElement(item.icon as React.ReactElement, { className: 'w-4 h-5' })}
               </span>
-              <span className={`relative z-10 text-[9px] font-semibold tracking-wide transition-colors leading-none ${activeTab === item.id ? 'text-[#a78bfa]' : 'text-slate-600'}`}>
+              <span className={`relative z-10 text-[8px] sm:text-[9px] font-semibold tracking-wide transition-colors leading-none ${activeTab === item.id ? 'text-[#a78bfa]' : 'text-slate-500'}`}>
                 {item.label}
               </span>
             </button>
@@ -1095,40 +1095,40 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
           {/* TAB: LINKS MANAGEMENT */}
           {activeTab === 'links' && (
             <div id="tab-content-links" className="flex w-full">
-              <div className="flex-1 min-w-0 p-4 sm:p-5 md:p-6 space-y-6">
-                <div className="bg-[#0f172a] p-4 rounded-2xl border border-slate-800/50 shadow-lg">
-                  <div className="flex items-center justify-between gap-3 flex-wrap">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <ExternalLink className="w-4 h-4 text-[#a78bfa] shrink-0" />
-                      <h3 className="text-xs font-semibold text-slate-300 whitespace-nowrap">Sua página pública</h3>
-                      <span className="text-[9px] text-zinc-500 font-mono truncate bg-black/40 border border-slate-800 px-2 py-1 rounded-lg max-w-[120px] sm:max-w-[200px]">{publicProfileUrl}</span>
+              <div className="flex-1 min-w-0 px-3 sm:px-5 md:px-6 pt-4 sm:pt-5 md:pt-6 space-y-6">
+                <div className="bg-[#0f172a] p-3 sm:p-4 rounded-2xl border border-slate-800/50 shadow-lg">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
+                    <div className="flex items-center gap-2 min-w-0 w-full sm:w-auto">
+                      <ExternalLink className="w-4 h-4 text-[#a78bfa] shrink-0 hidden sm:block" />
+                      <h3 className="text-[10px] sm:text-xs font-semibold text-slate-300 whitespace-nowrap">Sua página pública</h3>
+                      <span className="text-[8px] sm:text-[9px] text-zinc-500 font-mono truncate bg-black/40 border border-slate-800 px-1.5 sm:px-2 py-1 rounded-lg max-w-[100px] sm:max-w-[200px]">{publicProfileUrl}</span>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 w-full sm:w-auto justify-end">
                       {/* Preview button — visible on small screens where the side panel is hidden */}
                       <button
                         type="button"
                         onClick={() => setShowMobilePreview(true)}
-                        className="lg:hidden flex items-center gap-1.5 text-[10px] font-bold px-3 py-2 rounded-lg bg-[#a78bfa]/10 hover:bg-[#a78bfa]/20 text-[#a78bfa] border border-[#a78bfa]/20 transition-all cursor-pointer"
+                        className="lg:hidden flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-[#a78bfa]/10 hover:bg-[#a78bfa]/20 text-[#a78bfa] border border-[#a78bfa]/20 transition-all cursor-pointer"
                         title="Pré-visualizar"
                       >
-                        <Smartphone className="w-3 h-3" /> Preview
+                        <Smartphone className="w-3 h-3" /> <span className="hidden xs:inline">Preview</span>
                       </button>
                       <button
                         type="button"
                         onClick={handleCopyLink}
-                        className="flex items-center gap-1.5 text-[10px] font-bold px-3 py-2 rounded-lg bg-[#a78bfa]/10 hover:bg-[#a78bfa]/20 text-[#a78bfa] border border-[#a78bfa]/20 transition-all cursor-pointer"
+                        className="flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-[#a78bfa]/10 hover:bg-[#a78bfa]/20 text-[#a78bfa] border border-[#a78bfa]/20 transition-all cursor-pointer"
                       >
-                        {copiedNotification ? <><Check className="w-3 h-3" /> Copiado!</> : <><Copy className="w-3 h-3" /> Copiar</>}
+                        {copiedNotification ? <><Check className="w-3 h-3" /> <span className="hidden xs:inline">Copiado!</span></> : <><Copy className="w-3 h-3" /> <span className="hidden xs:inline">Copiar</span></>}
                       </button>
                       <a
                         id="visit-public-profile-from-builder"
                         href={`/${userProfile.username}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-[10px] font-bold px-3 py-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 transition-all cursor-pointer"
+                        className="flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 transition-all cursor-pointer"
                         title="Abrir minha página pública em nova aba"
                       >
-                        <ExternalLink className="w-3 h-3" /> Visitar
+                        <ExternalLink className="w-3 h-3" /> <span className="hidden xs:inline">Visitar</span>
                       </a>
                     </div>
                   </div>
@@ -1148,7 +1148,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                 onClick={() => setShowMobilePreview(true)}
                 className="lg:hidden fixed right-4 z-40 w-12 h-12 rounded-full bg-gradient-to-br from-[#a78bfa] to-indigo-600 text-white shadow-xl shadow-[#a78bfa]/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-all cursor-pointer sm:hidden"
                 title="Pré-visualizar"
-                style={{ bottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}
+                style={{ bottom: 'calc(120px + env(safe-area-inset-bottom, 0px))' }}
               >
                 <Smartphone className="w-5 h-5" />
               </button>
@@ -1782,7 +1782,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                 onClick={() => setShowMobilePreview(true)}
                 className="lg:hidden fixed right-4 z-40 w-12 h-12 rounded-full bg-gradient-to-br from-[#a78bfa] to-indigo-600 text-white shadow-xl shadow-[#a78bfa]/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-all cursor-pointer"
                 title="Pré-visualizar"
-                style={{ bottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}
+                style={{ bottom: 'calc(120px + env(safe-area-inset-bottom, 0px))' }}
               >
                 <Smartphone className="w-5 h-5" />
               </button>
@@ -1810,7 +1810,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
               ? 'bg-[#0f172a]/95 border-[#a78bfa]/40 text-[#a78bfa]'
               : 'bg-emerald-950/90 border-emerald-500/30 text-emerald-200'
           }`}
-          style={{ bottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}
+          style={{ bottom: 'calc(120px + env(safe-area-inset-bottom, 0px))' }}
         >
           <span
             className={`w-2 h-2 rounded-full ${

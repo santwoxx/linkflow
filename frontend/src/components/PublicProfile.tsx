@@ -1707,8 +1707,8 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
       </div>
       {/* Lead Capture Modal */}
       {showLeadCapture && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white text-zinc-800 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-purple-100 flex flex-col animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white text-zinc-800 rounded-t-3xl sm:rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-purple-100 flex flex-col animate-in zoom-in-95 duration-200 max-h-[90dvh] sm:max-h-none">
             {/* Modal Header */}
             <div className="relative bg-gradient-to-r from-purple-50 to-violet-50 px-6 py-5 border-b border-purple-100">
               <h3 className="text-base font-extrabold text-zinc-900 flex items-center gap-2 font-sans">
@@ -1798,8 +1798,8 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
 
       {/* Resume Modal */}
       {isResumeModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white text-zinc-800 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-orange-100 flex flex-col animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white text-zinc-800 rounded-t-3xl sm:rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-orange-100 flex flex-col animate-in zoom-in-95 duration-200 max-h-[90dvh] sm:max-h-none">
             {/* Modal Header */}
             <div className="relative bg-gradient-to-r from-orange-50 to-amber-50 px-6 py-5 border-b border-orange-100">
               <h3 className="text-base font-extrabold text-zinc-900 flex items-center gap-2 font-sans">
@@ -1935,8 +1935,8 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
 
       {/* Booking Modal */}
       {isBookingOpen && selectedService && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white text-zinc-800 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-pink-100 flex flex-col animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white text-zinc-800 rounded-t-3xl sm:rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-pink-100 flex flex-col animate-in zoom-in-95 duration-200 max-h-[90dvh] sm:max-h-none">
             {/* Modal Header */}
             <div className="relative bg-gradient-to-r from-pink-50 to-rose-50 px-6 py-5 border-b border-pink-100">
               <h3 className="text-base font-extrabold text-zinc-900 flex items-center gap-2 font-sans">

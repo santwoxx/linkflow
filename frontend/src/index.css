@@ -231,3 +231,37 @@
   transform: scale(0.96);
 }
 
+/* Mobile improvements */
+html {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Remove 300ms tap delay on mobile for interactive elements */
+button, a, input, select, textarea {
+  touch-action: manipulation;
+}
+
+/* Smooth momentum scrolling for scrollable areas */
+.overflow-y-auto, .overflow-x-auto, .overflow-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent text size adjustment on orientation change */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Hide scrollbar for category chips on mobile */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
