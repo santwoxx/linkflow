@@ -158,11 +158,12 @@ service cloud.firestore {
              d.animation == 'bounce' || d.animation == 'glow') &&
 
             // type: enum string, ou ausente (defaults to 'link' no client)
-            (!(d.type is string) ||
-             d.type == 'link' || d.type == 'whatsapp' || d.type == 'telegram' ||
-             d.type == 'buy_now' || d.type == 'payment' || d.type == 'products' ||
-             d.type == 'services' || d.type == 'service_card' || d.type == 'testimonials' ||
-             d.type == 'gallery' || d.type == 'promo_banner') &&
+             (!(d.type is string) ||
+              d.type == 'link' || d.type == 'whatsapp' || d.type == 'telegram' ||
+              d.type == 'buy_now' || d.type == 'payment' || d.type == 'products' ||
+              d.type == 'services' || d.type == 'service_card' || d.type == 'testimonials' ||
+              d.type == 'gallery' || d.type == 'promo_banner' || d.type == 'scheduling' ||
+              d.type == 'send_resume' || d.type == 'raffle') &&
 
             // Personalização avançada (todos opcionais)
             optionalString(d.customColor, 200) &&
@@ -322,6 +323,61 @@ service cloud.firestore {
         && request.resource.data.id == followId;
       allow delete: if isSignedIn() && request.auth.uid == resource.data.followerId;
       allow update: if false;  // imutável
+    }
+
+    // ==========================================================================
+    // RAFFLES /{raffleId}  (sorteios/promoções)
+    // ==========================================================================
+    match /raffles/{raffleId} {
+      allow read: if true;  // sorteios são públicos
+
+      allow create: if isSignedIn() && !isBanned()
+        && request.resource.data.id == raffleId
+        && request.resource.data.userId == request.auth.uid
+        && validString(request.resource.data.title, 1, 120)
+        && validString(request.resource.data.description, 1, 2000)
+        && validString(request.resource.data.prize, 1, 500)
+        && optionalString(request.resource.data.requirements, 2000)
+        && optionalString(request.resource.data.coverImage, 2048)
+        && request.resource.data.status == 'active'
+        && request.resource.data.username is string
+        && request.resource.data.displayName is string
+        && request.resource.data.profilePicUrl is string;
+
+      allow update: if (isOwner(resource.data.userId) && !isBanned()) || isAdmin();
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+
+      // PARTICIPANTS
+      match /participants/{participantId} {
+        allow read: if true;
+
+        allow create: if isSignedIn() && !isBanned()
+          && request.resource.data.id == participantId
+          && request.resource.data.raffleId == raffleId
+          && request.resource.data.userId == request.auth.uid
+          && validString(request.resource.data.proofImageUrl, 1, 500000)
+          && request.resource.data.status == 'pending'
+          && request.resource.data.username is string
+          && request.resource.data.displayName is string
+          && request.resource.data.profilePicUrl is string;
+
+        allow update: if isOwner(get(/databases/$(database)/documents/raffles/$(raffleId)).data.get('userId', '')) || isAdmin();
+        allow delete: if isOwner(get(/databases/$(database)/documents/raffles/$(raffleId)).data.get('userId', '')) || isAdmin();
+      }
+
+      // MESSAGES (chat between winner and owner)
+      match /messages/{messageId} {
+        allow read: if isSignedIn() && (
+          request.auth.uid == get(/databases/$(database)/documents/raffles/$(raffleId)).data.get('userId', '') ||
+          request.auth.uid == get(/databases/$(database)/documents/raffles/$(raffleId)).data.get('winnerId', '')
+        );
+        allow create: if isSignedIn() && !isBanned()
+          && request.resource.data.id == messageId
+          && request.resource.data.raffleId == raffleId
+          && request.resource.data.senderId == request.auth.uid
+          && validString(request.resource.data.text, 1, 2000);
+        allow update, delete: if false;
+      }
     }
   }
 }

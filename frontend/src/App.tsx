@@ -11,6 +11,7 @@ const ProSalesPage = React.lazy(() => import('./components/ProSalesPage'));
 const SeoLandingPage = React.lazy(() => import('./components/SeoLandingPage'));
 import { motion, AnimatePresence } from 'motion/react';
 import LoadingSpinner from './components/LoadingSpinner';
+import RaffleParticipate from './components/RaffleParticipate';
 import { Link2, Sparkles, LogIn, Lock, CheckCircle, RefreshCw, BarChart4, Palette, Heart, AlertTriangle, ExternalLink, Ban, FileText, X, Briefcase, Users, ShieldCheck, TrendingUp, Smartphone, Store } from 'lucide-react';
 
 export default function App() {
@@ -100,6 +101,7 @@ export default function App() {
   const [publicLinks, setPublicLinks] = useState<LinkItem[]>([]);
   const [publicLoading, setPublicLoading] = useState(false);
   const [publicError, setPublicError] = useState<string | null>(null);
+  const [publicRaffleId, setPublicRaffleId] = useState<string | null>(null);
 
   // Dynamic SEO meta tags for public profiles and SEO pages
   useEffect(() => {
@@ -442,6 +444,7 @@ export default function App() {
     let u = params.get('u');
     const view = params.get('view');
     const pro = params.get('pro');
+    const raffle = params.get('raffle');
 
     const path = window.location.pathname;
     const cleanPath = path.replace(/^\/+|\/+$/g, '');
@@ -528,6 +531,10 @@ export default function App() {
 
     if (pro) {
       setPublicProProfile(pro.trim().toLowerCase());
+    }
+
+    if (raffle) {
+      setPublicRaffleId(raffle.trim());
     }
     // Scroll to top on navigation
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1315,6 +1322,26 @@ export default function App() {
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // ----- RENDER PUBLIC RAFFLE PARTICIPATION PAGE -----
+  if (publicView === 'sorteio' && publicRaffleId) {
+    return (
+      <RaffleParticipate
+        raffleId={publicRaffleId}
+        currentUser={currentUser}
+        currentUserProfile={userProfile}
+        onBack={() => {
+          const newUrl = new URL(window.location.href);
+          newUrl.searchParams.delete('view');
+          newUrl.searchParams.delete('raffle');
+          newUrl.searchParams.delete('user');
+          window.history.pushState({}, '', newUrl.toString());
+          setPublicView(null);
+          setPublicRaffleId(null);
+        }}
+      />
+    );
+  }
 
   // ----- RENDER NEW PROFESSIONAL MODULE ROUTES -----
   if (publicView === 'servicos') {

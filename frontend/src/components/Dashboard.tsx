@@ -10,9 +10,10 @@ import CommunityFeed from './CommunityFeed';
 import DiscoverProfiles from './DiscoverProfiles';
 const AdminPanel = React.lazy(() => import('./AdminPanel'));
 const ProfessionalDashboard = React.lazy(() => import('./ProfessionalDashboard'));
+import RafflesList from './RafflesList';
 import { motion } from 'motion/react';
 import LoadingSpinner from './LoadingSpinner';
-import { Link2, Sparkles, User, LogOut, Check, Copy, ExternalLink, RefreshCw, MessageSquare, Compass, ImageIcon, Crown, Layout, Smartphone, BarChart4, Briefcase, Upload, AtSign, X } from 'lucide-react';
+import { Link2, Sparkles, User, LogOut, Check, Copy, ExternalLink, RefreshCw, MessageSquare, Compass, ImageIcon, Crown, Layout, Smartphone, BarChart4, Briefcase, Upload, AtSign, X, Gift } from 'lucide-react';
 import { ADMIN_EMAIL } from '../types';
 import { compressImage } from '../utils/image';
 
@@ -22,7 +23,7 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ userProfile, onProfileUpdate }: DashboardProps) {
-  const [activeTab, setActiveTab] = useState<'links' | 'design' | 'stats' | 'feed' | 'discover' | 'preview' | 'admin'>('feed');
+  const [activeTab, setActiveTab] = useState<'links' | 'design' | 'stats' | 'feed' | 'discover' | 'preview' | 'admin' | 'raffles'>('feed');
   const isAdmin = userProfile.email === ADMIN_EMAIL || userProfile.role === 'admin';
   const [links, setLinks] = useState<LinkItem[]>([]);
   const [clicks, setClicks] = useState<ClickLog[]>([]);
@@ -932,6 +933,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
     { id: 'feed', label: 'Feed', icon: <MessageSquare className="w-5 h-5" /> } as const,
     { id: 'discover', label: 'Descobrir', icon: <Compass className="w-5 h-5" /> } as const,
     { id: 'professional', label: 'Serviços', icon: <Briefcase className="w-5 h-5" /> } as const,
+    { id: 'raffles', label: 'Sorteios', icon: <Gift className="w-5 h-5" /> } as const,
     { id: 'links', label: 'Construtor', icon: <Link2 className="w-5 h-5" /> } as const,
     { id: 'design', label: 'Aparência', icon: <Layout className="w-5 h-5" /> } as const,
     { id: 'stats', label: 'Métricas', icon: <BarChart4 className="w-5 h-5" /> } as const,
@@ -1190,6 +1192,18 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
               }>
                 <ProfessionalDashboard userProfile={userProfile} onProfileUpdate={onProfileUpdate} />
               </React.Suspense>
+            </div>
+          )}
+
+          {/* TAB: SORTEIOS */}
+          {activeTab === 'raffles' && (
+            <div id="tab-content-raffles" className="pb-10 max-w-3xl mx-auto w-full px-4 py-4 md:py-6">
+              <RafflesList
+                userId={userProfile.uid}
+                username={userProfile.username}
+                displayName={userProfile.displayName}
+                profilePicUrl={userProfile.profilePicUrl}
+              />
             </div>
           )}
 

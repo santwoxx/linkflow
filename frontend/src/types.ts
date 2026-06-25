@@ -216,7 +216,53 @@ export interface ProfessionalProfile {
 }
 
 
-export type BlockType = 'link' | 'whatsapp' | 'telegram' | 'buy_now' | 'payment' | 'products' | 'services' | 'service_card' | 'testimonials' | 'gallery' | 'promo_banner' | 'scheduling' | 'send_resume';
+export type RaffleStatus = 'active' | 'drawing' | 'completed' | 'cancelled';
+
+export interface Raffle {
+  id: string;
+  userId: string;
+  username: string;
+  displayName: string;
+  profilePicUrl: string;
+  title: string;
+  description: string;
+  prize: string;
+  requirements: string;
+  coverImage?: string;
+  status: RaffleStatus;
+  drawDate?: any;
+  winnerId?: string;
+  winnerUsername?: string;
+  winnerDisplayName?: string;
+  winnerProfilePicUrl?: string;
+  createdAt: any;
+  updatedAt: any;
+}
+
+export interface RaffleParticipant {
+  id: string;
+  raffleId: string;
+  userId: string;
+  username: string;
+  displayName: string;
+  profilePicUrl: string;
+  proofImageUrl: string;
+  status: 'pending' | 'approved' | 'rejected';
+  adminMessage?: string;
+  createdAt: any;
+}
+
+export interface RaffleMessage {
+  id: string;
+  raffleId: string;
+  senderId: string;
+  senderName: string;
+  senderPic?: string;
+  text: string;
+  createdAt: any;
+}
+
+export type BlockType = 'link' | 'whatsapp' | 'telegram' | 'buy_now' | 'payment' | 'products' | 'services' | 'service_card' | 'testimonials' | 'gallery' | 'promo_banner' | 'scheduling' | 'send_resume' | 'raffle';
 
 export interface ProductItem {
   id: string;
