@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "br.com.linkflowai.twa",
+      "sha256_cert_fingerprints": [
+        "14:6D:E9:83:C5:22:75:40:AA:3E:6B:7D:9B:45:C9:83:8B:2A:46:12:11:00:00:00:00:00:00:00:00:00:00:00:00"
+      ]
+    }
+  }
+]

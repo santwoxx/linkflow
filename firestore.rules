@@ -1,0 +1,356 @@
+rules_version = '2';
+
+// ============================================================================
+// LINKFLOW - REGRAS DO FIRESTORE
+// Projeto: linkflow-bf1bb
+// ============================================================================
+// Coleções:
+//   - users/{userId}                    → perfis públicos
+//   - users/{userId}/links/{linkId}    → blocos/links da landing page
+//   - users/{userId}/clicks/{clickId}  → log de cliques (analytics)
+//   - posts/{postId}                    → posts do feed comunitário
+//   - posts/{postId}/comments/{cmtId}  → comentários dos posts
+//   - follows/{followId}                → relacionamentos de seguir
+//   - professional_profiles/{uid}       → perfis de prestadores de serviço (LinkFlow Profissional)
+// ============================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Helpers ----------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email == 'brisasofc@gmail.com';
+    }
+    function isBanned() {
+      return isSignedIn() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('banned', false) == true;
+    }
+    function validString(s, minLen, maxLen) {
+      return s is string && s.size() >= minLen && s.size() <= maxLen;
+    }
+    function optionalString(s, maxLen) {
+      return !(s is string) || s is string && s.size() <= maxLen;
+    }
+    function isValidUsername(u) {
+      return u is string && u.size() >= 3 && u.size() <= 30 && u.matches('^[a-zA-Z0-9_\\-\\.]+$');
+    }
+    function isValidColor(c) {
+      // aceita hex (#fff, #ffffff, #ffffffff), color functions (rgb, hsl, lab,
+      // lch, oklab, oklch, hwb, color, color-mix, etc), cores nomeadas CSS
+      // (red, blue, transparent, currentcolor, ...) ou vazio.
+      // Bloqueia caracteres perigosos (;, espaços, parens) para evitar CSS injection.
+      // `!(c is string)` cobre campo AUSENTE e campo de tipo errado: o caller
+      // geralmente precisa de "ausente OU válido", nunca de "obrigatório".
+      return !(c is string) ||
+             c == '' ||
+             c.matches('^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$') ||
+             c.matches('^[a-zA-Z][a-zA-Z0-9_-]*\\(') ||
+             c.matches('^[a-zA-Z]+$');
+    }
+    function isValidGradient(g) {
+      return !(g is string) ||
+             g == '' ||
+             g.matches('^[a-zA-Z][a-zA-Z0-9_-]*-gradient\\(');
+    }
+
+    // ==========================================================================
+    // USERS /{userId}
+    // ==========================================================================
+    match /users/{userId} {
+      allow read: if true;  // perfis são públicos
+
+      // Criação do próprio perfil (no registro)
+      allow create: if isOwner(userId) && !isBanned()
+        && validString(request.resource.data.username, 3, 30)
+        && isValidUsername(request.resource.data.username)
+        && validString(request.resource.data.displayName, 1, 60)
+        && optionalString(request.resource.data.get('bio', null), 280)
+        && optionalString(request.resource.data.get('profilePicUrl', null), 2048)
+        && optionalString(request.resource.data.get('coverUrl', null), 2048)
+        && optionalString(request.resource.data.get('coverColor', null), 100)
+        && optionalString(request.resource.data.get('coverGradient', null), 500)
+        && optionalString(request.resource.data.get('phone', null), 30)
+        && request.resource.data.theme is map
+        && request.resource.data.uid == userId
+        && request.resource.data.email is string;
+
+      // Edição do próprio perfil (não pode mudar uid, email, role, banned, contadores)
+      allow update: if isOwner(userId) && !isBanned()
+        && request.resource.data.get('uid', '') == resource.data.get('uid', '')
+        && request.resource.data.get('email', '') == resource.data.get('email', '')
+        && request.resource.data.get('role', 'user') == resource.data.get('role', 'user')
+        && request.resource.data.get('banned', false) == resource.data.get('banned', false)
+        && request.resource.data.get('followersCount', 0) == resource.data.get('followersCount', 0)
+        && request.resource.data.get('followingCount', 0) == resource.data.get('followingCount', 0)
+        && validString(request.resource.data.username, 3, 30)
+        && isValidUsername(request.resource.data.username)
+        && validString(request.resource.data.displayName, 1, 60)
+        && optionalString(request.resource.data.get('bio', null), 280)
+        && optionalString(request.resource.data.get('profilePicUrl', null), 2048)
+        && optionalString(request.resource.data.get('coverUrl', null), 2048)
+        && optionalString(request.resource.data.get('coverColor', null), 100)
+        && optionalString(request.resource.data.get('coverGradient', null), 500)
+        && request.resource.data.theme is map;
+
+      // Admin pode banar/desbanar/editar qualquer perfil
+      allow update, delete: if isAdmin();
+
+      // ======================================================================
+      // LINKS /{linkId}  (blocos da landing page)
+      // ======================================================================
+      match /links/{linkId} {
+        allow read: if true;  // links públicos são visíveis para todos
+
+        allow create: if isOwner(userId) && !isBanned()
+          && validString(request.resource.data.title, 1, 120)
+          && optionalString(request.resource.data.get('url', null), 2048)
+          && request.resource.data.userId == userId
+          && request.resource.data.id == linkId
+          && request.resource.data.active is bool
+          && request.resource.data.order is number
+          && linkFieldsAreValid();
+
+        allow update: if isOwner(userId) && !isBanned()
+          && request.resource.data.userId == resource.data.userId
+          && request.resource.data.id == resource.data.id
+          && validString(request.resource.data.title, 1, 120)
+          && optionalString(request.resource.data.get('url', null), 2048)
+          && request.resource.data.active is bool
+          && request.resource.data.order is number
+          && linkFieldsAreValid();
+
+        allow delete: if isOwner(userId) && !isBanned();
+        allow delete: if isAdmin();
+
+        // Validação centralizada de todos os campos de um link.
+        // IMPORTANTE: todos os campos além de id/userId/title/url/active/order
+        // são OPCIONAIS. Cada check usa o padrão
+        //   `!(field is <type>) || <enum/validations>`
+        // para permitir campo AUSENTE ou de tipo errado sem quebrar a regra.
+        // (Se o campo existir, precisa estar em um dos valores válidos.)
+        function linkFieldsAreValid() {
+          let d = request.resource.data;
+
+          return
+            // Campos básicos opcionais (strings)
+            optionalString(d.get('subtitle', null), 200) &&
+            optionalString(d.get('badgeText', null), 30) &&
+            optionalString(d.get('iconEmoji', null), 20) &&
+
+            // iconUrl / imageUrl
+            optionalString(d.get('iconUrl', null), 500000) &&
+            optionalString(d.get('imageUrl', null), 500000) &&
+
+            // animation: enum string, ou ausente
+            (!(d.get('animation', null) is string) || d.get('animation', null) in ['none', 'pulse', 'wobble', 'bounce', 'glow']) &&
+
+            // type: enum string, ou ausente
+             (!(d.get('type', null) is string) || d.get('type', null) in [
+              'link', 'whatsapp', 'telegram', 'buy_now', 'payment', 'products', 'services', 
+              'service_card', 'testimonials', 'gallery', 'promo_banner', 'scheduling', 'send_resume', 'raffle'
+             ]) &&
+
+            // Personalização avançada (todos opcionais)
+            optionalString(d.get('customColor', null), 200) &&
+            isValidColor(d.get('customColor', null)) &&
+            optionalString(d.get('customTextColor', null), 200) &&
+            isValidColor(d.get('customTextColor', null)) &&
+            optionalString(d.get('customGradient', null), 500) &&
+            isValidGradient(d.get('customGradient', null)) &&
+            (!(d.get('useGradient', null) is bool) || d.get('useGradient', null) == true || d.get('useGradient', null) == false) &&
+            optionalString(d.get('customBorderColor', null), 200) &&
+            isValidColor(d.get('customBorderColor', null)) &&
+            (!(d.get('customBorderWidth', null) is number) || (d.get('customBorderWidth', null) >= 0 && d.get('customBorderWidth', null) <= 8)) &&
+
+            (!(d.get('customStyle', null) is string) || d.get('customStyle', null) in ['', 'flat', 'rounded', 'outline', 'shadow', 'brutalist', 'glass', 'gradient', 'neon']) &&
+            (!(d.get('customRadius', null) is string) || d.get('customRadius', null) in ['', 'none', 'subtle', 'medium', 'full', 'pill']) &&
+            (!(d.get('customSize', null) is string) || d.get('customSize', null) in ['', 'small', 'medium', 'large', 'xl']) &&
+            (!(d.get('customFont', null) is string) || d.get('customFont', null) in ['', 'sans', 'serif', 'mono', 'space', 'outfit', 'syne', 'bebas', 'caveat']) &&
+            (!(d.get('customTextAlign', null) is string) || d.get('customTextAlign', null) in ['', 'left', 'center', 'right']) &&
+            (!(d.get('customLetterSpacing', null) is string) || d.get('customLetterSpacing', null) in ['', 'tight', 'normal', 'wide', 'wider']) &&
+            (!(d.get('customUppercase', null) is bool) || d.get('customUppercase', null) == true || d.get('customUppercase', null) == false) &&
+            (!(d.get('customIconPosition', null) is string) || d.get('customIconPosition', null) in ['', 'left', 'right', 'top', 'none']) &&
+            (!(d.get('customShadow', null) is bool) || d.get('customShadow', null) == true || d.get('customShadow', null) == false) &&
+            (!(d.get('customGlass', null) is bool) || d.get('customGlass', null) == true || d.get('customGlass', null) == false);
+        }
+      }
+
+      // ======================================================================
+      // CLICKS /{clickId}  (registro anônimo de cliques em links)
+      // ======================================================================
+      match /clicks/{clickId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if true;  // qualquer visitante pode registrar um clique
+        allow update, delete: if isAdmin();
+      }
+
+      // ======================================================================
+      // VIEWS /{viewId}  (registro anônimo de visualizações de perfil)
+      // ======================================================================
+      match /views/{viewId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if true;  // qualquer visitante pode registrar uma visualização
+        allow update, delete: if isAdmin();
+      }
+
+      // ======================================================================
+      // RESUMES /{resumeId}  (currículos enviados para o perfil)
+      // ======================================================================
+      match /resumes/{resumeId} {
+        // O dono do perfil pode listar os currículos recebidos
+        allow read: if isOwner(userId) || isAdmin();
+        // Qualquer visitante pode enviar um currículo (sem necessidade de login)
+        allow create: if true;
+        // Apenas o dono ou admin pode deletar
+        allow delete: if isOwner(userId) || isAdmin();
+        allow update: if isAdmin();
+      }
+
+      // ======================================================================
+      // LEADS /{leadId}  (leads capturados de visitantes)
+      // ======================================================================
+      match /leads/{leadId} {
+        // O dono do perfil pode listar os leads recebidos
+        allow read: if isOwner(userId) || isAdmin();
+        // Qualquer visitante pode enviar um lead (sem necessidade de login)
+        allow create: if true;
+        // Apenas o dono ou admin pode deletar
+        allow delete: if isOwner(userId) || isAdmin();
+        allow update: if isAdmin();
+      }
+    }
+
+    // ==========================================================================
+    // PROFESSIONAL_PROFILES /{userId} (LinkFlow Profissional)
+    // ==========================================================================
+    match /professional_profiles/{userId} {
+      allow read: if true; // Todos podem ver os perfis públicos
+
+      // Criar: usuário cria o próprio perfil (pendente) OU admin promove um usuário
+      // comum a prestador (também entra como pendente para aprovação posterior).
+      // Em ambos os casos, verified/pendingApproval devem vir como false/true —
+      // apenas admin pode virar verified=true via update.
+      allow create: if request.resource.data.uid == userId
+        && request.resource.data.verified == false
+        && request.resource.data.pendingApproval == true
+        && (isAdmin() || (isOwner(userId) && !isBanned()));
+
+      // Atualizar: Usuário só pode atualizar os próprios dados. Campos "verified" e "pendingApproval" restritos
+      allow update: if (isOwner(userId) && !isBanned()
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.verified == resource.data.verified
+        && request.resource.data.pendingApproval == resource.data.pendingApproval)
+        || isAdmin();
+
+      // Deletar: Apenas Admin ou o próprio usuário
+      allow delete: if isAdmin() || isOwner(userId);
+    }
+
+    // ==========================================================================
+    // POSTS /{postId}  (feed comunitário)
+    // ==========================================================================
+    match /posts/{postId} {
+      allow read: if true;
+      allow create: if isSignedIn() && !isBanned()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.id == postId
+        && validString(request.resource.data.caption, 0, 1000)
+        && optionalString(request.resource.data.imageUrl, 2048)
+        && request.resource.data.likes is list
+        && request.resource.data.likesCount is number
+        && request.resource.data.commentsCount is number;
+      allow update: if isSignedIn() && !isBanned()
+        && (request.resource.data.userId == resource.data.userId || isAdmin());
+      allow delete: if isSignedIn() && (request.auth.uid == resource.data.userId || isAdmin());
+
+      // COMMENTS
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isSignedIn() && !isBanned()
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.id == commentId
+          && request.resource.data.postId == postId
+          && validString(request.resource.data.text, 1, 600)
+          && optionalString(request.resource.data.displayName, 60)
+          && optionalString(request.resource.data.username, 30)
+          && optionalString(request.resource.data.profilePicUrl, 2048);
+        allow update: if isSignedIn() && request.auth.uid == resource.data.userId;
+        allow delete: if isSignedIn() && (request.auth.uid == resource.data.userId || isAdmin());
+      }
+    }
+
+    // ==========================================================================
+    // FOLLOWS /{followId}
+    // ==========================================================================
+    match /follows/{followId} {
+      allow read: if true;
+      allow create: if isSignedIn() && !isBanned()
+        && request.resource.data.followerId == request.auth.uid
+        && request.resource.data.id == followId;
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.followerId;
+      allow update: if false;  // imutável
+    }
+
+    // ==========================================================================
+    // RAFFLES /{raffleId}  (sorteios/promoções)
+    // ==========================================================================
+    match /raffles/{raffleId} {
+      allow read: if true;  // sorteios são públicos
+
+      allow create: if isSignedIn() && !isBanned()
+        && request.resource.data.id == raffleId
+        && request.resource.data.userId == request.auth.uid
+        && validString(request.resource.data.title, 1, 120)
+        && validString(request.resource.data.description, 1, 2000)
+        && validString(request.resource.data.prize, 1, 500)
+        && optionalString(request.resource.data.requirements, 2000)
+        && optionalString(request.resource.data.coverImage, 2048)
+        && request.resource.data.status == 'active'
+        && request.resource.data.username is string
+        && request.resource.data.displayName is string
+        && request.resource.data.profilePicUrl is string;
+
+      allow update: if (isOwner(resource.data.userId) && !isBanned()) || isAdmin();
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+
+      // PARTICIPANTS
+      match /participants/{participantId} {
+        allow read: if true;
+
+        allow create: if isSignedIn() && !isBanned()
+          && request.resource.data.id == participantId
+          && request.resource.data.raffleId == raffleId
+          && request.resource.data.userId == request.auth.uid
+          && validString(request.resource.data.proofImageUrl, 1, 500000)
+          && request.resource.data.status == 'pending'
+          && request.resource.data.username is string
+          && request.resource.data.displayName is string
+          && request.resource.data.profilePicUrl is string;
+
+        allow update: if isOwner(get(/databases/$(database)/documents/raffles/$(raffleId)).data.get('userId', '')) || isAdmin();
+        allow delete: if isOwner(get(/databases/$(database)/documents/raffles/$(raffleId)).data.get('userId', '')) || isAdmin();
+      }
+
+      // MESSAGES (chat between winner and owner)
+      match /messages/{messageId} {
+        allow read: if isSignedIn() && (
+          request.auth.uid == get(/databases/$(database)/documents/raffles/$(raffleId)).data.get('userId', '') ||
+          request.auth.uid == get(/databases/$(database)/documents/raffles/$(raffleId)).data.get('winnerId', '')
+        );
+        allow create: if isSignedIn() && !isBanned()
+          && request.resource.data.id == messageId
+          && request.resource.data.raffleId == raffleId
+          && request.resource.data.senderId == request.auth.uid
+          && validString(request.resource.data.text, 1, 2000);
+        allow update, delete: if false;
+      }
+    }
+  }
+}
