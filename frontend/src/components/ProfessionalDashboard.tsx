@@ -340,9 +340,9 @@ export default function ProfessionalDashboard({ userProfile, onProfileUpdate }: 
                     const file = e.target.files?.[0]; 
                     if (file) { 
                       try { 
-                        setProfilePicUrl(await compressImage(file, 150, 150, 0.6)); 
+                        setProfilePicUrl(await compressImage(file, 400, 400, 0.9)); 
                       } catch (err) {
-                        console.error("Erro ao comprimir imagem:", err);
+                        console.error(err);
                       } 
                     } 
                     e.target.value = ''; 

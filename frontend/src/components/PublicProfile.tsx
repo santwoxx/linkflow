@@ -816,9 +816,47 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
     <p id="profile-username" className={`text-xs opacity-60 font-mono mt-1 ${isLightColor(theme.backgroundColor) ? 'text-zinc-700' : 'text-slate-300'}`}>{p.username && `@${p.username}`}</p>
   );
 
-  const RenderBio = ({ profile: p }: { profile: UserProfile }) => (
-    p.bio ? <p id="profile-bio" className={`text-sm opacity-85 max-w-sm mt-3 whitespace-pre-line leading-relaxed break-words ${isLightColor(theme.backgroundColor) ? 'text-zinc-800' : 'text-slate-100'}`}>{p.bio}</p> : null
-  );
+  const RenderBio = ({ profile: p }: { profile: UserProfile }) => {
+    if (!p.bio) return null;
+    const { bioFontFamily, bioFontSize, bioColor, bioAlign, bioWeight } = theme;
+    
+    let fontClass = '';
+    if (bioFontFamily === 'sans') fontClass = 'font-sans';
+    else if (bioFontFamily === 'serif') fontClass = 'font-serif';
+    else if (bioFontFamily === 'mono') fontClass = 'font-mono';
+    else if (bioFontFamily === 'outfit') fontClass = 'font-outfit';
+    else if (bioFontFamily === 'caveat') fontClass = 'font-caveat';
+    
+    let sizeClass = 'text-sm';
+    if (bioFontSize === 'small') sizeClass = 'text-xs';
+    else if (bioFontSize === 'medium') sizeClass = 'text-base';
+    else if (bioFontSize === 'large') sizeClass = 'text-lg';
+    else if (bioFontSize === 'xl') sizeClass = 'text-xl';
+    
+    let alignClass = '';
+    if (bioAlign === 'left') alignClass = 'text-left';
+    else if (bioAlign === 'right') alignClass = 'text-right';
+    else if (bioAlign === 'justify') alignClass = 'text-justify';
+    else if (bioAlign === 'center') alignClass = 'text-center';
+
+    let weightClass = '';
+    if (bioWeight === 'normal') weightClass = 'font-normal';
+    else if (bioWeight === 'medium') weightClass = 'font-medium';
+    else if (bioWeight === 'semibold') weightClass = 'font-semibold';
+    else if (bioWeight === 'bold') weightClass = 'font-bold';
+
+    const defaultColor = isLightColor(theme.backgroundColor) ? 'text-zinc-800' : 'text-slate-100';
+
+    return (
+      <p 
+        id="profile-bio" 
+        className={`${sizeClass} ${fontClass} ${alignClass} ${weightClass} opacity-85 max-w-sm mt-3 whitespace-pre-line leading-relaxed break-words ${bioColor ? '' : defaultColor}`}
+        style={bioColor ? { color: bioColor } : {}}
+      >
+        {p.bio}
+      </p>
+    );
+  };
 
   const RenderHeaderSocials = ({ theme: t }: { theme: any }) => {
     if (!t.headerSocials) return null;

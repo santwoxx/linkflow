@@ -1548,6 +1548,92 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                           <textarea rows={2} placeholder="Uma breve descrição" value={bio} onChange={(e) => setBio(e.target.value)}
                             className="w-full bg-[#0a0a0a] text-xs text-white py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all placeholder-zinc-600 outline-none resize-none leading-relaxed" />
                         </div>
+                        
+                        <div className="sm:col-span-2 pt-3 mt-1 border-t border-white/5 space-y-4">
+                          <label className="text-[10px] text-[#a78bfa] font-mono tracking-wide uppercase flex items-center gap-2">
+                            <Sparkles className="w-3.5 h-3.5" /> Personalização da Biografia
+                          </label>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div className="space-y-1.5">
+                              <label className="text-[9px] text-zinc-500 font-mono uppercase tracking-wider">Fonte</label>
+                              <select 
+                                value={theme.bioFontFamily || ''} 
+                                onChange={(e) => setTheme({ ...theme, bioFontFamily: e.target.value })}
+                                className="w-full bg-[#0a0a0a] text-xs text-white py-2.5 px-3 rounded-lg border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 outline-none transition-all"
+                              >
+                                <option value="">Padrão do Tema</option>
+                                <option value="sans">Sans-Serif</option>
+                                <option value="serif">Serif (Elegante)</option>
+                                <option value="mono">Monospace</option>
+                                <option value="outfit">Outfit (Moderna)</option>
+                                <option value="caveat">Handwriting</option>
+                              </select>
+                            </div>
+                            <div className="space-y-1.5">
+                              <label className="text-[9px] text-zinc-500 font-mono uppercase tracking-wider">Tamanho</label>
+                              <select 
+                                value={theme.bioFontSize || ''} 
+                                onChange={(e) => setTheme({ ...theme, bioFontSize: e.target.value as any })}
+                                className="w-full bg-[#0a0a0a] text-xs text-white py-2.5 px-3 rounded-lg border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 outline-none transition-all"
+                              >
+                                <option value="">Padrão</option>
+                                <option value="small">Pequeno</option>
+                                <option value="medium">Médio</option>
+                                <option value="large">Grande</option>
+                                <option value="xl">Extra Grande</option>
+                              </select>
+                            </div>
+                            <div className="space-y-1.5">
+                              <label className="text-[9px] text-zinc-500 font-mono uppercase tracking-wider">Peso</label>
+                              <select 
+                                value={theme.bioWeight || ''} 
+                                onChange={(e) => setTheme({ ...theme, bioWeight: e.target.value as any })}
+                                className="w-full bg-[#0a0a0a] text-xs text-white py-2.5 px-3 rounded-lg border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 outline-none transition-all"
+                              >
+                                <option value="">Padrão</option>
+                                <option value="normal">Normal</option>
+                                <option value="medium">Médio</option>
+                                <option value="semibold">Semi-Negrito</option>
+                                <option value="bold">Negrito</option>
+                              </select>
+                            </div>
+                            <div className="space-y-1.5">
+                              <label className="text-[9px] text-zinc-500 font-mono uppercase tracking-wider">Alinhamento</label>
+                              <select 
+                                value={theme.bioAlign || ''} 
+                                onChange={(e) => setTheme({ ...theme, bioAlign: e.target.value as any })}
+                                className="w-full bg-[#0a0a0a] text-xs text-white py-2.5 px-3 rounded-lg border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 outline-none transition-all"
+                              >
+                                <option value="">Padrão</option>
+                                <option value="center">Centralizado</option>
+                                <option value="left">Esquerda</option>
+                                <option value="right">Direita</option>
+                                <option value="justify">Justificado</option>
+                              </select>
+                            </div>
+                            <div className="sm:col-span-4 space-y-1.5">
+                              <label className="text-[9px] text-zinc-500 font-mono uppercase tracking-wider">Cor do Texto da Bio</label>
+                              <div className="flex gap-2">
+                                <input
+                                  type="color"
+                                  value={theme.bioColor || '#ffffff'}
+                                  onChange={(e) => setTheme({ ...theme, bioColor: e.target.value })}
+                                  className="w-10 h-10 rounded-lg border border-white/5 bg-transparent cursor-pointer shrink-0"
+                                />
+                                <input
+                                  type="text"
+                                  placeholder="Ex: Padrão do Tema ou #ffffff"
+                                  value={theme.bioColor || ''}
+                                  onChange={(e) => setTheme({ ...theme, bioColor: e.target.value })}
+                                  className="flex-1 bg-[#0a0a0a] text-xs text-white px-4 rounded-lg border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 outline-none transition-all"
+                                />
+                                {theme.bioColor && (
+                                  <button type="button" onClick={() => setTheme({ ...theme, bioColor: undefined })} className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[10px] font-bold px-3 rounded-lg border border-rose-500/20 transition-all uppercase tracking-wider">Limpar</button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -1562,7 +1648,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                             className="flex-1 bg-[#0a0a0a] text-xs text-zinc-300 py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all placeholder-zinc-600 font-mono outline-none" />
                           <div className="flex gap-2">
                             <input id="file-upload-avatar" type="file" accept="image/*" className="hidden"
-                              onChange={async (e) => { const file = e.target.files?.[0]; if (file) { try { setProfilePicUrl(await compressImage(file, 150, 150, 0.6)); } catch {} } e.target.value = ''; }} />
+                              onChange={async (e) => { const file = e.target.files?.[0]; if (file) { try { setProfilePicUrl(await compressImage(file, 400, 400, 0.9)); } catch {} } e.target.value = ''; }} />
                             <label htmlFor="file-upload-avatar" className="bg-[#151515] hover:bg-[#202020] text-white text-[11px] font-bold px-5 py-3.5 rounded-xl border border-white/5 hover:border-white/10 transition-all cursor-pointer flex-1 sm:flex-none flex items-center justify-center gap-2 shadow-sm uppercase tracking-wider">
                               <Upload className="w-3.5 h-3.5 text-emerald-400" /> Subir
                             </label>
@@ -1595,7 +1681,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                             className="flex-1 bg-[#0a0a0a] text-xs text-zinc-300 py-3.5 px-4 rounded-xl border border-white/5 hover:border-white/10 focus:border-[#a78bfa]/50 focus:ring-2 focus:ring-[#a78bfa]/20 transition-all placeholder-zinc-600 font-mono outline-none" />
                           <div className="flex gap-2">
                             <input id="file-upload-cover" type="file" accept="image/*" className="hidden"
-                              onChange={async (e) => { const file = e.target.files?.[0]; if (file) { try { setCoverUrl(await compressImage(file, 800, 320, 0.7)); } catch {} } e.target.value = ''; }} />
+                              onChange={async (e) => { const file = e.target.files?.[0]; if (file) { try { setCoverUrl(await compressImage(file, 1200, 480, 0.85)); } catch {} } e.target.value = ''; }} />
                             <label htmlFor="file-upload-cover" className="bg-[#151515] hover:bg-[#202020] text-white text-[11px] font-bold px-5 py-3.5 rounded-xl border border-white/5 hover:border-white/10 transition-all cursor-pointer flex-1 sm:flex-none flex items-center justify-center gap-2 shadow-sm uppercase tracking-wider">
                               <Upload className="w-3.5 h-3.5 text-[#a78bfa]" /> Subir
                             </label>

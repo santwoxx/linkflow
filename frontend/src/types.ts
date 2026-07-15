@@ -96,6 +96,13 @@ export interface UserTheme {
   };
   gradientStartColor?: string;
   gradientEndColor?: string;
+
+  // Bio Typography
+  bioFontFamily?: string;
+  bioFontSize?: 'small' | 'medium' | 'large' | 'xl';
+  bioColor?: string;
+  bioAlign?: 'left' | 'center' | 'right' | 'justify';
+  bioWeight?: 'normal' | 'medium' | 'semibold' | 'bold';
 }
 
 export interface UserProfile {
