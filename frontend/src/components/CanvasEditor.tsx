@@ -204,18 +204,14 @@ export default function CanvasEditor({ profile, links, theme, onSave, onClose }:
           if (y + it.h > canvasH - 24) setCanvasH(Math.ceil(y + it.h + 60));
           return { ...it, x, y };
         }
-        // resize: avatar mantém proporção quadrada; demais ajustam largura
+        // resize: avatar mantém proporção quadrada; demais ajustam largura e altura
         if (it.id === 'avatar') {
           const size = clamp(drag.orig.w + Math.max(dx, dy), 40, 240);
           return { ...it, w: size, h: size };
         }
-        if (it.type === 'shape' || it.id.startsWith('shape:') || it.type === 'text' || it.id.startsWith('text:')) {
-           const w = clamp(drag.orig.w + dx, 40, FREE_CANVAS_WIDTH);
-           const h = clamp(drag.orig.h + dy, 20, 2000);
-           return { ...it, w, h };
-        }
-        const w = clamp(drag.orig.w + dx, 60, FREE_CANVAS_WIDTH);
-        return { ...it, w };
+        const w = clamp(drag.orig.w + dx, 40, FREE_CANVAS_WIDTH);
+        const h = clamp(drag.orig.h + dy, 10, 2000);
+        return { ...it, w, h };
       })
     );
   };
@@ -409,7 +405,7 @@ export default function CanvasEditor({ profile, links, theme, onSave, onClose }:
     if (item.id === 'socials') {
       const count = theme?.headerSocials ? Object.values(theme.headerSocials).filter(Boolean).length : 0;
       return (
-        <div className="flex flex-wrap gap-2.5 justify-center select-none">
+        <div className="w-full h-full flex flex-wrap gap-2.5 justify-center content-center select-none overflow-hidden">
           {Array.from({ length: Math.max(1, count) }).map((_, i) => (
             <span key={i} className={`w-9 h-9 rounded-full flex items-center justify-center border ${lightBg ? 'bg-black/5 border-black/10 text-zinc-700' : 'bg-white/5 border-white/15 text-zinc-300'}`}>
               <Globe className="w-4 h-4" />
@@ -570,6 +566,14 @@ export default function CanvasEditor({ profile, links, theme, onSave, onClose }:
               <button onClick={sendToBack} className="flex items-center gap-1 text-[10px] font-bold px-2 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 transition-all cursor-pointer" title="Enviar para trás">
                 <ArrowDownToLine className="w-3 h-3" />
               </button>
+              
+              <div className="w-px h-4 bg-slate-700 mx-1 hidden sm:block" />
+              <div className="flex items-center gap-1 bg-slate-800 rounded px-1 border border-slate-700" title="Largura e Altura">
+                 <span className="text-[9px] text-slate-500">L:</span>
+                 <input type="number" min="40" max={FREE_CANVAS_WIDTH} value={Math.round(selectedItem.w)} onChange={(e) => setItems(prev => prev.map(it => it.id === selectedId ? {...it, w: clamp(Number(e.target.value), 40, FREE_CANVAS_WIDTH)} : it))} className="w-10 h-6 text-[10px] bg-transparent border-0 outline-none text-white text-center" />
+                 <span className="text-[9px] text-slate-500 ml-1">A:</span>
+                 <input type="number" min="10" max="2000" value={Math.round(selectedItem.h)} onChange={(e) => setItems(prev => prev.map(it => it.id === selectedId ? {...it, h: Math.max(10, Number(e.target.value))} : it))} className="w-10 h-6 text-[10px] bg-transparent border-0 outline-none text-white text-center" />
+              </div>
 
               {/* Text Properties */}
               {(selectedItem.id === 'name' || selectedItem.id === 'bio' || selectedItem.id === 'username' || selectedItem.type === 'text' || selectedItem.id.startsWith('text:')) && (

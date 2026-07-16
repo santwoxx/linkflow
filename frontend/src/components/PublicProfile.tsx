@@ -932,7 +932,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
   };
 
   // Renderiza um link/bloco individual (usado no fluxo normal E no Construtor Livre)
-  const renderLinkNode = (link: LinkItem, index: number) => {
+  const renderLinkNode = (link: LinkItem, index: number, isFreeLayout: boolean = false) => {
                 const animClass = link.animation === 'pulse' ? ' anim-pulse' :
                                   link.animation === 'wobble' ? ' anim-wobble' :
                                   link.animation === 'bounce' ? ' anim-bounce' :
@@ -1315,6 +1315,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05, duration: 0.3 }}
                     key={link.id}
+                    className={isFreeLayout ? 'w-full h-full' : ''}
                   >
                   <a
                     id={`link-node-${link.id}`}
@@ -1322,7 +1323,7 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => handleRegisterClick(link)}
-                    className={`${btnStyle.className}${animClass} relative flex items-center justify-between group overflow-visible ${customStyleClasses.join(' ')} card-lift glow-border`}
+                    className={`${btnStyle.className.replace('max-w-md', isFreeLayout ? '' : 'max-w-md')} ${animClass} relative flex items-center justify-between group overflow-visible ${customStyleClasses.join(' ')} card-lift glow-border ${isFreeLayout ? 'h-full' : ''}`}
                     style={specializedBtnStyle}
                   >
                     {link.badgeText && (
@@ -1456,8 +1457,8 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
       const idx = activeLinks.findIndex((l) => `link:${l.id}` === item.id);
       if (idx === -1) return null;
       return (
-        <div key={item.id} style={baseStyle}>
-          {renderLinkNode(activeLinks[idx], idx)}
+        <div key={item.id} style={{ ...baseStyle, height: item.h }}>
+          {renderLinkNode(activeLinks[idx], idx, true)}
         </div>
       );
     }
