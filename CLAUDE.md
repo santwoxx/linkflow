@@ -39,6 +39,7 @@ backend/    Express 4 + firebase-admin + Gemini (@google/genai) — SEO/sitemap/
 | `PublicProfile.tsx` | Página pública do usuário (renderiza temas/layouts) — caminho mais acessado por visitantes |
 | `LinkEditor.tsx` | CRUD de links (tipos: link, whatsapp, scheduling, pix, etc.) |
 | `ThemeSelector.tsx` | Editor de temas/aparência (aba design) |
+| `CanvasEditor.tsx` | Construtor Livre (estilo Canva): drag/resize dos elementos da página em canvas fixo |
 | `StatsView.tsx` | Métricas (cliques, views, leads) |
 | `CommunityFeed.tsx` | Rede social (posts, likes, comentários) |
 | `AdminPanel.tsx` | Painel do CEO (somente `ADMIN_EMAIL`) |
@@ -95,6 +96,17 @@ npm run build    # tsc
    App.tsx (`seoPaths`), SeoLandingPage.tsx e backend — manter em sincronia.
 7. **Roteamento manual** — não adicionar react-router. Novas rotas entram no
    parser de URL do App.tsx e na lista `reservedPaths`.
+8. **Construtor Livre (modo Canva)** — o canvas usa coordenadas fixas de
+   `FREE_CANVAS_WIDTH` (400) unidades definidas em `types.ts`
+   (`theme.freeLayoutItems`/`freeLayoutEnabled`/`freeCanvasHeight`). O
+   PublicProfile escala o canvas à largura do container
+   (`transform: scale`), então NUNCA mudar `FREE_CANVAS_WIDTH` — isso
+   deslocaria todos os layouts já salvos pelos usuários. A renderização de
+   cada link é compartilhada via `renderLinkNode()` no PublicProfile (usada
+   pelo fluxo normal E pelo modo livre). Links criados depois do layout salvo
+   aparecem no fluxo normal abaixo do canvas (`flowLinks`). As classes
+   `.fc-*` no index.css neutralizam margens internas dos elementos
+   posicionados.
 8. **TypeScript sempre limpo** — `npm run lint` (tsc --noEmit) deve terminar
    com 0 erros antes de concluir qualquer tarefa.
 

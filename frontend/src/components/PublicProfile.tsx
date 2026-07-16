@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserProfile, LinkItem, ADMIN_EMAIL, DEFAULT_LAYOUT } from '../types';
+import { UserProfile, LinkItem, ADMIN_EMAIL, DEFAULT_LAYOUT, FREE_CANVAS_WIDTH, FreeCanvasItem } from '../types';
 import { db, auth } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, doc, getDoc, setDoc, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -622,6 +622,32 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
     })
     .sort((a, b) => a.order - b.order);
 
+  // ── Construtor Livre (posicionamento estilo Canva) ─────────────────────────
+  // Quando ativo, o cabeçalho e os links são renderizados em um canvas de
+  // coordenadas fixas (FREE_CANVAS_WIDTH un.) escalado à largura do container.
+  const freeItems: FreeCanvasItem[] | null =
+    theme.freeLayoutEnabled && Array.isArray(theme.freeLayoutItems) && theme.freeLayoutItems.length > 0
+      ? theme.freeLayoutItems
+      : null;
+  const freeCanvasH = Math.max(300, Number(theme.freeCanvasHeight) || 720);
+  const freeWrapRef = React.useRef<HTMLDivElement | null>(null);
+  const [freeScale, setFreeScale] = useState(1);
+  React.useLayoutEffect(() => {
+    if (!freeItems) return;
+    const el = freeWrapRef.current;
+    if (!el) return;
+    const update = () => setFreeScale(el.clientWidth / FREE_CANVAS_WIDTH);
+    update();
+    if (typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [!!freeItems]);
+  // Links adicionados depois do layout salvo continuam aparecendo no fluxo normal
+  const flowLinks = freeItems
+    ? activeLinks.filter((l) => !freeItems.some((i) => i.id === `link:${l.id}`))
+    : activeLinks;
+
   // Function to register outbound metric clicks
   const handleRegisterClick = async (link: LinkItem) => {
     if (previewMode) {
@@ -905,283 +931,8 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
     );
   };
 
-  // --- MEDIA BACKGROUND HANDLERS ---
-  const bgType = theme.backgroundType || 'color';
-  
-  const getContainerStyle = () => {
-    if (bgType === 'color' && isCustomBg) return { backgroundColor: theme.backgroundColor };
-    if (bgType === 'gradient' && theme.backgroundGradient) return { background: theme.backgroundGradient };
-    if (bgType === 'image' && theme.backgroundImageUrl && !theme.wallpaperBlur) {
-      return { 
-        backgroundImage: `url(${theme.backgroundImageUrl})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        ...(!previewMode ? { backgroundAttachment: 'fixed' } : {}),
-      };
-    }
-    return {};
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.4 }}
-      id="public-profile-screen"
-      style={getContainerStyle()}
-      className={`${previewMode ? 'min-h-0' : 'min-h-[100dvh]'} w-full flex flex-col justify-between items-center py-8 px-4 sm:py-10 sm:px-5 md:py-12 md:px-6 relative transition-all duration-500 ${fontClass} ${letterSpacingClass} ${textAlignClass} ${
-        bgType === 'color' && !isCustomBg 
-          ? theme.backgroundColor || 'bg-zinc-950 text-zinc-100' 
-          : isLightColor(theme.backgroundColor) ? 'text-zinc-900' : 'text-zinc-100'
-      } ${theme.patternOverlay === 'dots' ? 'bg-[radial-gradient(circle,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[length:20px_20px]' : ''} ${theme.patternOverlay === 'grid' ? 'bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[length:40px_40px]' : ''} ${theme.patternOverlay === 'crosshatch' ? 'bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_2px,transparent_2px,transparent_6px),repeating-linear-gradient(-45deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_2px,transparent_2px,transparent_6px)]' : ''} ${theme.patternOverlay === 'waves' ? 'bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,255,255,0.04)_0%,transparent_50%),radial-gradient(ellipse_at_50%_100%,rgba(255,255,255,0.02)_0%,transparent_50%)]' : ''} ${theme.wallpaperNoise ? 'bg-noise' : ''}`}
-    >
-      {/* Video Background */}
-      {theme.wallpaperStyle === 'video' && theme.wallpaperVideoUrl && (
-        <video autoPlay muted loop playsInline className={`${previewMode ? 'absolute' : 'fixed'} inset-0 w-full h-full object-cover z-0 pointer-events-none`}>
-          <source src={theme.wallpaperVideoUrl} type="video/mp4" />
-        </video>
-      )}
-
-      {/* Background Image Layer with optional blur */}
-      {bgType === 'image' && theme.backgroundImageUrl && (
-        <div
-          className={`${previewMode ? 'absolute' : 'fixed'} inset-0 z-0 pointer-events-none`}
-          style={{
-            backgroundImage: `url(${theme.backgroundImageUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            filter: theme.wallpaperBlur ? `blur(${theme.wallpaperBlur}px) scale(${1 + (theme.wallpaperBlur || 0) / 100})` : 'none',
-            ...(!previewMode ? { backgroundAttachment: 'fixed' } : {}),
-          }}
-        />
-      )}
-
-      {/* Optional Dark Overlay for readability when using Images or Video */}
-      {((bgType === 'image' && theme.backgroundImageUrl) || (theme.wallpaperStyle === 'video' && theme.wallpaperVideoUrl)) ? (
-        <div className={`${previewMode ? 'absolute' : 'fixed'} inset-0 z-[1] bg-black/40 backdrop-blur-[1px] pointer-events-none`} />
-      ) : null}
-
-
-
-      <div className={`w-full ${contentMaxW} flex flex-col items-center relative z-10`}>
-        {/* Share Button (Only visible top-right on public profiles or simulated) */}
-        {!previewMode && (
-          <div className="absolute top-4 right-4 flex items-center gap-2 z-20">
-            <GoToNatanDevButton variant="icon" className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/80 hover:bg-zinc-800/80 p-2.5 rounded-full" />
-            <button
-              id="share-profile-btn"
-              onClick={handleCopyLink}
-              type="button"
-              className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/80 hover:bg-zinc-800/80 text-zinc-300 hover:text-zinc-100 p-2.5 rounded-full transition-all flex items-center justify-center cursor-pointer scale-on-click"
-              title="Copiar link para divulgar"
-            >
-              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-            </button>
-          </div>
-        )}
-
-        {/* 1. Header Information */}
-        {/* Hero layout - full-bleed cover with text overlay */}
-        {theme.headerStyle === 'hero' ? (
-          <div id="profile-card-hero" className={`w-full ${contentMaxW} relative ${layout.elementSpacing === 'compact' ? 'mb-4' : layout.elementSpacing === 'spacious' ? 'mb-8' : 'mb-6'} rounded-2xl overflow-hidden`}>
-            <div className="w-full h-56 relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950/50 to-slate-900" style={getCoverContainerStyle()}>
-              {profile.coverUrl ? (
-                <img src={profile.coverUrl} alt="Hero" referrerPolicy="no-referrer" className={getCoverImageClass()} />
-              ) : (
-                !profile.coverGradient && !profile.coverColor && (
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#a78bfa]/30 via-slate-950/60 to-indigo-950/30" />
-                )
-              )}
-              {renderCoverOverlay()}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-[3]" />
-              <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col items-center text-center">
-                <RenderAvatar profile={profile} theme={theme} avatarSizeClass="w-20 h-20" avatarBorderSize="border-4" />
-                <RenderName profile={profile} isOwner={isOwner} layoutMt="mt-3" />
-                <RenderUsername profile={profile} />
-                <RenderBio profile={profile} />
-                <RenderHeaderSocials theme={theme} />
-              </div>
-            </div>
-          </div>
-        ) : layout.headerLayout === 'stacked' && (
-          <div id="profile-card-header" className={`w-full ${contentMaxW} ${layout.elementSpacing === 'compact' ? 'mb-4' : layout.elementSpacing === 'spacious' ? 'mb-8' : 'mb-6'} rounded-2xl overflow-hidden bg-black/20 border border-white/5 shadow-md`}>
-            {layout.showCover && (
-              <div className="w-full h-32 relative overflow-hidden bg-gradient-to-tr from-slate-900 via-indigo-950/50 to-slate-900 border-b border-white/5" style={getCoverContainerStyle()}>
-                {profile.coverUrl ? (
-                  <img src={profile.coverUrl} alt="Foto de Capa" referrerPolicy="no-referrer" className={getCoverImageClass()} />
-                ) : (
-                  !profile.coverGradient && !profile.coverColor && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-[#a78bfa]/20 via-slate-950/40 to-indigo-950/15">
-                      <div role="img" className="w-full h-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.08)_0%,transparent_70%)]" />
-                    </div>
-                  )
-                )}
-                {renderCoverOverlay()}
-              </div>
-            )}
-            <div className={`flex flex-col items-center ${layout.avatarAlignment === 'left' ? 'items-start px-4' : layout.avatarAlignment === 'right' ? 'items-end px-4' : 'items-center px-4'} pb-6 ${layout.showCover ? 'mt-4' : 'mt-6'} relative z-10`}>
-              <RenderAvatar profile={profile} theme={theme} avatarSizeClass={avatarSizeClass} avatarBorderSize={avatarBorderSize} />
-              <RenderName profile={profile} isOwner={isOwner} layoutMt={layoutMt} />
-              <RenderUsername profile={profile} />
-              <RenderBio profile={profile} />
-              <RenderHeaderSocials theme={theme} />
-            </div>
-          </div>
-        )}
-
-        {layout.headerLayout === 'detached' && (
-          <>
-            {layout.showCover && (
-              <div className={`w-full ${contentMaxW} h-32 rounded-2xl overflow-hidden bg-black/20 border border-white/5 shadow-md mb-4 relative`} style={getCoverContainerStyle()}>
-                {profile.coverUrl ? (
-                  <img src={profile.coverUrl} alt="Foto de Capa" referrerPolicy="no-referrer" className={getCoverImageClass()} />
-                ) : (
-                  !profile.coverGradient && !profile.coverColor && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-[#a78bfa]/20 via-slate-950/40 to-indigo-950/15">
-                      <div role="img" className="w-full h-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.08)_0%,transparent_70%)]" />
-                    </div>
-                  )
-                )}
-                {renderCoverOverlay()}
-              </div>
-            )}
-            <div className={`w-full ${contentMaxW} rounded-2xl bg-black/20 border border-white/5 shadow-md p-6 ${layout.elementSpacing === 'compact' ? 'mb-4' : layout.elementSpacing === 'spacious' ? 'mb-8' : 'mb-6'}`}>
-              <div className={`flex flex-col ${layout.avatarAlignment === 'left' ? 'items-start' : layout.avatarAlignment === 'right' ? 'items-end' : 'items-center'}`}>
-                <RenderAvatar profile={profile} theme={theme} avatarSizeClass={avatarSizeClass} avatarBorderSize={avatarBorderSize} />
-                <RenderName profile={profile} isOwner={isOwner} layoutMt={layoutMt} />
-                <RenderUsername profile={profile} />
-                <RenderBio profile={profile} />
-                <RenderHeaderSocials theme={theme} />
-              </div>
-            </div>
-          </>
-        )}
-
-        {layout.headerLayout === 'minimal' && (
-          <div className={`w-full ${contentMaxW} rounded-2xl bg-black/20 border border-white/5 shadow-md p-6 ${layout.elementSpacing === 'compact' ? 'mb-4' : layout.elementSpacing === 'spacious' ? 'mb-8' : 'mb-6'}`}>
-            <div className={`flex flex-col ${layout.avatarAlignment === 'left' ? 'items-start' : layout.avatarAlignment === 'right' ? 'items-end' : 'items-center'}`}>
-              <RenderAvatar profile={profile} theme={theme} avatarSizeClass={avatarSizeClass} avatarBorderSize={avatarBorderSize} />
-              <RenderName profile={profile} isOwner={isOwner} layoutMt={layoutMt} />
-              <RenderUsername profile={profile} />
-              <RenderBio profile={profile} />
-              <RenderHeaderSocials theme={theme} />
-            </div>
-          </div>
-        )}
-
-        {(!layout.headerLayout || layout.headerLayout === 'overlapping') && theme.headerStyle !== 'hero' && (
-          <div id="profile-card-header" className={`w-full ${contentMaxW} relative ${layout.elementSpacing === 'compact' ? 'mb-4' : layout.elementSpacing === 'spacious' ? 'mb-8' : 'mb-6'} rounded-2xl overflow-hidden bg-black/20 border border-white/5 shadow-md`}>
-            {layout.showCover && (
-              <div className="w-full h-32 relative overflow-hidden bg-gradient-to-tr from-slate-900 via-indigo-950/50 to-slate-900 border-b border-white/5" style={getCoverContainerStyle()}>
-                {profile.coverUrl ? (
-                  <img src={profile.coverUrl} alt="Foto de Capa" referrerPolicy="no-referrer" className={getCoverImageClass()} />
-                ) : (
-                  !profile.coverGradient && !profile.coverColor && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-[#a78bfa]/20 via-slate-950/40 to-indigo-950/15">
-                      <div role="img" className="w-full h-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.08)_0%,transparent_70%)]" />
-                    </div>
-                  )
-                )}
-                {renderCoverOverlay()}
-              </div>
-            )}
-            <div className={`flex flex-col items-center ${layout.avatarAlignment === 'left' ? 'items-start pl-5' : layout.avatarAlignment === 'right' ? 'items-end pr-5' : 'items-center'} px-4 pb-6 ${layout.showCover ? 'mt-[-48px]' : 'mt-6'} relative z-10`}>
-              <RenderAvatar profile={profile} theme={theme} avatarSizeClass={avatarSizeClass} avatarBorderSize={avatarBorderSize} />
-              <RenderName profile={profile} isOwner={isOwner} layoutMt={layoutMt} />
-              <RenderUsername profile={profile} />
-              <RenderBio profile={profile} />
-              <RenderHeaderSocials theme={theme} />
-            </div>
-          </div>
-        )}
-
-        {/* Follow Stats + Button */}
-        {!previewMode && (
-          <div className={`w-full ${contentMaxW} flex items-center justify-between gap-4 ${layout.elementSpacing === 'compact' ? 'mb-4' : layout.elementSpacing === 'spacious' ? 'mb-8' : 'mb-6'} px-4`}>
-            <div className="flex gap-6">
-              <div className="text-center">
-                <p className="text-sm font-extrabold text-white">{followersCount >= 1000 ? `${(followersCount / 1000).toFixed(1)}k` : followersCount}</p>
-                <p className="text-[10px] text-white/50 uppercase tracking-wider font-medium">Seguidores</p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm font-extrabold text-white">{followingCount >= 1000 ? `${(followingCount / 1000).toFixed(1)}k` : followingCount}</p>
-                <p className="text-[10px] text-white/50 uppercase tracking-wider font-medium">Seguindo</p>
-              </div>
-            </div>
-            {sessionProfile && !isOwnProfile && (
-              <button
-                onClick={handleToggleFollow}
-                disabled={followLoading}
-                className={`flex items-center gap-1.5 py-2 px-4 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer scale-on-click ${
-                  followingState
-                    ? 'bg-white/10 text-white border border-white/20 hover:bg-white/15'
-                    : 'bg-[#a78bfa] text-white hover:bg-[#c4b5fd] shadow-md shadow-[#a78bfa]/20'
-                } ${followLoading ? 'opacity-50 pointer-events-none' : ''}`}
-              >
-                {followingState ? (
-                  <><UserCheck className="w-3.5 h-3.5" /> Seguindo</>
-                ) : (
-                  <><UserPlus className="w-3.5 h-3.5" /> Seguir</>
-                )}
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* 2. Brand Tabs: Links, Services and Social Feed */}
-        <div className={`flex bg-black/25 backdrop-blur-md p-1.5 rounded-2xl border border-white/5 w-full ${contentMaxW} gap-1 ${layout.elementSpacing === 'compact' ? 'mb-4' : layout.elementSpacing === 'spacious' ? 'mb-8' : 'mb-6'} justify-center`}>
-          <button
-            type="button"
-            onClick={() => setProfileTab('links')}
-            className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer scale-on-click ${
-              profileTab === 'links'
-                ? 'bg-white/10 text-white shadow-sm ring-1 ring-white/10'
-                : 'text-white/50 hover:text-white/80'
-            }`}
-          >
-            <LinkIcon className="w-3.5 h-3.5" />
-            Links
-          </button>
-
-          {profile.serviceEnabled && profile.verifiedProfessional && proData && (
-            <button
-              type="button"
-              onClick={() => setProfileTab('services')}
-              className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer scale-on-click ${
-                profileTab === 'services'
-                  ? 'bg-white/10 text-white shadow-sm ring-1 ring-white/10'
-                  : 'text-white/50 hover:text-white/80'
-              }`}
-            >
-              <Briefcase className="w-3.5 h-3.5" />
-              Serviços
-            </button>
-          )}
-          
-          <button
-            type="button"
-            onClick={() => setProfileTab('social')}
-            className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer scale-on-click ${
-              profileTab === 'social'
-                ? 'bg-white/10 text-white shadow-sm ring-1 ring-white/10'
-                : 'text-white/50 hover:text-white/80'
-            }`}
-          >
-            <MessageSquare className="w-3.5 h-3.5" />
-            Rede Social
-          </button>
-        </div>
-
-        {/* 3. Conditional Content Rendering */}
-        {profileTab === 'links' && (
-          <div id="profile-buttons-list" className={`w-full flex flex-col items-center ${layoutSpacing}`}>
-            {activeLinks.length === 0 ? (
-              <div className={`text-center py-12 px-4 rounded-xl border border-dashed border-white/10 ${contentMaxW} w-full bg-white/5 backdrop-blur-sm`}>
-                <p className="text-sm opacity-60">Nenhum link disponível no momento.</p>
-              </div>
-            ) : (
-              <>
-              {activeLinks.map((link, index) => {
+  // Renderiza um link/bloco individual (usado no fluxo normal E no Construtor Livre)
+  const renderLinkNode = (link: LinkItem, index: number) => {
                 const animClass = link.animation === 'pulse' ? ' anim-pulse' :
                                   link.animation === 'wobble' ? ' anim-wobble' :
                                   link.animation === 'bounce' ? ' anim-bounce' :
@@ -1605,7 +1356,377 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
                   </a>
                   </motion.div>
                 );
-              })}
+  };
+
+  // Renderiza um elemento posicionado do Construtor Livre
+  const renderFreeItem = (item: FreeCanvasItem) => {
+    const baseStyle: React.CSSProperties = {
+      position: 'absolute',
+      left: item.x,
+      top: item.y,
+      width: item.w,
+      zIndex: item.z || 1,
+    };
+
+    if (item.id === 'avatar') {
+      const frame = theme.avatarFrame;
+      return (
+        <div key={item.id} style={{ ...baseStyle, height: item.h }}>
+          {frame === 'story' && <div className="absolute -inset-1.5 rounded-full" style={{ background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)' }} />}
+          {frame === 'fire' && <div className="absolute -inset-1.5 rounded-full" style={{ background: 'linear-gradient(135deg, #ff4500 0%, #ff8c00 50%, #ffd700 100%)', boxShadow: '0 0 25px rgba(255,100,0,0.7)' }} />}
+          {frame === 'rainbow' && <div className="absolute -inset-2 rounded-full animate-spin" style={{ background: 'conic-gradient(#ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff, #ff0000)', animationDuration: '4s' }} />}
+          {profile.profilePicUrl ? (
+            <img
+              src={profile.profilePicUrl}
+              referrerPolicy="no-referrer"
+              alt={profile.displayName}
+              className={`w-full h-full rounded-full object-cover relative z-10 bg-[#0a1128] ${
+                frame === 'gold' ? 'border-2 border-[#d4af37] shadow-[0_0_15px_rgba(212,175,55,0.4)]' :
+                frame === 'neon' ? 'border-2 border-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.75)]' :
+                'border-4 border-[#0a1128] shadow-lg'
+              } ${theme.avatarGlow ? 'shadow-[0_0_25px_rgba(255,255,255,0.25)]' : ''}`}
+            />
+          ) : (
+            <div className="w-full h-full rounded-full bg-gradient-to-tr from-emerald-500 to-indigo-600 flex items-center justify-center text-white text-3xl font-bold relative z-10 border-4 border-[#0a1128] shadow-lg">
+              {profile.displayName ? profile.displayName.charAt(0).toUpperCase() : '?'}
+            </div>
+          )}
+        </div>
+      );
+    }
+    if (item.id === 'name') {
+      return (
+        <div key={item.id} style={baseStyle} className="fc-name text-center">
+          <RenderName profile={profile} isOwner={isOwner} layoutMt="mt-0" />
+        </div>
+      );
+    }
+    if (item.id === 'username') {
+      return (
+        <div key={item.id} style={baseStyle} className="fc-username text-center">
+          <RenderUsername profile={profile} />
+        </div>
+      );
+    }
+    if (item.id === 'bio') {
+      return (
+        <div key={item.id} style={baseStyle} className="fc-bio text-center">
+          <RenderBio profile={profile} />
+        </div>
+      );
+    }
+    if (item.id === 'socials') {
+      return (
+        <div key={item.id} style={baseStyle} className="fc-socials">
+          <RenderHeaderSocials theme={theme} />
+        </div>
+      );
+    }
+    if (item.id.startsWith('link:')) {
+      const idx = activeLinks.findIndex((l) => `link:${l.id}` === item.id);
+      if (idx === -1) return null;
+      return (
+        <div key={item.id} style={baseStyle}>
+          {renderLinkNode(activeLinks[idx], idx)}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // --- MEDIA BACKGROUND HANDLERS ---
+  const bgType = theme.backgroundType || 'color';
+  
+  const getContainerStyle = () => {
+    if (bgType === 'color' && isCustomBg) return { backgroundColor: theme.backgroundColor };
+    if (bgType === 'gradient' && theme.backgroundGradient) return { background: theme.backgroundGradient };
+    if (bgType === 'image' && theme.backgroundImageUrl && !theme.wallpaperBlur) {
+      return { 
+        backgroundImage: `url(${theme.backgroundImageUrl})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        ...(!previewMode ? { backgroundAttachment: 'fixed' } : {}),
+      };
+    }
+    return {};
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+      id="public-profile-screen"
+      style={getContainerStyle()}
+      className={`${previewMode ? 'min-h-0' : 'min-h-[100dvh]'} w-full flex flex-col justify-between items-center py-8 px-4 sm:py-10 sm:px-5 md:py-12 md:px-6 relative transition-all duration-500 ${fontClass} ${letterSpacingClass} ${textAlignClass} ${
+        bgType === 'color' && !isCustomBg 
+          ? theme.backgroundColor || 'bg-zinc-950 text-zinc-100' 
+          : isLightColor(theme.backgroundColor) ? 'text-zinc-900' : 'text-zinc-100'
+      } ${theme.patternOverlay === 'dots' ? 'bg-[radial-gradient(circle,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[length:20px_20px]' : ''} ${theme.patternOverlay === 'grid' ? 'bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[length:40px_40px]' : ''} ${theme.patternOverlay === 'crosshatch' ? 'bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_2px,transparent_2px,transparent_6px),repeating-linear-gradient(-45deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_2px,transparent_2px,transparent_6px)]' : ''} ${theme.patternOverlay === 'waves' ? 'bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,255,255,0.04)_0%,transparent_50%),radial-gradient(ellipse_at_50%_100%,rgba(255,255,255,0.02)_0%,transparent_50%)]' : ''} ${theme.wallpaperNoise ? 'bg-noise' : ''}`}
+    >
+      {/* Video Background */}
+      {theme.wallpaperStyle === 'video' && theme.wallpaperVideoUrl && (
+        <video autoPlay muted loop playsInline className={`${previewMode ? 'absolute' : 'fixed'} inset-0 w-full h-full object-cover z-0 pointer-events-none`}>
+          <source src={theme.wallpaperVideoUrl} type="video/mp4" />
+        </video>
+      )}
+
+      {/* Background Image Layer with optional blur */}
+      {bgType === 'image' && theme.backgroundImageUrl && (
+        <div
+          className={`${previewMode ? 'absolute' : 'fixed'} inset-0 z-0 pointer-events-none`}
+          style={{
+            backgroundImage: `url(${theme.backgroundImageUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            filter: theme.wallpaperBlur ? `blur(${theme.wallpaperBlur}px) scale(${1 + (theme.wallpaperBlur || 0) / 100})` : 'none',
+            ...(!previewMode ? { backgroundAttachment: 'fixed' } : {}),
+          }}
+        />
+      )}
+
+      {/* Optional Dark Overlay for readability when using Images or Video */}
+      {((bgType === 'image' && theme.backgroundImageUrl) || (theme.wallpaperStyle === 'video' && theme.wallpaperVideoUrl)) ? (
+        <div className={`${previewMode ? 'absolute' : 'fixed'} inset-0 z-[1] bg-black/40 backdrop-blur-[1px] pointer-events-none`} />
+      ) : null}
+
+
+
+      <div className={`w-full ${contentMaxW} flex flex-col items-center relative z-10`}>
+        {/* Share Button (Only visible top-right on public profiles or simulated) */}
+        {!previewMode && (
+          <div className="absolute top-4 right-4 flex items-center gap-2 z-20">
+            <GoToNatanDevButton variant="icon" className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/80 hover:bg-zinc-800/80 p-2.5 rounded-full" />
+            <button
+              id="share-profile-btn"
+              onClick={handleCopyLink}
+              type="button"
+              className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/80 hover:bg-zinc-800/80 text-zinc-300 hover:text-zinc-100 p-2.5 rounded-full transition-all flex items-center justify-center cursor-pointer scale-on-click"
+              title="Copiar link para divulgar"
+            >
+              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+            </button>
+          </div>
+        )}
+
+        {/* 1. Header Information */}
+        {/* Hero layout - full-bleed cover with text overlay */}
+        {freeItems ? null : theme.headerStyle === 'hero' ? (
+          <div id="profile-card-hero" className={`w-full ${contentMaxW} relative ${layout.elementSpacing === 'compact' ? 'mb-4' : layout.elementSpacing === 'spacious' ? 'mb-8' : 'mb-6'} rounded-2xl overflow-hidden`}>
+            <div className="w-full h-56 relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950/50 to-slate-900" style={getCoverContainerStyle()}>
+              {profile.coverUrl ? (
+                <img src={profile.coverUrl} alt="Hero" referrerPolicy="no-referrer" className={getCoverImageClass()} />
+              ) : (
+                !profile.coverGradient && !profile.coverColor && (
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#a78bfa]/30 via-slate-950/60 to-indigo-950/30" />
+                )
+              )}
+              {renderCoverOverlay()}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-[3]" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col items-center text-center">
+                <RenderAvatar profile={profile} theme={theme} avatarSizeClass="w-20 h-20" avatarBorderSize="border-4" />
+                <RenderName profile={profile} isOwner={isOwner} layoutMt="mt-3" />
+                <RenderUsername profile={profile} />
+                <RenderBio profile={profile} />
+                <RenderHeaderSocials theme={theme} />
+              </div>
+            </div>
+          </div>
+        ) : layout.headerLayout === 'stacked' && (
+          <div id="profile-card-header" className={`w-full ${contentMaxW} ${layout.elementSpacing === 'compact' ? 'mb-4' : layout.elementSpacing === 'spacious' ? 'mb-8' : 'mb-6'} rounded-2xl overflow-hidden bg-black/20 border border-white/5 shadow-md`}>
+            {layout.showCover && (
+              <div className="w-full h-32 relative overflow-hidden bg-gradient-to-tr from-slate-900 via-indigo-950/50 to-slate-900 border-b border-white/5" style={getCoverContainerStyle()}>
+                {profile.coverUrl ? (
+                  <img src={profile.coverUrl} alt="Foto de Capa" referrerPolicy="no-referrer" className={getCoverImageClass()} />
+                ) : (
+                  !profile.coverGradient && !profile.coverColor && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-[#a78bfa]/20 via-slate-950/40 to-indigo-950/15">
+                      <div role="img" className="w-full h-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.08)_0%,transparent_70%)]" />
+                    </div>
+                  )
+                )}
+                {renderCoverOverlay()}
+              </div>
+            )}
+            <div className={`flex flex-col items-center ${layout.avatarAlignment === 'left' ? 'items-start px-4' : layout.avatarAlignment === 'right' ? 'items-end px-4' : 'items-center px-4'} pb-6 ${layout.showCover ? 'mt-4' : 'mt-6'} relative z-10`}>
+              <RenderAvatar profile={profile} theme={theme} avatarSizeClass={avatarSizeClass} avatarBorderSize={avatarBorderSize} />
+              <RenderName profile={profile} isOwner={isOwner} layoutMt={layoutMt} />
+              <RenderUsername profile={profile} />
+              <RenderBio profile={profile} />
+              <RenderHeaderSocials theme={theme} />
+            </div>
+          </div>
+        )}
+
+        {!freeItems && layout.headerLayout === 'detached' && (
+          <>
+            {layout.showCover && (
+              <div className={`w-full ${contentMaxW} h-32 rounded-2xl overflow-hidden bg-black/20 border border-white/5 shadow-md mb-4 relative`} style={getCoverContainerStyle()}>
+                {profile.coverUrl ? (
+                  <img src={profile.coverUrl} alt="Foto de Capa" referrerPolicy="no-referrer" className={getCoverImageClass()} />
+                ) : (
+                  !profile.coverGradient && !profile.coverColor && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-[#a78bfa]/20 via-slate-950/40 to-indigo-950/15">
+                      <div role="img" className="w-full h-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.08)_0%,transparent_70%)]" />
+                    </div>
+                  )
+                )}
+                {renderCoverOverlay()}
+              </div>
+            )}
+            <div className={`w-full ${contentMaxW} rounded-2xl bg-black/20 border border-white/5 shadow-md p-6 ${layout.elementSpacing === 'compact' ? 'mb-4' : layout.elementSpacing === 'spacious' ? 'mb-8' : 'mb-6'}`}>
+              <div className={`flex flex-col ${layout.avatarAlignment === 'left' ? 'items-start' : layout.avatarAlignment === 'right' ? 'items-end' : 'items-center'}`}>
+                <RenderAvatar profile={profile} theme={theme} avatarSizeClass={avatarSizeClass} avatarBorderSize={avatarBorderSize} />
+                <RenderName profile={profile} isOwner={isOwner} layoutMt={layoutMt} />
+                <RenderUsername profile={profile} />
+                <RenderBio profile={profile} />
+                <RenderHeaderSocials theme={theme} />
+              </div>
+            </div>
+          </>
+        )}
+
+        {!freeItems && layout.headerLayout === 'minimal' && (
+          <div className={`w-full ${contentMaxW} rounded-2xl bg-black/20 border border-white/5 shadow-md p-6 ${layout.elementSpacing === 'compact' ? 'mb-4' : layout.elementSpacing === 'spacious' ? 'mb-8' : 'mb-6'}`}>
+            <div className={`flex flex-col ${layout.avatarAlignment === 'left' ? 'items-start' : layout.avatarAlignment === 'right' ? 'items-end' : 'items-center'}`}>
+              <RenderAvatar profile={profile} theme={theme} avatarSizeClass={avatarSizeClass} avatarBorderSize={avatarBorderSize} />
+              <RenderName profile={profile} isOwner={isOwner} layoutMt={layoutMt} />
+              <RenderUsername profile={profile} />
+              <RenderBio profile={profile} />
+              <RenderHeaderSocials theme={theme} />
+            </div>
+          </div>
+        )}
+
+        {!freeItems && (!layout.headerLayout || layout.headerLayout === 'overlapping') && theme.headerStyle !== 'hero' && (
+          <div id="profile-card-header" className={`w-full ${contentMaxW} relative ${layout.elementSpacing === 'compact' ? 'mb-4' : layout.elementSpacing === 'spacious' ? 'mb-8' : 'mb-6'} rounded-2xl overflow-hidden bg-black/20 border border-white/5 shadow-md`}>
+            {layout.showCover && (
+              <div className="w-full h-32 relative overflow-hidden bg-gradient-to-tr from-slate-900 via-indigo-950/50 to-slate-900 border-b border-white/5" style={getCoverContainerStyle()}>
+                {profile.coverUrl ? (
+                  <img src={profile.coverUrl} alt="Foto de Capa" referrerPolicy="no-referrer" className={getCoverImageClass()} />
+                ) : (
+                  !profile.coverGradient && !profile.coverColor && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-[#a78bfa]/20 via-slate-950/40 to-indigo-950/15">
+                      <div role="img" className="w-full h-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.08)_0%,transparent_70%)]" />
+                    </div>
+                  )
+                )}
+                {renderCoverOverlay()}
+              </div>
+            )}
+            <div className={`flex flex-col items-center ${layout.avatarAlignment === 'left' ? 'items-start pl-5' : layout.avatarAlignment === 'right' ? 'items-end pr-5' : 'items-center'} px-4 pb-6 ${layout.showCover ? 'mt-[-48px]' : 'mt-6'} relative z-10`}>
+              <RenderAvatar profile={profile} theme={theme} avatarSizeClass={avatarSizeClass} avatarBorderSize={avatarBorderSize} />
+              <RenderName profile={profile} isOwner={isOwner} layoutMt={layoutMt} />
+              <RenderUsername profile={profile} />
+              <RenderBio profile={profile} />
+              <RenderHeaderSocials theme={theme} />
+            </div>
+          </div>
+        )}
+
+        {/* 1b. CONSTRUTOR LIVRE — canvas escalado com posicionamento absoluto */}
+        {freeItems && (
+          <div
+            ref={freeWrapRef}
+            className={`w-full ${contentMaxW} relative ${layout.elementSpacing === 'compact' ? 'mb-4' : layout.elementSpacing === 'spacious' ? 'mb-8' : 'mb-6'}`}
+            style={{ height: freeCanvasH * freeScale }}
+          >
+            <div
+              className="absolute top-0 left-0"
+              style={{ width: FREE_CANVAS_WIDTH, height: freeCanvasH, transform: `scale(${freeScale})`, transformOrigin: 'top left' }}
+            >
+              {freeItems.map((it) => renderFreeItem(it))}
+            </div>
+          </div>
+        )}
+
+        {/* Follow Stats + Button */}
+        {!previewMode && (
+          <div className={`w-full ${contentMaxW} flex items-center justify-between gap-4 ${layout.elementSpacing === 'compact' ? 'mb-4' : layout.elementSpacing === 'spacious' ? 'mb-8' : 'mb-6'} px-4`}>
+            <div className="flex gap-6">
+              <div className="text-center">
+                <p className="text-sm font-extrabold text-white">{followersCount >= 1000 ? `${(followersCount / 1000).toFixed(1)}k` : followersCount}</p>
+                <p className="text-[10px] text-white/50 uppercase tracking-wider font-medium">Seguidores</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-extrabold text-white">{followingCount >= 1000 ? `${(followingCount / 1000).toFixed(1)}k` : followingCount}</p>
+                <p className="text-[10px] text-white/50 uppercase tracking-wider font-medium">Seguindo</p>
+              </div>
+            </div>
+            {sessionProfile && !isOwnProfile && (
+              <button
+                onClick={handleToggleFollow}
+                disabled={followLoading}
+                className={`flex items-center gap-1.5 py-2 px-4 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer scale-on-click ${
+                  followingState
+                    ? 'bg-white/10 text-white border border-white/20 hover:bg-white/15'
+                    : 'bg-[#a78bfa] text-white hover:bg-[#c4b5fd] shadow-md shadow-[#a78bfa]/20'
+                } ${followLoading ? 'opacity-50 pointer-events-none' : ''}`}
+              >
+                {followingState ? (
+                  <><UserCheck className="w-3.5 h-3.5" /> Seguindo</>
+                ) : (
+                  <><UserPlus className="w-3.5 h-3.5" /> Seguir</>
+                )}
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* 2. Brand Tabs: Links, Services and Social Feed */}
+        <div className={`flex bg-black/25 backdrop-blur-md p-1.5 rounded-2xl border border-white/5 w-full ${contentMaxW} gap-1 ${layout.elementSpacing === 'compact' ? 'mb-4' : layout.elementSpacing === 'spacious' ? 'mb-8' : 'mb-6'} justify-center`}>
+          <button
+            type="button"
+            onClick={() => setProfileTab('links')}
+            className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer scale-on-click ${
+              profileTab === 'links'
+                ? 'bg-white/10 text-white shadow-sm ring-1 ring-white/10'
+                : 'text-white/50 hover:text-white/80'
+            }`}
+          >
+            <LinkIcon className="w-3.5 h-3.5" />
+            Links
+          </button>
+
+          {profile.serviceEnabled && profile.verifiedProfessional && proData && (
+            <button
+              type="button"
+              onClick={() => setProfileTab('services')}
+              className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer scale-on-click ${
+                profileTab === 'services'
+                  ? 'bg-white/10 text-white shadow-sm ring-1 ring-white/10'
+                  : 'text-white/50 hover:text-white/80'
+              }`}
+            >
+              <Briefcase className="w-3.5 h-3.5" />
+              Serviços
+            </button>
+          )}
+          
+          <button
+            type="button"
+            onClick={() => setProfileTab('social')}
+            className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer scale-on-click ${
+              profileTab === 'social'
+                ? 'bg-white/10 text-white shadow-sm ring-1 ring-white/10'
+                : 'text-white/50 hover:text-white/80'
+            }`}
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            Rede Social
+          </button>
+        </div>
+
+        {/* 3. Conditional Content Rendering */}
+        {profileTab === 'links' && (
+          <div id="profile-buttons-list" className={`w-full flex flex-col items-center ${layoutSpacing}`}>
+            {activeLinks.length === 0 && !freeItems ? (
+              <div className={`text-center py-12 px-4 rounded-xl border border-dashed border-white/10 ${contentMaxW} w-full bg-white/5 backdrop-blur-sm`}>
+                <p className="text-sm opacity-60">Nenhum link disponível no momento.</p>
+              </div>
+            ) : (
+              <>
+              {flowLinks.map((link, index) => renderLinkNode(link, index))}
               </>
             )}
           </div>

@@ -12,6 +12,7 @@ const DiscoverProfiles = React.lazy(() => import('./DiscoverProfiles'));
 const AdminPanel = React.lazy(() => import('./AdminPanel'));
 const ProfessionalDashboard = React.lazy(() => import('./ProfessionalDashboard'));
 const RafflesList = React.lazy(() => import('./RafflesList'));
+const CanvasEditor = React.lazy(() => import('./CanvasEditor'));
 import { motion } from 'motion/react';
 import LoadingSpinner from './LoadingSpinner';
 import { Link2, Sparkles, User, LogOut, Check, Copy, ExternalLink, RefreshCw, MessageSquare, Compass, ImageIcon, Crown, Layout, Smartphone, BarChart4, Briefcase, Upload, AtSign, X, Gift } from 'lucide-react';
@@ -36,6 +37,7 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
   const [activeTab, setActiveTab] = useState<'links' | 'design' | 'stats' | 'feed' | 'discover' | 'preview' | 'admin' | 'raffles'>('feed');
   const isAdmin = userProfile.email === ADMIN_EMAIL || userProfile.role === 'admin';
   const [links, setLinks] = useState<LinkItem[]>([]);
+  const [showCanvasEditor, setShowCanvasEditor] = useState(false);
   const [clicks, setClicks] = useState<ClickLog[]>([]);
   const [views, setViews] = useState<ViewLog[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -1336,6 +1338,71 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                     </div>
                   </div>
                 </div>
+
+                {/* 1b. CONSTRUTOR LIVRE (estilo Canva) */}
+                <div className="relative bg-[#0a0a0a] border border-white/5 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden group">
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                  <div className="absolute -top-24 right-10 w-56 h-56 bg-[#a78bfa]/10 blur-[80px] rounded-full pointer-events-none group-hover:bg-[#a78bfa]/20 transition-all duration-700" />
+
+                  <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <h3 className="text-[13px] font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                        <Layout className="w-4 h-4 text-[#a78bfa]" />
+                        Construtor Livre
+                        <span className="text-[8px] font-black uppercase tracking-wider bg-[#a78bfa]/15 text-[#a78bfa] border border-[#a78bfa]/25 px-1.5 py-0.5 rounded-md">Beta</span>
+                      </h3>
+                      <p className="text-[11px] text-zinc-500 mt-2 leading-relaxed max-w-md">
+                        Posicione avatar, textos e botões livremente, como no Canva: arraste para mover,
+                        use a alça para redimensionar e clique em salvar. O layout vale para a sua página pública.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {theme.freeLayoutEnabled && (
+                        <button
+                          type="button"
+                          onClick={() => handleThemeChange({ ...theme, freeLayoutEnabled: false })}
+                          className="px-3 py-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 text-[10px] font-bold border border-slate-700/50 transition-all cursor-pointer"
+                          title="Voltar ao layout empilhado normal (as posições ficam salvas)"
+                        >
+                          Desativar
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setShowCanvasEditor(true)}
+                        className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#a78bfa] hover:bg-[#c4b5fd] text-white text-[10px] font-extrabold uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-[#a78bfa]/20"
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        {theme.freeLayoutEnabled ? 'Editar Layout' : 'Abrir Editor'}
+                      </button>
+                    </div>
+                  </div>
+                  {theme.freeLayoutEnabled && (
+                    <div className="relative mt-4 text-[10px] text-emerald-400 bg-emerald-950/10 border border-emerald-900/20 rounded-lg px-3 py-2 flex items-center gap-1.5">
+                      <Check className="w-3.5 h-3.5 shrink-0" /> Modo livre ativo — sua página pública usa o layout personalizado.
+                    </div>
+                  )}
+                </div>
+
+                {/* Modal fullscreen do Construtor Livre */}
+                {showCanvasEditor && (
+                  <React.Suspense fallback={
+                    <div className="fixed inset-0 z-[100] bg-[#050b18] flex items-center justify-center">
+                      <LoadingSpinner size="sm" message="Abrindo construtor..." />
+                    </div>
+                  }>
+                    <CanvasEditor
+                      profile={{ ...userProfile, displayName: displayName || userProfile.displayName, bio, profilePicUrl }}
+                      links={links}
+                      theme={theme}
+                      onSave={async (updatedTheme) => {
+                        await handleThemeChange(updatedTheme);
+                        setShowCanvasEditor(false);
+                      }}
+                      onClose={() => setShowCanvasEditor(false)}
+                    />
+                  </React.Suspense>
+                )}
 
                 {/* 2. EDITOR VISUAL */}
                 <form id="profile-editor-form" onSubmit={handleSaveProfile} className="relative bg-[#0a0a0a] border border-white/5 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden">

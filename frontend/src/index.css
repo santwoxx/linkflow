@@ -292,6 +292,13 @@ html {
   display: none;
 }
 
+/* ── Construtor Livre: neutraliza margens internas dos elementos posicionados
+   para que a posição no canvas seja exatamente a definida no editor ─────── */
+.fc-name #profile-display-name { margin-top: 0 !important; justify-content: center !important; }
+.fc-username #profile-username { margin-top: 0 !important; }
+.fc-bio #profile-bio { margin-top: 0 !important; max-width: none !important; }
+.fc-socials > div { margin-top: 0 !important; }
+
 /* Scrollbar fina também no Firefox (equivalente ao ::-webkit-scrollbar acima) */
 html {
   scrollbar-width: thin;

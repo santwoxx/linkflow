@@ -103,6 +103,32 @@ export interface UserTheme {
   bioColor?: string;
   bioAlign?: 'left' | 'center' | 'right' | 'justify';
   bioWeight?: 'normal' | 'medium' | 'semibold' | 'bold';
+
+  // Construtor Livre (posicionamento estilo Canva)
+  freeLayoutEnabled?: boolean;
+  freeLayoutItems?: FreeCanvasItem[];
+  freeCanvasHeight?: number;
+}
+
+// ── Construtor Livre ─────────────────────────────────────────────────────────
+// O canvas usa um espaço de coordenadas fixo (FREE_CANVAS_WIDTH unidades de
+// largura). Na página pública ele é escalado proporcionalmente à largura do
+// container, garantindo WYSIWYG entre editor e resultado final.
+export const FREE_CANVAS_WIDTH = 400;
+
+export interface FreeCanvasItem {
+  /** 'avatar' | 'name' | 'username' | 'bio' | 'socials' | `link:{linkId}` */
+  id: string;
+  /** Posição X em unidades do canvas (0..FREE_CANVAS_WIDTH), canto sup. esquerdo */
+  x: number;
+  /** Posição Y em unidades do canvas */
+  y: number;
+  /** Largura em unidades do canvas */
+  w: number;
+  /** Altura em unidades (usada pelo avatar; nos demais é aproximação p/ editor) */
+  h: number;
+  /** Ordem de empilhamento (maior = na frente) */
+  z: number;
 }
 
 export interface UserProfile {
