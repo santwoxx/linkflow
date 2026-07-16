@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db, loginWithGoogle, logoutUser } from './firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { collection, doc, getDoc, getDocFromServer, getDocs, getDocsFromServer, query, setDoc, updateDoc, where, limit, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, getDocsFromServer, query, setDoc, updateDoc, where, limit, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { UserProfile, LinkItem, AVAILABLE_THEMES, ADMIN_EMAIL } from './types';
-import Dashboard from './components/Dashboard';
 import PublicProfile from './components/PublicProfile';
+const Dashboard = React.lazy(() => import('./components/Dashboard'));
 const ServicesDiscovery = React.lazy(() => import('./components/ServicesDiscovery'));
 const ProfessionalProfilePage = React.lazy(() => import('./components/ProfessionalProfilePage'));
 const ProSalesPage = React.lazy(() => import('./components/ProSalesPage'));
 const SeoLandingPage = React.lazy(() => import('./components/SeoLandingPage'));
-import { motion, AnimatePresence } from 'motion/react';
+const RaffleParticipate = React.lazy(() => import('./components/RaffleParticipate'));
+import { motion } from 'motion/react';
 import LoadingSpinner from './components/LoadingSpinner';
-import RaffleParticipate from './components/RaffleParticipate';
 import { Link2, Sparkles, LogIn, Lock, CheckCircle, RefreshCw, BarChart4, Palette, Heart, AlertTriangle, ExternalLink, Ban, FileText, X, Briefcase, Users, ShieldCheck, TrendingUp, Smartphone, Store } from 'lucide-react';
 
 export default function App() {
@@ -1326,20 +1326,26 @@ export default function App() {
   // ----- RENDER PUBLIC RAFFLE PARTICIPATION PAGE -----
   if (publicView === 'sorteio' && publicRaffleId) {
     return (
-      <RaffleParticipate
-        raffleId={publicRaffleId}
-        currentUser={currentUser}
-        currentUserProfile={userProfile}
-        onBack={() => {
-          const newUrl = new URL(window.location.href);
-          newUrl.searchParams.delete('view');
-          newUrl.searchParams.delete('raffle');
-          newUrl.searchParams.delete('user');
-          window.history.pushState({}, '', newUrl.toString());
-          setPublicView(null);
-          setPublicRaffleId(null);
-        }}
-      />
+      <React.Suspense fallback={
+        <div className="min-h-screen bg-[#050b18] flex items-center justify-center">
+          <LoadingSpinner message="Carregando sorteio..." />
+        </div>
+      }>
+        <RaffleParticipate
+          raffleId={publicRaffleId}
+          currentUser={currentUser}
+          currentUserProfile={userProfile}
+          onBack={() => {
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete('view');
+            newUrl.searchParams.delete('raffle');
+            newUrl.searchParams.delete('user');
+            window.history.pushState({}, '', newUrl.toString());
+            setPublicView(null);
+            setPublicRaffleId(null);
+          }}
+        />
+      </React.Suspense>
     );
   }
 
@@ -1671,10 +1677,16 @@ export default function App() {
   // ----- AUTHENTICATED STATE: DASHBOARD -----
   if (currentUser && userProfile) {
     return (
-      <Dashboard
-        userProfile={userProfile}
-        onProfileUpdate={(updated) => setUserProfile(updated)}
-      />
+      <React.Suspense fallback={
+        <div className="min-h-screen bg-[#050b18] flex items-center justify-center">
+          <LoadingSpinner message="Abrindo seu painel..." />
+        </div>
+      }>
+        <Dashboard
+          userProfile={userProfile}
+          onProfileUpdate={(updated) => setUserProfile(updated)}
+        />
+      </React.Suspense>
     );
   }
 
@@ -1719,7 +1731,7 @@ export default function App() {
       <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-8 sm:py-12 max-w-4xl mx-auto text-center space-y-8 sm:space-y-10 z-10" role="main">
         
         {/* Highlight Pill */}
-        <div className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full bg-gradient-to-r from-[#a78bfa]/20 to-[#c4b5fd]/20 border border-[#a78bfa]/30 text-[#a78bfa] text-[9px] sm:text-[10px] font-bold uppercase tracking-wider select-none animate-bounce shadow-lg shadow-[#a78bfa]/10">
+        <div className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full bg-gradient-to-r from-[#a78bfa]/20 to-[#c4b5fd]/20 border border-[#a78bfa]/30 text-[#a78bfa] text-[9px] sm:text-[10px] font-bold uppercase tracking-wider select-none anim-glow shadow-lg shadow-[#a78bfa]/10">
           <Sparkles className="w-3 h-3" />
           +1000 Usuários | Plataforma 100% Gratuita
         </div>
@@ -1763,7 +1775,7 @@ export default function App() {
             <button
               id="register-cta-btn"
               onClick={handleLogin}
-              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-[#a78bfa] to-[#c4b5fd] hover:from-[#c4b5fd] hover:to-[#ddd6fe] hover:scale-[1.02] active:scale-[0.98] text-black font-extrabold text-xs rounded-xl tracking-wide font-sans shadow-[0_0_30px_rgba(167,139,250,0.35)] transition-all cursor-pointer flex items-center justify-center gap-2 uppercase shrink-0"
+              className="btn-shimmer w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-[#a78bfa] to-[#c4b5fd] hover:from-[#c4b5fd] hover:to-[#ddd6fe] hover:scale-[1.02] active:scale-[0.98] text-black font-extrabold text-xs rounded-xl tracking-wide font-sans shadow-[0_0_30px_rgba(167,139,250,0.35)] transition-all cursor-pointer flex items-center justify-center gap-2 uppercase shrink-0"
               aria-label="Criar minha página no LinkFlowAI gratuitamente"
             >
               <LogIn className="w-4 h-4 text-white" aria-hidden="true" />
@@ -1822,7 +1834,7 @@ export default function App() {
         {/* Feature grid */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full pt-6 sm:pt-8 text-left" aria-label="Recursos da plataforma">
           
-          <article className="bg-[#0f172a] p-5 rounded-2xl border border-slate-900/50 space-y-2 shadow-md hover:border-emerald-500/20 hover:shadow-emerald-500/5 transition-all">
+          <article className="card-lift bg-[#0f172a] p-5 rounded-2xl border border-slate-900/50 space-y-2 shadow-md hover:border-emerald-500/20 hover:shadow-emerald-500/5 transition-all">
             <div className="w-8 h-8 rounded-lg bg-emerald-600/10 text-emerald-400 flex items-center justify-center mb-2" aria-hidden="true">
               <Store className="w-4 h-4" />
             </div>
@@ -1830,7 +1842,7 @@ export default function App() {
             <p className="text-xs text-slate-500 leading-relaxed font-light">Crie vitrine de serviços com preços, categorias e contato direto por WhatsApp. Você é o dono do seu negócio.</p>
           </article>
 
-          <article className="bg-[#0f172a] p-5 rounded-2xl border border-slate-900/50 space-y-2 shadow-md hover:border-[#a78bfa]/20 hover:shadow-[#a78bfa]/5 transition-all">
+          <article className="card-lift bg-[#0f172a] p-5 rounded-2xl border border-slate-900/50 space-y-2 shadow-md hover:border-[#a78bfa]/20 hover:shadow-[#a78bfa]/5 transition-all">
             <div className="w-8 h-8 rounded-lg bg-[#a78bfa]/10 text-[#a78bfa] flex items-center justify-center mb-2" aria-hidden="true">
               <Palette className="w-4 h-4" />
             </div>
@@ -1838,7 +1850,7 @@ export default function App() {
             <p className="text-xs text-slate-500 leading-relaxed font-light">Mais de 14 temas, paletas, estilos de botões, fontes, capa, avatar e layout — sua página com a sua cara.</p>
           </article>
 
-          <article className="bg-[#0f172a] p-5 rounded-2xl border border-slate-900/50 space-y-2 shadow-md hover:border-purple-500/20 hover:shadow-purple-500/5 transition-all">
+          <article className="card-lift bg-[#0f172a] p-5 rounded-2xl border border-slate-900/50 space-y-2 shadow-md hover:border-purple-500/20 hover:shadow-purple-500/5 transition-all">
             <div className="w-8 h-8 rounded-lg bg-purple-600/10 text-purple-400 flex items-center justify-center mb-2" aria-hidden="true">
               <Users className="w-4 h-4" />
             </div>
@@ -1846,7 +1858,7 @@ export default function App() {
             <p className="text-xs text-slate-500 leading-relaxed font-light">Publique fotos, receba curtidas e comentários, siga perfis e construa sua comunidade dentro do LinkFlowAI.</p>
           </article>
 
-          <article className="bg-[#0f172a] p-5 rounded-2xl border border-slate-900/50 space-y-2 shadow-md hover:border-amber-500/20 hover:shadow-amber-500/5 transition-all">
+          <article className="card-lift bg-[#0f172a] p-5 rounded-2xl border border-slate-900/50 space-y-2 shadow-md hover:border-amber-500/20 hover:shadow-amber-500/5 transition-all">
             <div className="w-8 h-8 rounded-lg bg-amber-600/10 text-amber-400 flex items-center justify-center mb-2" aria-hidden="true">
               <BarChart4 className="w-4 h-4" />
             </div>

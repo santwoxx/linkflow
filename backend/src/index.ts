@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
+import compression from 'compression';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -19,6 +20,8 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   contentSecurityPolicy: false,
 }));
+// Gzip nas respostas (páginas SEO em HTML e JSON da API ficam ~70% menores)
+app.use(compression());
 app.use(cors({ origin: corsOrigin, credentials: true }));
 app.use(morgan('short'));
 app.use(express.json({ limit: '5mb' }));

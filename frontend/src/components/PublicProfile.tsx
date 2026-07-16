@@ -4,7 +4,8 @@ import { db, auth } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, doc, getDoc, setDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ExternalLink, Copy, Check, Sparkles, MessageSquare, Link as LinkIcon, LogIn, Star, Crown, UserPlus, UserCheck, Briefcase, ShoppingBag, Clock, ShieldCheck, Music, Calendar, X, Instagram, Youtube, Linkedin, Github, Twitter, Upload, FileText, Loader2, Mail } from 'lucide-react';
-import CommunityFeed from './CommunityFeed';
+// Feed social só é usado na aba "social" — lazy para não pesar o bundle da página pública
+const CommunityFeed = React.lazy(() => import('./CommunityFeed'));
 import { isFollowing, followUser, unfollowUser } from '../utils/follow';
 import GoToNatanDevButton from './GoToNatanDevButton';
 import { useAnalytics } from '../hooks/useAnalytics';
@@ -1687,20 +1688,26 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
               </div>
             )}
             
-            <CommunityFeed 
-              currentUserProfile={sessionProfile || {
-                uid: 'guest',
-                username: 'visitante',
-                displayName: 'Visitante',
-                bio: '',
-                profilePicUrl: '',
-                theme: profile.theme,
-                createdAt: new Date(),
-                updatedAt: new Date()
-              }}
-              filterByUserId={profile.uid}
-              previewMode={previewMode || !sessionUser}
-            />
+            <React.Suspense fallback={
+              <div className="flex items-center justify-center py-10" aria-label="Carregando feed">
+                <Loader2 className={`w-5 h-5 animate-spin ${isLightColor(theme.backgroundColor) ? 'text-zinc-500' : 'text-white/50'}`} />
+              </div>
+            }>
+              <CommunityFeed
+                currentUserProfile={sessionProfile || {
+                  uid: 'guest',
+                  username: 'visitante',
+                  displayName: 'Visitante',
+                  bio: '',
+                  profilePicUrl: '',
+                  theme: profile.theme,
+                  createdAt: new Date(),
+                  updatedAt: new Date()
+                }}
+                filterByUserId={profile.uid}
+                previewMode={previewMode || !sessionUser}
+              />
+            </React.Suspense>
           </div>
         )}
       </div>

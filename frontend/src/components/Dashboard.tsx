@@ -3,14 +3,15 @@ import { UserProfile, LinkItem, ClickLog, ViewLog, Lead, ResumeData } from '../t
 import { db, OperationType, handleFirestoreError, logoutUser } from '../firebase';
 import { collection, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, onSnapshot, query, orderBy, getDocs, where, limit } from 'firebase/firestore';
 import LinkEditor from './LinkEditor';
-import ThemeSelector from './ThemeSelector';
-import StatsView from './StatsView';
 import PublicProfile from './PublicProfile';
-import CommunityFeed from './CommunityFeed';
-import DiscoverProfiles from './DiscoverProfiles';
+// Componentes de aba pesados: carregados sob demanda (code-splitting por aba)
+const ThemeSelector = React.lazy(() => import('./ThemeSelector'));
+const StatsView = React.lazy(() => import('./StatsView'));
+const CommunityFeed = React.lazy(() => import('./CommunityFeed'));
+const DiscoverProfiles = React.lazy(() => import('./DiscoverProfiles'));
 const AdminPanel = React.lazy(() => import('./AdminPanel'));
 const ProfessionalDashboard = React.lazy(() => import('./ProfessionalDashboard'));
-import RafflesList from './RafflesList';
+const RafflesList = React.lazy(() => import('./RafflesList'));
 import { motion } from 'motion/react';
 import LoadingSpinner from './LoadingSpinner';
 import { Link2, Sparkles, User, LogOut, Check, Copy, ExternalLink, RefreshCw, MessageSquare, Compass, ImageIcon, Crown, Layout, Smartphone, BarChart4, Briefcase, Upload, AtSign, X, Gift } from 'lucide-react';
@@ -20,6 +21,15 @@ import { compressImage } from '../utils/image';
 interface DashboardProps {
   userProfile: UserProfile;
   onProfileUpdate: (updated: UserProfile) => void;
+}
+
+// Fallback padrão exibido enquanto o chunk lazy de uma aba é baixado
+function TabLoader() {
+  return (
+    <div className="flex items-center justify-center py-16">
+      <LoadingSpinner size="sm" message="Carregando..." />
+    </div>
+  );
 }
 
 export default function Dashboard({ userProfile, onProfileUpdate }: DashboardProps) {
@@ -1090,7 +1100,9 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
           {/* TAB: SOCIAL COMMUNITY FEED (default) */}
           {activeTab === 'feed' && (
             <div id="tab-content-feed" className="pb-6">
-              <CommunityFeed currentUserProfile={userProfile} />
+              <React.Suspense fallback={<TabLoader />}>
+                <CommunityFeed currentUserProfile={userProfile} />
+              </React.Suspense>
             </div>
           )}
 
@@ -1165,7 +1177,9 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
           {/* TAB: DISCOVER PROFILES */}
           {activeTab === 'discover' && (
             <div id="tab-content-discover" className="pb-10 h-full">
-              <DiscoverProfiles />
+              <React.Suspense fallback={<TabLoader />}>
+                <DiscoverProfiles />
+              </React.Suspense>
             </div>
           )}
 
@@ -1198,12 +1212,14 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
           {/* TAB: SORTEIOS */}
           {activeTab === 'raffles' && (
             <div id="tab-content-raffles" className="pb-10 max-w-3xl mx-auto w-full px-4 py-4 md:py-6">
-              <RafflesList
-                userId={userProfile.uid}
-                username={userProfile.username}
-                displayName={userProfile.displayName}
-                profilePicUrl={userProfile.profilePicUrl}
-              />
+              <React.Suspense fallback={<TabLoader />}>
+                <RafflesList
+                  userId={userProfile.uid}
+                  username={userProfile.username}
+                  displayName={userProfile.displayName}
+                  profilePicUrl={userProfile.profilePicUrl}
+                />
+              </React.Suspense>
             </div>
           )}
 
@@ -1270,7 +1286,9 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                   </a>
                 </div>
               </div>
-              <StatsView links={links} clicks={clicks} views={views} leads={leads} resumes={resumes} />
+              <React.Suspense fallback={<TabLoader />}>
+                <StatsView links={links} clicks={clicks} views={views} leads={leads} resumes={resumes} />
+              </React.Suspense>
             </div>
           )}
 
@@ -1869,7 +1887,9 @@ export default function Dashboard({ userProfile, onProfileUpdate }: DashboardPro
                 </div>
 
                 <div className="relative bg-[#0a0a0a] border border-white/5 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden">
-                  <ThemeSelector currentTheme={theme} onChange={handleThemeChange} />
+                  <React.Suspense fallback={<TabLoader />}>
+                    <ThemeSelector currentTheme={theme} onChange={handleThemeChange} />
+                  </React.Suspense>
                 </div>
 
                 {/* pb spacer */}
