@@ -117,18 +117,33 @@ export interface UserTheme {
 export const FREE_CANVAS_WIDTH = 400;
 
 export interface FreeCanvasItem {
-  /** 'avatar' | 'name' | 'username' | 'bio' | 'socials' | `link:{linkId}` */
+  /** 'avatar' | 'name' | 'username' | 'bio' | 'socials' | 'text' | 'shape' | `link:{linkId}` */
   id: string;
+  type?: 'avatar' | 'text' | 'link' | 'socials' | 'shape' | 'image' | string;
   /** Posição X em unidades do canvas (0..FREE_CANVAS_WIDTH), canto sup. esquerdo */
   x: number;
   /** Posição Y em unidades do canvas */
   y: number;
   /** Largura em unidades do canvas */
   w: number;
-  /** Altura em unidades (usada pelo avatar; nos demais é aproximação p/ editor) */
+  /** Altura em unidades (usada pelo avatar e formas; nos demais é aproximação p/ editor) */
   h: number;
   /** Ordem de empilhamento (maior = na frente) */
   z: number;
+  /** Conteúdo textual (se aplicável, ex: blocos de texto ou sobrepondo nome/bio) */
+  content?: string;
+  /** Cor do texto ou da borda da forma */
+  color?: string;
+  /** Cor de fundo da forma ou bloco */
+  backgroundColor?: string;
+  /** Tamanho da fonte */
+  fontSize?: number;
+  /** Peso da fonte */
+  fontWeight?: string;
+  /** Alinhamento do texto */
+  textAlign?: 'left' | 'center' | 'right' | 'justify';
+  /** Arredondamento da borda (para formas) */
+  borderRadius?: number;
 }
 
 export interface UserProfile {

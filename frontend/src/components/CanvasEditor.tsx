@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { UserProfile, LinkItem, FreeCanvasItem, FREE_CANVAS_WIDTH } from '../types';
-import { X, Save, RotateCcw, AlignCenterHorizontal, ArrowUpToLine, ArrowDownToLine, Plus, Minus, Move, Globe, Sparkles } from 'lucide-react';
+import { X, Save, RotateCcw, AlignCenterHorizontal, ArrowUpToLine, ArrowDownToLine, Plus, Minus, Move, Globe, Sparkles, Trash2, Type, Square, Edit3 } from 'lucide-react';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTRUTOR LIVRE (estilo Canva)
@@ -124,8 +124,21 @@ export default function CanvasEditor({ profile, links, theme, onSave, onClose }:
   });
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [snapGuide, setSnapGuide] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Tecla delete para remover item
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId && !editingId) {
+        setItems((prev) => prev.filter((it) => it.id !== selectedId));
+        setSelectedId(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedId, editingId]);
 
   // ── Escala do canvas para caber na área do editor
   const areaRef = useRef<HTMLDivElement | null>(null);
@@ -196,6 +209,11 @@ export default function CanvasEditor({ profile, links, theme, onSave, onClose }:
           const size = clamp(drag.orig.w + Math.max(dx, dy), 40, 240);
           return { ...it, w: size, h: size };
         }
+        if (it.type === 'shape' || it.id.startsWith('shape:') || it.type === 'text' || it.id.startsWith('text:')) {
+           const w = clamp(drag.orig.w + dx, 40, FREE_CANVAS_WIDTH);
+           const h = clamp(drag.orig.h + dy, 20, 2000);
+           return { ...it, w, h };
+        }
         const w = clamp(drag.orig.w + dx, 60, FREE_CANVAS_WIDTH);
         return { ...it, w };
       })
@@ -231,6 +249,34 @@ export default function CanvasEditor({ profile, links, theme, onSave, onClose }:
     setItems(def.items);
     setCanvasH(def.canvasH);
     setSelectedId(null);
+  };
+
+  const addText = () => {
+    const newId = `text:${Date.now()}`;
+    const maxZ = items.reduce((m, it) => Math.max(m, it.z || 1), 1);
+    setItems(prev => [...prev, {
+      id: newId,
+      type: 'text',
+      x: 40, y: 100, w: 320, h: 40, z: maxZ + 1,
+      content: 'Novo Texto',
+      color: titleColor,
+      fontSize: 16,
+      textAlign: 'center'
+    }]);
+    setSelectedId(newId);
+  };
+
+  const addShape = () => {
+    const newId = `shape:${Date.now()}`;
+    const maxZ = items.reduce((m, it) => Math.max(m, it.z || 1), 1);
+    setItems(prev => [...prev, {
+      id: newId,
+      type: 'shape',
+      x: 100, y: 100, w: 200, h: 200, z: maxZ + 1,
+      backgroundColor: theme?.buttonColor || '#a78bfa',
+      borderRadius: 12
+    }]);
+    setSelectedId(newId);
   };
 
   const handleSave = async () => {
@@ -284,6 +330,46 @@ export default function CanvasEditor({ profile, links, theme, onSave, onClose }:
 
   // ── Conteúdo de cada elemento (mock fiel ao render público)
   const renderItemContent = (item: FreeCanvasItem) => {
+    const isTextEditable = item.id === 'name' || item.id === 'username' || item.id === 'bio' || item.type === 'text' || item.id.startsWith('text:');
+    
+    if (editingId === item.id && isTextEditable) {
+      const val = item.content !== undefined ? item.content : (
+        item.id === 'name' ? (profile.displayName || `@${profile.username}`) :
+        item.id === 'username' ? `@${profile.username}` :
+        item.id === 'bio' ? profile.bio : ''
+      );
+      return (
+        <textarea
+          autoFocus
+          value={val}
+          onChange={(e) => setItems(prev => prev.map(it => it.id === item.id ? { ...it, content: e.target.value } : it))}
+          onBlur={() => setEditingId(null)}
+          className="w-full h-full bg-transparent resize-none border-none outline-none focus:ring-2 focus:ring-[#a78bfa] rounded-md p-1"
+          style={{
+             color: item.color || (item.id === 'name' ? titleColor : item.id === 'username' ? baseTextColor : item.id === 'bio' ? (theme?.bioColor || baseTextColor) : titleColor),
+             fontSize: item.fontSize ? `${item.fontSize}px` : undefined,
+             textAlign: item.textAlign || 'center',
+             fontWeight: item.fontWeight || (item.id === 'name' ? 'bold' : 'normal'),
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+        />
+      );
+    }
+
+    if (item.type === 'shape' || item.id.startsWith('shape:')) {
+      return (
+        <div className="w-full h-full select-none" style={{ backgroundColor: item.backgroundColor || '#a78bfa', borderRadius: item.borderRadius !== undefined ? `${item.borderRadius}px` : '12px' }} />
+      );
+    }
+
+    if (item.type === 'text' || item.id.startsWith('text:')) {
+      return (
+        <div onDoubleClick={() => setEditingId(item.id)} className="w-full h-full whitespace-pre-line break-words select-none overflow-hidden" style={{ color: item.color || titleColor, fontSize: item.fontSize ? `${item.fontSize}px` : '16px', textAlign: item.textAlign || 'center', fontWeight: item.fontWeight || 'normal' }}>
+          {item.content || 'Novo Texto'}
+        </div>
+      );
+    }
+
     if (item.id === 'avatar') {
       return profile.profilePicUrl ? (
         <img
@@ -301,22 +387,22 @@ export default function CanvasEditor({ profile, links, theme, onSave, onClose }:
     }
     if (item.id === 'name') {
       return (
-        <h1 className="text-xl font-bold text-center truncate select-none" style={{ color: titleColor }}>
-          {profile.displayName || `@${profile.username}`}
+        <h1 onDoubleClick={() => setEditingId(item.id)} className="text-xl font-bold text-center truncate select-none" style={{ color: item.color || titleColor, fontSize: item.fontSize ? `${item.fontSize}px` : undefined, textAlign: item.textAlign || 'center' }}>
+          {item.content !== undefined ? item.content : (profile.displayName || `@${profile.username}`)}
         </h1>
       );
     }
     if (item.id === 'username') {
       return (
-        <p className="text-xs opacity-60 font-mono text-center select-none" style={{ color: baseTextColor }}>
-          @{profile.username}
+        <p onDoubleClick={() => setEditingId(item.id)} className="text-xs opacity-60 font-mono text-center select-none" style={{ color: item.color || baseTextColor, fontSize: item.fontSize ? `${item.fontSize}px` : undefined, textAlign: item.textAlign || 'center' }}>
+          {item.content !== undefined ? item.content : `@${profile.username}`}
         </p>
       );
     }
     if (item.id === 'bio') {
       return (
-        <p className="text-sm opacity-85 text-center whitespace-pre-line leading-relaxed break-words select-none" style={{ color: theme?.bioColor || baseTextColor }}>
-          {profile.bio}
+        <p onDoubleClick={() => setEditingId(item.id)} className="text-sm opacity-85 text-center whitespace-pre-line leading-relaxed break-words select-none" style={{ color: item.color || theme?.bioColor || baseTextColor, fontSize: item.fontSize ? `${item.fontSize}px` : undefined, textAlign: item.textAlign || 'center' }}>
+          {item.content !== undefined ? item.content : profile.bio}
         </p>
       );
     }
@@ -393,7 +479,15 @@ export default function CanvasEditor({ profile, links, theme, onSave, onClose }:
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <div className="hidden sm:flex items-center gap-1 bg-black/40 border border-slate-800 rounded-xl px-2 py-1">
+          <div className="hidden sm:flex items-center gap-1">
+            <button onClick={addText} className="flex items-center gap-1 text-[10px] font-bold px-2 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 transition-all cursor-pointer" title="Adicionar Texto">
+              <Type className="w-3 h-3" /> <span className="hidden sm:inline">Texto</span>
+            </button>
+            <button onClick={addShape} className="flex items-center gap-1 text-[10px] font-bold px-2 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 transition-all cursor-pointer" title="Adicionar Forma">
+              <Square className="w-3 h-3" /> <span className="hidden sm:inline">Forma</span>
+            </button>
+          </div>
+          <div className="hidden sm:flex items-center gap-1 bg-black/40 border border-slate-800 rounded-xl px-2 py-1 ml-1">
             <span className="text-[9px] text-slate-500 font-semibold uppercase tracking-wider mr-1">Altura</span>
             <button onClick={() => setCanvasH((h) => Math.max(400, h - 100))} className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-all cursor-pointer" title="Diminuir altura do canvas"><Minus className="w-3 h-3" /></button>
             <span className="text-[10px] text-slate-300 font-mono w-10 text-center">{Math.round(canvasH)}</span>
@@ -462,23 +556,51 @@ export default function CanvasEditor({ profile, links, theme, onSave, onClose }:
       </div>
 
       {/* ── Barra inferior: ações do selecionado + dica */}
-      <footer className="shrink-0 border-t border-slate-800/70 bg-[#0a1128]/90 backdrop-blur-md px-3 sm:px-5 py-2.5 flex items-center justify-between gap-3">
+      <footer className="shrink-0 border-t border-slate-800/70 bg-[#0a1128]/90 backdrop-blur-md px-3 sm:px-5 py-2.5 flex items-center justify-between gap-3 min-h-[52px]">
         {selectedItem ? (
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mr-1 hidden sm:inline">Selecionado:</span>
-            <button onClick={centerSelected} className="flex items-center gap-1 text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 transition-all cursor-pointer" title="Centralizar horizontalmente">
-              <AlignCenterHorizontal className="w-3 h-3" /> Centralizar
-            </button>
-            <button onClick={bringToFront} className="flex items-center gap-1 text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 transition-all cursor-pointer" title="Trazer para frente">
-              <ArrowUpToLine className="w-3 h-3" /> Frente
-            </button>
-            <button onClick={sendToBack} className="flex items-center gap-1 text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 transition-all cursor-pointer" title="Enviar para trás">
-              <ArrowDownToLine className="w-3 h-3" /> Trás
+          <div className="flex items-center gap-1.5 flex-wrap w-full justify-between">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mr-1 hidden sm:inline">Editando:</span>
+              <button onClick={centerSelected} className="flex items-center gap-1 text-[10px] font-bold px-2 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 transition-all cursor-pointer" title="Centralizar horizontalmente">
+                <AlignCenterHorizontal className="w-3 h-3" />
+              </button>
+              <button onClick={bringToFront} className="flex items-center gap-1 text-[10px] font-bold px-2 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 transition-all cursor-pointer" title="Trazer para frente">
+                <ArrowUpToLine className="w-3 h-3" />
+              </button>
+              <button onClick={sendToBack} className="flex items-center gap-1 text-[10px] font-bold px-2 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 transition-all cursor-pointer" title="Enviar para trás">
+                <ArrowDownToLine className="w-3 h-3" />
+              </button>
+
+              {/* Text Properties */}
+              {(selectedItem.id === 'name' || selectedItem.id === 'bio' || selectedItem.id === 'username' || selectedItem.type === 'text' || selectedItem.id.startsWith('text:')) && (
+                <>
+                  <div className="w-px h-4 bg-slate-700 mx-1" />
+                  <input type="color" value={selectedItem.color || (selectedItem.id === 'name' ? titleColor : selectedItem.id === 'username' ? baseTextColor : selectedItem.id === 'bio' ? (theme?.bioColor || baseTextColor) : titleColor)} onChange={(e) => setItems(prev => prev.map(it => it.id === selectedId ? {...it, color: e.target.value} : it))} className="w-6 h-6 p-0 border-0 rounded cursor-pointer bg-transparent" title="Cor do Texto" />
+                  <input type="number" min="8" max="72" value={selectedItem.fontSize || 16} onChange={(e) => setItems(prev => prev.map(it => it.id === selectedId ? {...it, fontSize: Number(e.target.value)} : it))} className="w-12 h-6 text-[10px] bg-slate-800 border border-slate-700 rounded px-1 text-white" title="Tamanho da Fonte (px)" />
+                  <button onClick={() => setEditingId(selectedId)} className="flex items-center gap-1 text-[10px] font-bold px-2 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-700/60 text-slate-300"><Edit3 className="w-3 h-3" /> Editar</button>
+                </>
+              )}
+
+              {/* Shape Properties */}
+              {(selectedItem.type === 'shape' || selectedItem.id.startsWith('shape:')) && (
+                <>
+                  <div className="w-px h-4 bg-slate-700 mx-1" />
+                  <input type="color" value={selectedItem.backgroundColor || '#a78bfa'} onChange={(e) => setItems(prev => prev.map(it => it.id === selectedId ? {...it, backgroundColor: e.target.value} : it))} className="w-6 h-6 p-0 border-0 rounded cursor-pointer bg-transparent" title="Cor de Fundo" />
+                  <div className="flex items-center gap-1 bg-slate-800 rounded px-1 border border-slate-700" title="Arredondamento das Bordas">
+                     <span className="text-[9px] text-slate-500">Raio:</span>
+                     <input type="number" min="0" max="200" value={selectedItem.borderRadius ?? 12} onChange={(e) => setItems(prev => prev.map(it => it.id === selectedId ? {...it, borderRadius: Number(e.target.value)} : it))} className="w-10 h-6 text-[10px] bg-transparent border-0 outline-none text-white text-center" />
+                  </div>
+                </>
+              )}
+            </div>
+
+            <button onClick={() => { setItems(prev => prev.filter(it => it.id !== selectedId)); setSelectedId(null); setEditingId(null); }} className="flex items-center gap-1 text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-red-900/40 hover:bg-red-800/60 text-red-300 transition-all cursor-pointer shrink-0">
+              <Trash2 className="w-3 h-3" /> Excluir
             </button>
           </div>
         ) : (
           <p className="text-[10px] text-slate-500">
-            <span className="font-bold text-slate-400">Dica:</span> arraste os elementos para mover • toque em um elemento e use a alça roxa para redimensionar
+            <span className="font-bold text-slate-400">Dica:</span> arraste p/ mover • 2 cliques p/ editar texto • DEL p/ excluir
           </p>
         )}
         <span className="text-[9px] text-slate-600 font-mono hidden md:inline shrink-0">{items.length} elementos • canvas {FREE_CANVAS_WIDTH}×{Math.round(canvasH)}</span>

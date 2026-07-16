@@ -1397,21 +1397,51 @@ export default function PublicProfile({ profile, links, previewMode = false }: P
     if (item.id === 'name') {
       return (
         <div key={item.id} style={baseStyle} className="fc-name text-center">
-          <RenderName profile={profile} isOwner={isOwner} layoutMt="mt-0" />
+          {item.content !== undefined ? (
+             <h1 className="text-xl font-bold text-center truncate" style={{ color: item.color || titleColor, fontSize: item.fontSize ? `${item.fontSize}px` : undefined, textAlign: item.textAlign || 'center' }}>
+               {item.content}
+             </h1>
+          ) : (
+             <RenderName profile={profile} isOwner={isOwner} layoutMt="mt-0" />
+          )}
         </div>
       );
     }
     if (item.id === 'username') {
       return (
         <div key={item.id} style={baseStyle} className="fc-username text-center">
-          <RenderUsername profile={profile} />
+          {item.content !== undefined ? (
+             <p className="text-xs opacity-60 font-mono text-center" style={{ color: item.color || (isLightColor(theme.backgroundColor) ? '#3f3f46' : '#cbd5e1'), fontSize: item.fontSize ? `${item.fontSize}px` : undefined, textAlign: item.textAlign || 'center' }}>
+               {item.content}
+             </p>
+          ) : (
+             <RenderUsername profile={profile} />
+          )}
         </div>
       );
     }
     if (item.id === 'bio') {
       return (
         <div key={item.id} style={baseStyle} className="fc-bio text-center">
-          <RenderBio profile={profile} />
+          {item.content !== undefined ? (
+             <p className="text-sm opacity-85 text-center whitespace-pre-line leading-relaxed break-words" style={{ color: item.color || theme?.bioColor || (isLightColor(theme.backgroundColor) ? '#27272a' : '#f1f5f9'), fontSize: item.fontSize ? `${item.fontSize}px` : undefined, textAlign: item.textAlign || 'center' }}>
+               {item.content}
+             </p>
+          ) : (
+             <RenderBio profile={profile} />
+          )}
+        </div>
+      );
+    }
+    if (item.type === 'shape' || item.id.startsWith('shape:')) {
+      return (
+        <div key={item.id} style={{ ...baseStyle, backgroundColor: item.backgroundColor || '#a78bfa', borderRadius: item.borderRadius !== undefined ? `${item.borderRadius}px` : '12px', height: item.h }} />
+      );
+    }
+    if (item.type === 'text' || item.id.startsWith('text:')) {
+      return (
+        <div key={item.id} style={{ ...baseStyle, height: item.h, color: item.color || titleColor, fontSize: item.fontSize ? `${item.fontSize}px` : '16px', textAlign: item.textAlign || 'center', fontWeight: item.fontWeight || 'normal' }} className="whitespace-pre-line break-words overflow-hidden">
+          {item.content || 'Novo Texto'}
         </div>
       );
     }
