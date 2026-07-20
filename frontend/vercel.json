@@ -78,7 +78,7 @@
         { "key": "Cross-Origin-Opener-Policy", "value": "same-origin-allow-popups" },
         { "key": "Cross-Origin-Embedder-Policy", "value": "unsafe-none" },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Content-Security-Policy", "value": "frame-ancestors 'self' https://centralautocar.com.br https://www.centralautocar.com.br http://localhost:* http://127.0.0.1:*;" }
+        { "key": "Content-Security-Policy", "value": "frame-ancestors *;" }
       ]
     }
   ]
